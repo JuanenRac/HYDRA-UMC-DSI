@@ -10,12 +10,23 @@
 # the fast day-to-day dev loop (hot reload works normally) - build.sh/
 # build_linux.sh are for producing a real standalone binary.
 # =============================================================================
+
+echo "============================================================================="
+echo "HYDRA-UMC DSI (Flutter) - run_dev.sh"
+echo "Runs this app in desktop simulation mode against a real or local HYDRA-UMC"
+echo "STUDIO server (hot-reload dev loop - stays running until closed)."
+echo "Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>"
+echo "GPL-3.0 - see LICENSE"
+echo "============================================================================="
+echo
+
 set -euo pipefail
 
 if ! command -v flutter >/dev/null 2>&1; then
     echo "[ERROR] flutter was not found on PATH. Install the Flutter SDK" >&2
     echo "        (https://docs.flutter.dev/get-started/install) and add its" >&2
     echo "        bin/ directory to PATH, then re-run this script." >&2
+    read -p "Press Enter to close this window..."
     exit 1
 fi
 

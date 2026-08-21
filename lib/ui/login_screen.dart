@@ -34,10 +34,12 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _isSubmitting = false;
 
   StreamSubscription<ServerInfo>? _scanSub;
+  StreamSubscription<ServerInfo>? _mdnsSub;
 
   @override
   void dispose() {
     _scanSub?.cancel();
+    _mdnsSub?.cancel();
     _hostCtrl.dispose();
     _portCtrl.dispose();
     _userCtrl.dispose();
@@ -45,23 +47,54 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  /// Runs [scanSubnets] and shows results live in a dialog sized for a
-  /// touch panel (a bottom sheet works fine too, but a centered dialog
-  /// keeps the whole 1280x720 frame visible instead of one edge of it).
+  /// Runs [discoverMdns] (real mDNS/Bonjour) and [scanSubnets] (brute-force
+  /// subnet scan) at the same time and shows results live in a dialog
+  /// sized for a touch panel (a bottom sheet works fine too, but a
+  /// centered dialog keeps the whole 1280x720 frame visible instead of one
+  /// edge of it). Both paths report through the same [found] list, deduped
+  /// by [ServerInfo.connectionId] since a server both paths agree on would
+  /// otherwise show up twice.
   Future<void> _openScanDialog() async {
     final found = <ServerInfo>[];
     final foundNotifier = ValueNotifier<List<ServerInfo>>(const []);
+    var mdnsDone = false;
+    var subnetDone = false;
     final scanningNotifier = ValueNotifier<bool>(true);
+
+    void addResult(ServerInfo server) {
+      if (found.any((s) => s.connectionId == server.connectionId)) return;
+      found.add(server);
+      foundNotifier.value = List.of(found);
+    }
+
+    void checkDone() {
+      if (mdnsDone && subnetDone) scanningNotifier.value = false;
+    }
+
+    _mdnsSub?.cancel();
+    _mdnsSub = discoverMdns().listen(
+      addResult,
+      onDone: () {
+        mdnsDone = true;
+        checkDone();
+      },
+      onError: (_) {
+        mdnsDone = true;
+        checkDone();
+      },
+    );
 
     _scanSub?.cancel();
     _scanSub = scanSubnets(lastHost: _hostCtrl.text.trim().isEmpty ? null : _hostCtrl.text.trim()).listen(
-      (server) {
-        if (found.any((s) => s.connectionId == server.connectionId)) return;
-        found.add(server);
-        foundNotifier.value = List.of(found);
+      addResult,
+      onDone: () {
+        subnetDone = true;
+        checkDone();
       },
-      onDone: () => scanningNotifier.value = false,
-      onError: (_) => scanningNotifier.value = false,
+      onError: (_) {
+        subnetDone = true;
+        checkDone();
+      },
     );
 
     if (!mounted) return;
@@ -122,7 +155,8 @@ class _LoginScreenState extends State<LoginScreen> {
         );
       },
     );
-    unawaited(_scanSub?.cancel());
+    if (!mdnsDone) unawaited(_mdnsSub?.cancel());
+    if (!subnetDone) unawaited(_scanSub?.cancel());
   }
 
   Future<void> _submit() async {

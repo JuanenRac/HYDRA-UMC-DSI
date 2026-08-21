@@ -7,7 +7,7 @@ Una interfaz táctil nativa en Flutter (Dart, con target real de escritorio Linu
 ## 🏗️ Qué está implementado
 
 - **Login** (`lib/ui/login_screen.dart`, `lib/state/robot_view_model.dart`) - campos de IP/puerto del servidor y usuario/contraseña dimensionados para uso táctil, `POST /api/login` contra `admin`/`admin` (precargado - la cuenta por defecto que todo servidor de este ecosistema crea en su primer arranque; se pueden crear cuentas adicionales de menor privilegio "operator" desde Config > Users en la interfaz web), token de sesión persistido entre arranques vía `shared_preferences` - importante en un panel tipo kiosco que debe seguir con la sesión iniciada tras un ciclo de apagado/encendido de la propia CM5, no solo tras reabrir la app. Un diálogo de "Buscar en la red local" (`lib/network/discovery.dart`) encuentra servidores sin necesidad de conocer ya la IP - doblemente útil aquí, ya que la CM5 en la que corre esta app suele ser el propio controlador al que debe conectarse.
-- **Descubrimiento de red** (`lib/network/discovery.dart`) - escaneo concurrente de `GET /api/hydra-info` en las subredes locales reales de este dispositivo, trasladado sin cambios desde HYDRA-UMC-IOS-CONTROL.
+- **Descubrimiento de red** (`lib/network/discovery.dart`) - dos vías en paralelo desde el mismo diálogo "Scan local network": mDNS/Bonjour real (`discoverMdns()`, consultando el propio servicio `_hydra._tcp` que publica `server.ts` vía el paquete `multicast_dns`) y un escaneo concurrente por fuerza bruta de `GET /api/hydra-info` en las subredes locales reales de este dispositivo (`scanSubnets()`), deduplicado por host:puerto - portado desde HYDRA-UMC-IOS-CONTROL, el primer cliente del ecosistema en añadir mDNS real.
 - **Sincronización atómica de comandos** (`lib/state/robot_view_model.dart`, su propio `_sendAtomicCommand()`) - cada escritura (enable/disable/play/pause/stop/jog/valve/pump/speed/vision) usa el endpoint real `POST /api/robot/:id/command`, con la propagación correcta a robots combinados (`combinedWith`) y una reversión al estado previo si la petición falla - especialmente importante para un mando de jog/E-STOP situado a pocos metros de los robots reales.
 - **Sincronización en vivo por WebSocket** (`lib/network/hydra_websocket.dart`) - siempre añade `?token=`, gestiona los tipos de difusión `"settings"` y `"delta"`, reconecta automáticamente si se cae la conexión.
 - **Navegación táctil horizontal** (`lib/ui/main_screen.dart`) - una barra superior persistente con 6 pestañas grandes de icono+etiqueta (Dashboard/Control/Cámara/Vista 3D/Métricas/Ajustes) a lo ancho del marco fijo de 1280px, en el espíritu de KlipperScreen en vez de una barra inferior estilo móvil - siguiendo el catálogo que pidió el dueño del proyecto, reorganizado para un panel táctil ancho en vez de un layout vertical de móvil.
@@ -16,7 +16,8 @@ Una interfaz táctil nativa en Flutter (Dart, con target real de escritorio Linu
 - **Cámara** (`lib/ui/camera_screen.dart`, `lib/ui/widgets/mjpeg_view.dart`) - el mismo parser de MJPEG hecho a mano y sin dependencias que usa HYDRA-UMC-IOS-CONTROL (sin WebView, sin código específico de plataforma - funciona en escritorio Linux sin cambios), un estado claro de "Cámara Desactivada" y un interruptor para activar/desactivar la visión de un robot directamente desde el servidor.
 - **Vista 3D** (`lib/ui/three_d_screen.dart`) - **no** es un WebView incrustando la escena real Three.js de STUDIO, a diferencia de las apps de iOS/Android - `webview_flutter` no tiene ninguna implementación para escritorio Linux, y un motor de navegador completo supone una carga en tiempo de ejecución mayor de la que necesita este panel empotrado de bajo consumo. En su lugar: un pequeño indicador nativo isométrico de posición X/Y/Z (`CustomPainter`, sin motor 3D), con un aviso en pantalla que señala la escena 3D real en el monitor conectado por HDMI a esta misma placa. Ver la sección 4 de `docs/ARCHITECTURE.md` para el razonamiento completo.
 - **Métricas del Sistema** (`lib/ui/metrics_screen.dart`) - su propia pestaña dedicada (no integrada en el Dashboard como hacen iOS/Android) con paneles de CPU/memoria/temperatura/tiempo activo desde `GET /api/system/metrics`, más nombre de host/número de controladores/número de robots/versión de la app desde `GET /api/hydra-info`.
-- **Ajustes** (`lib/ui/settings_screen.dart`) - información de conexión, identidad del servidor y cierre de sesión.
+- **Ajustes** (`lib/ui/settings_screen.dart`) - información de conexión, identidad del servidor, cierre de sesión y la propia versión de esta app (ver [Versionado](#-versionado) más abajo).
+- **Arranque automático en kiosco** (`kiosk/hydra-umc-dsi.service`, `kiosk/install_kiosk.sh`) - unidad systemd que lanza la app a pantalla completa en `tty1` vía `cage`, con `Restart=always`. Ver "Ejecución en la CM5 real" más abajo.
 
 **Estado: scaffold + las 6 pantallas del catálogo implementadas y conectadas al contrato real REMOTE_API.md.** `flutter analyze` limpio, `flutter build windows` produce un binario en ejecución, `flutter test` pasa - ver "Compilación" más abajo para lo que sí y lo que no se pudo verificar desde este entorno de trabajo Windows, dado que el target real es Linux.
 
@@ -27,37 +28,68 @@ Requiere el [Flutter SDK](https://docs.flutter.dev/get-started/install) (canal s
 ### Scripts de compilación
 
 ```bash
-./build.sh          # Git Bash / WSL, o build.bat para cmd/PowerShell - flutter pub get + flutter build windows (verificación en máquina de desarrollo)
-./build_linux.sh    # Debe ejecutarse EN una máquina Linux real (o la propia CM5) - flutter build linux (el target real de despliegue)
+./build.sh          # Git Bash / WSL, o build.bat para cmd/PowerShell - flutter pub get + incremento de versión + flutter build windows (verificación en máquina de desarrollo)
+./build_linux.sh    # Debe ejecutarse EN una máquina Linux real (o la propia CM5) - flutter pub get + incremento de versión + flutter build linux (el target real de despliegue)
 ./run_dev.sh         # Git Bash / WSL, o run_dev.bat para cmd/PowerShell - modo de simulación de escritorio (flutter run), sin necesitar el hardware
 ```
+
+Los 3 scripts de compilación (`build.sh`/`build.bat`/`build_linux.sh`) incrementan primero la versión de la app - ver [Versionado](#-versionado) más abajo. `run_dev.sh`/`run_dev.bat` no lo hacen - un `flutter run` de ciclo de desarrollo no es una "compilación real" bajo esa política.
 
 ### Compilación manual
 
 ```bash
 flutter pub get
-flutter analyze          # análisis estático - no necesita compilador
-flutter test             # pruebas de widgets
-flutter build windows    # prueba de humo en la máquina de desarrollo - produce build/windows/x64/runner/Release/hydra_umc_dsi.exe
-flutter build linux      # el target REAL - debe ejecutarse en una máquina Linux real, produce build/linux/*/release/bundle/
-flutter run -d windows   # o -d linux en una máquina Linux real, para un ciclo de desarrollo en vivo con simulación de escritorio
+flutter analyze                  # análisis estático - no necesita compilador
+flutter test                     # pruebas de widgets
+dart run tool/bump_version.dart  # incrementa la versión, igual que build.sh/build.bat/build_linux.sh
+flutter build windows            # prueba de humo en la máquina de desarrollo - produce build/windows/x64/runner/Release/hydra_umc_dsi.exe
+flutter build linux              # el target REAL - debe ejecutarse en una máquina Linux real, produce build/linux/*/release/bundle/
+flutter run -d windows           # o -d linux en una máquina Linux real, para un ciclo de desarrollo en vivo con simulación de escritorio
 ```
 
 **Nota de honestidad sobre la verificación en Linux:** este repositorio se ha escrito en una máquina Windows sin toolchain de compilación de Linux disponible (confirmado con `wsl --status` - no hay ninguna distribución de WSL instalada). `flutter build linux` nunca se ha ejecutado realmente contra este código desde este entorno de trabajo; `flutter build windows` se ha usado como sustituto de prueba de humo, tal como permite explícitamente el encargo. Ver la sección 7 de `docs/ARCHITECTURE.md` para la lista exacta de lo verificado y lo no verificado, y `mejoras_futuras.txt` para el seguimiento pendiente.
 
+## 🔢 Versionado
+
+Este repositorio sigue una política ecosistema-wide (compartida con
+[HYDRA-UMC-IOS-CONTROL](https://github.com/JuanenRac/HYDRA-UMC-IOS-CONTROL),
+implementada allí en paralelo): la versión sube automáticamente en **cada
+compilación real**, sin edición manual de la línea `version:` de
+`pubspec.yaml`. `build.sh`/`build.bat`/`build_linux.sh` ejecutan
+`tool/bump_version.dart` antes de invocar `flutter build`, aplicando:
+
+- **Patch, estilo cuentakilómetros (base 10):** +1 en cada compilación; si
+  superaría 9, se resetea a 0 y la minor sube +1 en su lugar - ejemplo:
+  `1.0.9` -> `1.1.0`. La major nunca se toca automáticamente.
+- **Build-number** (la parte tras el `+`): un contador monótono simple, +1
+  en cada compilación, sin acarreo.
+
+El mismo script regenera `lib/app_version.dart` (generado, no editado a
+mano - un simple archivo `const`, no una nueva dependencia en tiempo de
+ejecución como `package_info_plus`), que la app lee en tiempo de ejecución
+para mostrar su propia versión en la pantalla de **Ajustes**. Ver
+[CHANGELOG.md](CHANGELOG.md) para el historial de versiones.
+
 ### Ejecución en la CM5 real
 
-Después de que `build_linux.sh` genere `build/linux/*/release/bundle/`, copia todo el directorio `bundle/` a la CM5 (depende de los archivos `.so` que están junto al binario, no solo del propio ejecutable) y ejecuta el binario que hay dentro directamente. Para un arranque automático tipo kiosco (pantalla completa, sin decoración de gestor de ventanas, arranque al encender) - no implementado aún en este repositorio, ver `mejoras_futuras.txt` - un compositor kiosco Wayland mínimo (p. ej. `cage`) o una unidad systemd que lance este binario directamente sobre el framebuffer son los dos enfoques más habituales para este tipo de despliegue de pantalla táctil empotrada; [`flutter-pi`](https://github.com/ardera/flutter-pi) (un embebedor de motor Flutter de terceros para Raspberry Pi que corre sin ningún gestor de ventanas) es una alternativa más ligera que merece la pena evaluar más adelante, pero compila directamente contra el motor de Flutter en vez de pasar por `flutter build linux`, así que necesitaría su propio paso de compilación separado, no es un sustituto directo de este.
+Después de que `build_linux.sh` genere `build/linux/*/release/bundle/`, copia todo el directorio `bundle/` a la CM5 (depende de los archivos `.so` que están junto al binario, no solo del propio ejecutable) a `/opt/hydra-umc-dsi/bundle/`, y luego ejecuta `sudo kiosk/install_kiosk.sh` para instalar y activar `kiosk/hydra-umc-dsi.service`, una unidad systemd que lanza la app a pantalla completa en `tty1` vía [`cage`](https://github.com/cage-kiosk/cage) (un compositor kiosco Wayland mínimo que ejecuta exactamente un cliente a pantalla completa), con `Restart=always` para que un fallo relance la app en vez de dejar la pantalla en negro. Elegido frente a [`flutter-pi`](https://github.com/ardera/flutter-pi) (un embebedor de motor Flutter de terceros para Raspberry Pi que corre sin ningún gestor de ventanas) precisamente porque reutiliza sin modificar la salida real de `flutter build linux` que ya genera `build_linux.sh` - flutter-pi en cambio compila directamente contra el motor de Flutter, así que necesitaría su propio paso de compilación separado, no es un sustituto directo. **Nota de honestidad:** escrito y revisado, pero nunca ejecutado de verdad contra una CM5 real ni ninguna otra máquina Linux - mismo estado sin verificar que el propio `flutter build linux` (ver `docs/ARCHITECTURE.md` sección 7). Ver el propio comentario de cabecera de `kiosk/hydra-umc-dsi.service` para las asunciones exactas (usuario root del servicio, propiedad de `tty1`) que habría que comprobar contra la imagen de Raspberry Pi OS real que use la CM5.
 
 ## 📂 Estructura del Repositorio
 
 ```text
 HYDRA-UMC-DSI/
-├── build.bat, build.sh              # flutter pub get + flutter build windows (verificación en máquina de desarrollo)
-├── build_linux.sh                   # flutter build linux (el target real de la CM5 - ejecutar en Linux real)
+├── build.bat, build.sh              # flutter pub get + incremento de versión + flutter build windows (verificación en máquina de desarrollo)
+├── build_linux.sh                   # flutter pub get + incremento de versión + flutter build linux (el target real de la CM5 - ejecutar en Linux real)
+├── CHANGELOG.md                      # historial de versiones (ver Versionado más arriba)
+├── kiosk/
+│   ├── hydra-umc-dsi.service        # unidad systemd - arranque automático a pantalla completa vía cage
+│   └── install_kiosk.sh             # instala y activa la unidad anterior (ejecutar en la CM5 real)
+├── tool/
+│   └── bump_version.dart            # Script de incremento de versión que build.bat/build.sh/build_linux.sh ejecutan antes de cada compilación (ver Versionado más arriba)
 ├── run_dev.bat, run_dev.sh          # flutter run - modo de simulación de escritorio
 ├── lib/
 │   ├── main.dart                    # Punto de entrada, ChangeNotifierProvider + puerta de login, tema oscuro fijo
+│   ├── app_version.dart             # GENERADO - regenerado por tool/bump_version.dart, no editar a mano
 │   ├── models/
 │   │   ├── server_info.dart         # Entrada de descubrimiento/conexión - refleja ServerInfo de los otros 3 clientes
 │   │   └── hydra_state.dart         # RobotView/ControllerView/HydraState - vistas mutables ligeras sobre el árbol bruto de settings.json
@@ -76,7 +108,7 @@ HYDRA-UMC-DSI/
 │       ├── camera_screen.dart       # Visor MJPEG + interruptor de visión
 │       ├── three_d_screen.dart      # Indicador isométrico nativo X/Y/Z - NO es un WebView (ver docs/ARCHITECTURE.md §4)
 │       ├── metrics_screen.dart      # Pestaña dedicada a métricas del host CM5 + identidad del servidor
-│       ├── settings_screen.dart     # Información de conexión + cierre de sesión
+│       ├── settings_screen.dart     # Información de conexión + cierre de sesión + versión propia de la app
 │       └── widgets/
 │           ├── joystick_pad.dart     # Mando direccional de jog, agrandado para uso táctil
 │           ├── digital_readout.dart, status_led.dart

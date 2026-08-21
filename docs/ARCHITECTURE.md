@@ -17,7 +17,7 @@ Both physical panel sizes (5" and 7") share the exact same 1280x720 pixel
 resolution, so this app ships one fixed layout, not a responsive one - see
 `SONNET/HYDRA-UMC-DSI/chat.TXT` section 1 for the hardware note this was
 specified against (that resolution was corrected from an earlier
-1280x800 assumption on 2026-08-20, before this app's own code existed).
+1280x800 assumption before this app's own code existed).
 
 This app is one of **two coexisting control surfaces** on the same board:
 the CM5 also drives an HDMI output for a full external monitor running the
@@ -46,7 +46,7 @@ was the concrete, low-risk choice over introducing a brand-new toolkit.
 **Correction to the record:** an earlier note (both this project's own
 `chat.TXT` and the task brief that started this implementation) described
 HYDRA-UMC-IOS-CONTROL as already using "a real embedded Linux target."
-That was inaccurate - as of 2026-08-21, `HYDRA-UMC-IOS-CONTROL` has only
+That was inaccurate - `HYDRA-UMC-IOS-CONTROL` has only
 `ios/` and `windows/` platform folders; it has never had a `linux/` folder,
 because its own real target is iOS and Windows exists there purely to
 verify app logic without a Mac (see that repo's own README "Why Flutter,

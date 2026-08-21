@@ -7,8 +7,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43
 # followed by an optional build number separated by a +.
-version: 1.0.0+1
-
+version: 1.0.2+3
 environment:
   sdk: ^3.13.0
 
@@ -24,6 +23,11 @@ dependencies:
   web_socket_channel: ^3.0.3
   shared_preferences: ^2.5.5
   provider: ^6.1.5+1
+
+  # Real mDNS/Bonjour discovery of server.ts's "_hydra._tcp" service -
+  # same version HYDRA-UMC-IOS-CONTROL already verified against that same
+  # server, ported directly (see network/discovery.dart header).
+  multicast_dns: ^0.3.3+1
 
   # NOTE: no cupertino_icons (this app never renders iOS-style widgets) and
   # no webview_flutter - that package ships no Linux desktop implementation

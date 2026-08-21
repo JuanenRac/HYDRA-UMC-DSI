@@ -23,7 +23,35 @@
 #   (see https://docs.flutter.dev/platform-integration/linux/building
 #   for the authoritative, up-to-date list)
 # =============================================================================
+
+echo "============================================================================="
+echo "HYDRA-UMC DSI (Flutter) - build_linux.sh"
+echo "Builds the REAL deployment target: a Linux GTK desktop binary for the CM5"
+echo "(bumps the app version, then runs flutter build linux). Must run ON a real"
+echo "Linux machine - see this file's own header comment for details."
+echo "Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>"
+echo "GPL-3.0 - see LICENSE"
+echo "============================================================================="
+echo
+
 set -euo pipefail
+
+# Always pause before this window closes - whether the build below succeeds
+# or fails - so a double-click launch doesn't flash a closed console before
+# any output can be read. Runs on every exit path (normal or `exit`) because
+# it's a trap, not something duplicated at each individual exit point.
+_pause_on_exit() {
+    local status=$?
+    echo
+    if [ "$status" -eq 0 ]; then
+        echo "Build finished successfully."
+    else
+        echo "Build FAILED (exit code $status)."
+    fi
+    read -n 1 -s -r -p "Press any key to close this window..."
+    echo
+}
+trap _pause_on_exit EXIT
 
 if ! command -v flutter >/dev/null 2>&1; then
     echo "[ERROR] flutter was not found on PATH. Install the Flutter SDK" >&2
@@ -32,13 +60,16 @@ if ! command -v flutter >/dev/null 2>&1; then
     exit 1
 fi
 
-echo "[1/3] flutter pub get"
+echo "[1/4] flutter pub get"
 flutter pub get
 
-echo "[2/3] flutter config --enable-linux-desktop"
+echo "[2/4] dart run tool/bump_version.dart"
+dart run tool/bump_version.dart
+
+echo "[3/4] flutter config --enable-linux-desktop"
 flutter config --enable-linux-desktop >/dev/null
 
-echo "[3/3] flutter build linux"
+echo "[4/4] flutter build linux"
 flutter build linux
 
 echo

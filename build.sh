@@ -15,7 +15,34 @@
 # build.sh for the same reason (verifying app logic without the real
 # target's toolchain on hand).
 # =============================================================================
+
+echo "============================================================================="
+echo "HYDRA-UMC DSI (Flutter) - build.sh"
+echo "Builds the Windows desktop target (dev-machine verification build - bumps"
+echo "the app version, then runs flutter build windows)."
+echo "Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>"
+echo "GPL-3.0 - see LICENSE"
+echo "============================================================================="
+echo
+
 set -euo pipefail
+
+# Always pause before this window closes - whether the build below succeeds
+# or fails - so a double-click launch doesn't flash a closed console before
+# any output can be read. Runs on every exit path (normal or `exit`) because
+# it's a trap, not something duplicated at each individual exit point.
+_pause_on_exit() {
+    local status=$?
+    echo
+    if [ "$status" -eq 0 ]; then
+        echo "Build finished successfully."
+    else
+        echo "Build FAILED (exit code $status)."
+    fi
+    read -n 1 -s -r -p "Press any key to close this window..."
+    echo
+}
+trap _pause_on_exit EXIT
 
 if ! command -v flutter >/dev/null 2>&1; then
     echo "[ERROR] flutter was not found on PATH. Install the Flutter SDK" >&2
@@ -24,10 +51,13 @@ if ! command -v flutter >/dev/null 2>&1; then
     exit 1
 fi
 
-echo "[1/2] flutter pub get"
+echo "[1/3] flutter pub get"
 flutter pub get
 
-echo "[2/2] flutter build windows"
+echo "[2/3] dart run tool/bump_version.dart"
+dart run tool/bump_version.dart
+
+echo "[3/3] flutter build windows"
 flutter build windows
 
 echo
