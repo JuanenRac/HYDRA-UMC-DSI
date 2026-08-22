@@ -88,14 +88,26 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final vm = context.watch<RobotViewModel>();
+    // context.select instead of context.watch here: this shell only needs
+    // the server name + connection status for _TopNavBar. The individual
+    // tab screens below (Dashboard/Control/Camera/Metrics/...) each watch
+    // RobotViewModel on their own for the fields they need - that part is
+    // an accepted ecosystem-wide Provider trade-off (see
+    // HYDRA-UMC-IOS-CONTROL's own RobotViewModel Provider pattern), not
+    // something this file can fix on its own. But there is no reason for
+    // this outer Scaffold/_TopNavBar shell to also rebuild on every 5s
+    // metrics tick / 10s hydra-info tick / websocket message that doesn't
+    // touch activeServer or connectionStatus - select() only rebuilds this
+    // widget when either of those two specific values actually changes.
+    final serverName = context.select<RobotViewModel, String?>((vm) => vm.activeServer?.displayName);
+    final connectionStatus = context.select<RobotViewModel, String>((vm) => vm.connectionStatus);
     return Scaffold(
       body: SafeArea(
         child: Column(
           children: [
             _TopNavBar(
-              serverName: vm.activeServer?.displayName ?? 'HYDRA-UMC DSI',
-              connectionStatus: vm.connectionStatus,
+              serverName: serverName ?? 'HYDRA-UMC DSI',
+              connectionStatus: connectionStatus,
               entries: _entries,
               selectedIndex: _index,
               onSelect: (i) => setState(() => _index = i),
