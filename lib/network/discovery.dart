@@ -45,7 +45,7 @@ import 'hydra_api_client.dart';
 
 const String _mdnsServiceType = '_hydra._tcp.local';
 
-/// Queries mDNS/Bonjour for real HYDRA-UMC STUDIO servers (server.ts's own
+/// Queries mDNS/Bonjour for real HYDRA-UMC servers (HYDRA-UMC-SERVER's own
 /// "_hydra._tcp" publish) and resolves every instance found down to a real
 /// [ServerInfo] via the same GET /api/hydra-info [scanSubnets] uses, so a
 /// match found this way is verified exactly the same way, not just assumed

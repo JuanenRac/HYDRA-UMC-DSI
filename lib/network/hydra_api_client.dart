@@ -3,7 +3,7 @@
 // Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 // GPL-3.0 - see LICENSE
 //
-// Talks the exact contract in HYDRA-UMC-STUDIO/docs/REMOTE_API.md - ported
+// Talks the exact contract in HYDRA-UMC-SERVER/docs/REMOTE_API.md - ported
 // from HYDRA-UMC-IOS-CONTROL's own network/hydra_api_client.dart (same
 // Dart/Flutter stack, direct reuse) with one deliberate change: the
 // X-Hydra-Client header below identifies this client as "dsi" rather than
