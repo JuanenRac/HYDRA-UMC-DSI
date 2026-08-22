@@ -1,5 +1,13 @@
 # 🖥️ HYDRA-UMC DSI
 
+<p align="left">
+  <img src="https://img.shields.io/badge/Licence-GPL%203.0-blue.svg" alt="GPL 3.0">
+  <img src="https://img.shields.io/badge/Framework-Flutter%203.x-02569B.svg" alt="Flutter">
+  <img src="https://img.shields.io/badge/Langage-Dart-0175C2.svg" alt="Dart">
+  <img src="https://img.shields.io/badge/Plateforme-Linux%20%7C%20CM5-E34F26.svg" alt="Platform">
+</p>
+
+
 Une interface tactile native en Flutter (Dart, avec une vraie cible desktop Linux) pour l'écran tactile DSI 5"/7" propre à HYDRA-UMC sur le Compute Module 5 - les deux tailles physiques de l'écran partagent exactement la même résolution de 1280x720 pixels, donc cette application utilise une mise en page unique et fixe, non responsive, plutôt que de s'adapter à deux tailles. Elle parle exactement le même contrat [`REMOTE_API.md`](https://github.com/JuanenRac/HYDRA-UMC-STUDIO/blob/main/docs/REMOTE_API.md) qu'utilisent [HYDRA-UMC SUITE](https://github.com/JuanenRac/HYDRA-UMC-SUITE), [HYDRA-UMC-ANDROID-CONTROL](https://github.com/JuanenRac/HYDRA-UMC-ANDROID-CONTROL) et [HYDRA-UMC-IOS-CONTROL](https://github.com/JuanenRac/HYDRA-UMC-IOS-CONTROL) - découverte, connexion, commandes atomiques par robot et synchronisation en direct par WebSocket avec un serveur [HYDRA-UMC STUDIO](https://github.com/JuanenRac/HYDRA-UMC-STUDIO) en cours d'exécution, lancée directement sur la carte elle-même plutôt que dans un onglet de navigateur. Voir [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) pour la conception complète, y compris pourquoi Flutter (et non Kivy) et pourquoi l'écran 3D n'utilise pas de WebView.
 
 **Cette application est l'une des deux voies de contrôle coexistant sur la même carte** - le CM5 pilote également une sortie HDMI pour un moniteur externe complet exécutant l'interface web. Cette application DSI complète cette voie avec une console tactile directe et toujours disponible sur la carte elle-même ; elle ne remplace pas l'interface web.
