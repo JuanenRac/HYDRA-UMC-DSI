@@ -4,8 +4,7 @@
 // GPL-3.0 - see LICENSE
 //
 // Adaptive backlight by time of day (audit idea: "retroiluminación
-// adaptativa según la hora del día" -
-// SONNET/AUDITORIA_COMPLETA_44_PROYECTOS.txt, HYDRA-UMC-DSI section).
+// adaptativa según la hora del día").
 //
 // Linux's own backlight class exposes brightness control identically for
 // every panel driver (DSI, HDMI-with-DDC, eDP, ...) at

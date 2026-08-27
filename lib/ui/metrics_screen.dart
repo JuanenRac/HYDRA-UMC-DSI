@@ -5,8 +5,8 @@
 //
 // New screen, not a straight port - HYDRA-UMC-ANDROID-CONTROL and
 // HYDRA-UMC-IOS-CONTROL both fold system metrics into a corner of their
-// own Dashboard screen; the DSI spec (SONNET/HYDRA-UMC-DSI/chat.TXT
-// section 1/3) explicitly calls out "metricas de sistema" as its own
+// own Dashboard screen; the DSI user interface explicitly calls out
+// "metricas de sistema" as its own
 // catalog entry, so it gets a dedicated tab here with room for the CM5
 // host's own hostname/controller/robot counts (state/robot_view_model.dart's
 // hydraInfo, from GET /api/hydra-info) alongside the same CPU/memory/temp/

@@ -50,8 +50,8 @@ class HydraApiClient {
   /// unrecognized value, is never gated here" - so this app's discovery
   /// requests simply pass through ungated (same as today's behavior with no
   /// header at all) until HYDRA-UMC-STUDIO's own SystemSettings.remoteAccess
-  /// type and Config > Remote Access UI grow a 4th "dsi" toggle. Tracked in
-  /// SONNET/HYDRA-UMC-DSI/mejoras_futuras.txt - out of scope for this app's
+  /// type and Config > Remote Access UI grow a 4th "dsi" toggle. This is
+  /// out of scope for this app's
   /// own repo since it requires a change on the server side.
   static const Map<String, String> _clientHeaders = {'X-Hydra-Client': 'dsi'};
 

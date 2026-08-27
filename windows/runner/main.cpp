@@ -28,7 +28,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
   Win32Window::Point origin(10, 10);
   // Fixed 1280x720 - this app targets a real embedded 5"/7" DSI touchscreen
   // on the HYDRA-UMC Compute Module 5 (both physical sizes share this exact
-  // resolution, see SONNET/HYDRA-UMC-DSI/chat.TXT section 1). This Windows
+  // resolution. This Windows
   // build only exists to verify the app's own logic on a machine without a
   // Linux toolchain (see README's "Why Flutter" section) - the window is
   // still resizable by the user here (WS_OVERLAPPEDWINDOW, unchanged) since

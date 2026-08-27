@@ -5,9 +5,7 @@
 //
 // Horizontal touch menu across the top of the fixed 1280x720 frame -
 // KlipperScreen-in-spirit navigation (a persistent row of large icon+label
-// buttons, not a phone-style bottom nav bar) matching the layout the owner
-// asked for in SONNET/HYDRA-UMC-DSI/chat.TXT section 1 ("menu tactil
-// horizontal similar en espiritu a HYDRA-UMC-ANDROID-CONTROL"). Same
+// buttons, not a phone-style bottom nav bar) for industrial touch use. Same
 // screen catalog as iOS/Android (Dashboard/Control/Camera/3D/Settings)
 // plus a dedicated Metrics tab - the DSI spec calls out system metrics as
 // its own catalog entry rather than folding it into the Dashboard the way
@@ -28,9 +26,7 @@ import 'metrics_screen.dart';
 import 'settings_screen.dart';
 import 'three_d_screen.dart';
 
-// Screen-cleaning mode duration (audit idea: "modo de limpieza de
-// pantalla que bloquee los inputs durante 30s" -
-// SONNET/AUDITORIA_COMPLETA_44_PROYECTOS.txt, HYDRA-UMC-DSI section). A
+// Screen-cleaning mode duration: a 30-second input lock is a
 // real, practical need for a touchscreen mounted on/near industrial
 // equipment: an operator wiping the panel down mid-shift shouldn't be
 // able to accidentally jog a robot or hit E-STOP through the cloth.

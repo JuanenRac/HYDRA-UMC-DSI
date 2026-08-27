@@ -27,15 +27,13 @@
 // "where is the tool head right now" glance without needing the real
 // per-model mesh/kinematics HYDRA-UMC-STUDIO's own scene renders. The
 // real, full 3D scene stays one tap away on the HDMI-connected monitor
-// this board also drives (see SONNET/HYDRA-UMC-DSI/chat.TXT section 1 -
-// HDMI + this DSI touchscreen are two coexisting control surfaces on the
+// this board also drives. HDMI + this DSI touchscreen are two coexisting control surfaces on the
 // same board, not a replacement of one by the other) - a clear on-screen
 // note says so rather than silently offering a degraded 3D view with no
 // explanation. Revisit if a lightweight native 3D package (e.g. a
 // `flutter_gl`/Filament-style renderer with real mesh loading, the same
 // unfinished path HYDRA-UMC-ANDROID-CONTROL's own NativeThreeDScreen.kt
-// explored) becomes worth the added complexity for this screen -
-// tracked in SONNET/HYDRA-UMC-DSI/mejoras_futuras.txt.
+// explored) becomes worth the added complexity for this screen.
 // =============================================================================
 
 import 'dart:math' as math;

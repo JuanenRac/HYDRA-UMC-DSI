@@ -14,10 +14,9 @@ same [HYDRA-UMC STUDIO](https://github.com/JuanenRac/HYDRA-UMC-STUDIO)
 server the browser UI, SUITE, Android, and iOS clients all talk to,
 without needing a browser, monitor, keyboard, or mouse attached to the CM5.
 Both physical panel sizes (5" and 7") share the exact same 1280x720 pixel
-resolution, so this app ships one fixed layout, not a responsive one - see
-`SONNET/HYDRA-UMC-DSI/chat.TXT` section 1 for the hardware note this was
-specified against (that resolution was corrected from an earlier
-1280x800 assumption before this app's own code existed).
+resolution, so this app ships one fixed layout, not a responsive one. This
+was corrected from an earlier 1280x800 assumption before this app's own code
+existed.
 
 This app is one of **two coexisting control surfaces** on the same board:
 the CM5 also drives an HDMI output for a full external monitor running the
@@ -28,8 +27,7 @@ section 4 below for the one screen where that trade-off is most visible).
 
 ## 2. Why Flutter, and why Linux (not Kivy)
 
-`SONNET/HYDRA-UMC-DSI/chat.TXT` section 2 left the stack open between two
-options the project owner named: a Python/Kivy stack in the style of
+The stack decision considered two options: a Python/Kivy stack in the style of
 KlipperScreen, or Flutter. Flutter was chosen for one concrete reason:
 [HYDRA-UMC-IOS-CONTROL](https://github.com/JuanenRac/HYDRA-UMC-IOS-CONTROL)
 already has a complete, working Dart implementation of everything this
@@ -54,9 +52,7 @@ not native Swift" section). This app is the first one in the ecosystem to
 actually add a `linux/` platform folder, because it is the first Flutter
 app here whose real deployment target genuinely is Linux (the CM5's own
 OS), not a stand-in for a platform this dev machine can't build. Both
-`chat.TXT` (this project's own tracking doc) and the task brief that
-described the stack decision have been corrected to reflect this - see
-`SONNET/HYDRA-UMC-DSI/chat.TXT` section 2 and `auditoria_historial.txt`.
+The project documentation has been corrected to reflect this distinction.
 
 ## 3. Wi-Fi transport - REMOTE_API.md, same contract as every other client
 

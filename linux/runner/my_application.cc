@@ -54,8 +54,7 @@ static void my_application_activate(GApplication* application) {
 
   // Fixed 1280x720 - this app targets a real embedded 5"/7" DSI touchscreen
   // on the HYDRA-UMC Compute Module 5, both physical sizes sharing the exact
-  // same 1280x720 panel resolution (see SONNET/HYDRA-UMC-DSI/chat.TXT
-  // section 1). One layout for one resolution, deliberately not resizable -
+  // same 1280x720 panel resolution. One layout for one resolution, deliberately not resizable -
   // unlike a desktop app, there's no "other window size" this ever runs at
   // on the real hardware. Still perfectly resizable on a dev machine window
   // manager that ignores the hint (many tiling WMs do), which is fine: the
