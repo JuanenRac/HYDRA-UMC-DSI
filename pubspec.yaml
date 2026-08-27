@@ -1,0 +1,47 @@
+name: hydra_umc_dsi
+description: "Native touch UI for HYDRA-UMC's own 5\"/7\" DSI touchscreen (1280x720, same resolution at both sizes), controlling a HYDRA-UMC-STUDIO server directly from the Compute Module 5 via its own REMOTE_API.md."
+# The following line prevents the package from being accidentally published to
+# pub.dev using `flutter pub publish`. This is preferred for private packages.
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+
+# The following defines the version and build number for your application.
+# A version number is three numbers separated by dots, like 1.2.43
+# followed by an optional build number separated by a +.
+version: 0.0.5+6
+environment:
+  sdk: ^3.13.0
+
+# Dependencies specify other packages that your package needs in order to work.
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # REST + WebSocket client for HYDRA-UMC-STUDIO's REMOTE_API.md, same
+  # versions HYDRA-UMC-IOS-CONTROL already verified against that same
+  # server - no reason to pick different ones here.
+  http: ^1.6.0
+  web_socket_channel: ^3.0.3
+  shared_preferences: ^2.5.5
+  provider: ^6.1.5+1
+
+  # Real mDNS/Bonjour discovery of server.ts's "_hydra._tcp" service -
+  # same version HYDRA-UMC-IOS-CONTROL already verified against that same
+  # server, ported directly (see network/discovery.dart header).
+  multicast_dns: ^0.3.3+1
+
+  # NOTE: no cupertino_icons (this app never renders iOS-style widgets) and
+  # no webview_flutter - that package ships no Linux desktop implementation
+  # at all, which is this app's real deployment target (see docs/ARCHITECTURE.md
+  # "Why not a WebView 3D view" for the full reasoning behind the native,
+  # simplified 3D screen this app uses instead).
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  # The "flutter_lints" package below contains a set of recommended lints to
+  # encourage good coding practices.
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true

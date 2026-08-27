@@ -1,0 +1,81 @@
+#!/usr/bin/env bash
+# =============================================================================
+# HYDRA-UMC DSI (Flutter) - build_linux.sh
+# Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
+# GPL-3.0 - see LICENSE
+#
+# Builds the REAL deployment target: a Linux GTK desktop binary meant to
+# run on the HYDRA-UMC's own Compute Module 5, driving its 5"/7" DSI
+# touchscreen (1280x720, fixed - see linux/runner/my_application.cc).
+#
+# This script must be run ON a real Linux machine (the CM5 itself, or any
+# Linux dev box/VM) - it CANNOT run on the Windows machine this repo was
+# authored on, which has no Linux build toolchain at all (confirmed via
+# `wsl --status`: no WSL distro installed here). `flutter build windows`
+# (build.sh/build.bat) is used instead on that machine purely as a smoke
+# test of this app's own Dart logic (analyze/build/test all pass there) -
+# it does not exercise this file or the linux/ platform folder at all.
+#
+# Prerequisites on the target Linux machine (Debian/Raspberry Pi OS
+# package names - adjust for other distros):
+#   sudo apt install clang cmake ninja-build pkg-config \
+#       libgtk-3-dev liblzma-dev libstdc++-12-dev
+#   (see https://docs.flutter.dev/platform-integration/linux/building
+#   for the authoritative, up-to-date list)
+# =============================================================================
+
+echo "============================================================================="
+echo "HYDRA-UMC DSI (Flutter) - build_linux.sh"
+echo "Builds the REAL deployment target: a Linux GTK desktop binary for the CM5"
+echo "(bumps the app version, then runs flutter build linux). Must run ON a real"
+echo "Linux machine - see this file's own header comment for details."
+echo "Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>"
+echo "GPL-3.0 - see LICENSE"
+echo "============================================================================="
+echo
+
+set -euo pipefail
+
+# Always pause before this window closes - whether the build below succeeds
+# or fails - so a double-click launch doesn't flash a closed console before
+# any output can be read. Runs on every exit path (normal or `exit`) because
+# it's a trap, not something duplicated at each individual exit point.
+_pause_on_exit() {
+    local status=$?
+    echo
+    if [ "$status" -eq 0 ]; then
+        echo "Build finished successfully."
+    else
+        echo "Build FAILED (exit code $status)."
+    fi
+    read -n 1 -s -r -p "Press any key to close this window..."
+    echo
+}
+trap _pause_on_exit EXIT
+
+if ! command -v flutter >/dev/null 2>&1; then
+    echo "[ERROR] flutter was not found on PATH. Install the Flutter SDK" >&2
+    echo "        (https://docs.flutter.dev/get-started/install) and add its" >&2
+    echo "        bin/ directory to PATH, then re-run this script." >&2
+    exit 1
+fi
+
+echo "[1/4] flutter pub get"
+flutter pub get
+
+echo "[2/4] dart run tool/bump_version.dart"
+dart run tool/bump_version.dart || exit 1
+python3 "$(dirname "$0")/bump_manifest_version.py" --sync || exit 1
+
+echo "[3/4] flutter config --enable-linux-desktop"
+flutter config --enable-linux-desktop >/dev/null
+
+echo "[4/4] flutter build linux"
+flutter build linux
+
+echo
+echo "Build complete: build/linux/*/release/bundle/hydra_umc_dsi"
+echo "Copy the whole bundle/ directory to the CM5 and run the binary inside"
+echo "it directly (it depends on the .so files alongside it) - see"
+echo "README.md's own 'Running on the real CM5' section for the kiosk"
+echo "autostart setup (fullscreen, no window manager chrome)."

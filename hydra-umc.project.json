@@ -1,0 +1,22 @@
+{
+  "schema_version": "1.0",
+  "ecosystem": "HYDRA-UMC",
+  "name": "HYDRA-UMC-DSI",
+  "version": "0.0.5",
+  "role": "ui",
+  "stack": "flutter",
+  "technologies": [
+    "Flutter 3.x",
+    "Dart"
+  ],
+  "deployment_target": "cm5",
+  "maturity": "established",
+  "family": "Core Backend & Clients",
+  "parent": "HYDRA-UMC-SERVER",
+  "build": "flutter pub get && flutter build apk.",
+  "notes": "Native touch UI for the onboard 7\" DSI touchscreen, same client role as the mobile apps but embedded on the CM5 itself.",
+  "native_version": {
+    "file": "pubspec.yaml",
+    "pattern": "^version:\\s*(\\d+)\\.(\\d+)\\.(\\d+)\\+\\d+"
+  }
+}
