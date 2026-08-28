@@ -1,27 +1,49 @@
 @echo off
-REM =============================================================================
-REM HYDRA-UMC DSI (Flutter) - build.bat
-REM Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
-REM GPL-3.0 - see LICENSE
-REM
-REM Builds the Windows desktop target - see build.sh's own header comment
-REM for why this is the verification target on this machine and
-REM build_linux.sh for the real CM5/Linux deployment target.
-REM =============================================================================
-
-echo =============================================================================
-echo HYDRA-UMC DSI (Flutter) - build.bat
-echo Builds the Windows desktop target (dev-machine verification build - bumps
-echo the app version, then runs flutter build windows^).
-echo Copyright (C) 2026 JuanenRac (Electro Hobby 3D) ^<electrohobby3d@gmail.com^>
-echo GPL-3.0 - see LICENSE
-echo =============================================================================
+REM HYDRA_UMC_SCRIPT_STANDARD_HEADER_BEGIN
+REM *****************************************************************************
+REM Project   : HYDRA-UMC-DSI
+REM Script    : build.bat
+REM Purpose   : Incremental project build, verification and packaging workflow.
+REM Author    : JuanenRac (Electro Hobby 3D)
+REM Email     : electrohobby3d@gmail.com
+REM Copyright : (C) 2026 JuanenRac
+REM License   : GPL-3.0 - see LICENSE
+REM *****************************************************************************
+REM HYDRA_UMC_SCRIPT_STANDARD_HEADER_END
+REM HYDRA_UMC_SCRIPT_STANDARD_BANNER_BEGIN
 echo.
-
+echo *****************************************************************************
+echo * HYDRA-UMC-DSI - build.bat
+echo * Mode      : INCREMENTAL BUILD
+echo * Author    : JuanenRac (Electro Hobby 3D)
+echo * Email     : electrohobby3d@gmail.com
+echo * Copyright : (C) 2026 JuanenRac
+echo * License   : GPL-3.0 - see LICENSE
+echo * ------------------------------------------------------------------------- *
+echo * 1. Increment the project version and synchronise its manifest.
+echo * 2. Run this project's declared build, verification and packaging commands.
+echo * 3. Report the result and keep an interactive terminal open.
+echo *****************************************************************************
+echo.
+REM HYDRA_UMC_SCRIPT_STANDARD_BANNER_END
 setlocal
+REM HYDRA_UMC_SCRIPT_STANDARD_VERSION_CAPTURE_BEFORE
+for /f "usebackq delims=" %%V in (`python -c "import json; print(json.load(open(r'%~dp0hydra-umc.project.json', encoding='utf-8'))['version'])"`) do set "HYDRA_UMC_VERSION_BEFORE=%%V"
 python "%~dp0bump_manifest_version.py"
 if errorlevel 1 ( echo VERSION BUMP FAILED. & pause & exit /b 1 )
 
+REM HYDRA_UMC_SCRIPT_STANDARD_VERSION_CAPTURE_AFTER
+for /f "usebackq delims=" %%V in (`python -c "import json; print(json.load(open(r'%~dp0hydra-umc.project.json', encoding='utf-8'))['version'])"`) do set "HYDRA_UMC_VERSION_AFTER=%%V"
+if not defined HYDRA_UMC_VERSION_BEFORE set "HYDRA_UMC_VERSION_BEFORE=unknown"
+if not defined HYDRA_UMC_VERSION_AFTER set "HYDRA_UMC_VERSION_AFTER=unknown"
+echo.
+echo *****************************************************************************
+echo * VERSION INCREMENT COMPLETED
+echo * v%HYDRA_UMC_VERSION_BEFORE% ^> v%HYDRA_UMC_VERSION_AFTER%
+echo * Project manifest has been synchronised by the project build flow.
+echo *****************************************************************************
+echo.
+echo.
 where flutter >nul 2>nul
 if errorlevel 1 (
     echo [ERROR] flutter was not found on PATH. Install the Flutter SDK
