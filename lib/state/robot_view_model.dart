@@ -388,10 +388,6 @@ class RobotViewModel extends ChangeNotifier {
 
   void sendCommand(String command) {
     switch (command) {
-      case 'enable':
-        _sendAtomicCommand(command, propagateToCombined: true, localMutate: (r) => r.setOnline(true));
-      case 'disable':
-        _sendAtomicCommand(command, propagateToCombined: true, localMutate: (r) => r.setOnline(false));
       case 'play':
         _sendAtomicCommand(command, propagateToCombined: true, localMutate: (r) => r.setPlaying(true));
       case 'pause':

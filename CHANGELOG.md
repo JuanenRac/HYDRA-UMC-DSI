@@ -9,6 +9,32 @@ in [README.md](README.md#-versioning); earlier entries are grouped under
 the pre-policy version `0.0.0+1` the repo carried while the policy did not
 yet exist.
 
+## [0.0.6] - Removed dead enable/disable command plumbing
+
+- Found in a live ecosystem bug audit: `state/robot_view_model.dart`'s
+  `sendCommand()` had `'enable'`/`'disable'` cases that POSTed
+  `command: "enable"`/`"disable"` to `/api/robot/:id/command` and
+  optimistically flipped the robot `online` flag locally via
+  `RobotView.setOnline()`. HYDRA-UMC-SERVER's real handler for that
+  endpoint has no `"enable"`/`"disable"` case in its command `switch` -
+  only `stop`/`play`/`pause`/`jog`/`tool`/`valve`/`pump`/`speed`/`vision`
+  - and always responds `{ success: true }` regardless of whether any
+  case matched, so either command would have silently done nothing
+  server-side (no state change, no broadcast to other clients) while
+  this app's own screen flipped online/offline as if it had worked.
+  `control_screen.dart` never called `sendCommand('enable'/'disable')`
+  and grep found no other call site, so the cases were dead, unreachable
+  code - but they were a real trap for whoever wired a future
+  online/offline button to it. Removed both cases from `sendCommand()`
+  and the now-unused `RobotView.setOnline()` helper it was the only
+  caller of; `robot_view_model_test.dart`'s optimistic-mutation/rollback/
+  combinedWith-propagation coverage now exercises the same
+  `_sendAtomicCommand()` machinery through `sendCommand('play')` instead,
+  a real command the server and `control_screen.dart` both already
+  support. A real online/offline toggle, if ever needed, would require
+  adding a matching case to HYDRA-UMC-SERVER's own command handler first
+  - out of scope here.
+
 ## [0.0.5]
 
 - Build version synchronized with `hydra-umc.project.json` and the repository-native version source.

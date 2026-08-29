@@ -60,7 +60,6 @@ class RobotView {
     return const [];
   }
 
-  void setOnline(bool value) => raw['online'] = value;
   void setTool(String value) => raw['tool'] = value;
 
   List<dynamic> get valves => (raw['valves'] ??= [false, false]) as List<dynamic>;
