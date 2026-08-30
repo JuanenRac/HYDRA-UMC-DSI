@@ -9,6 +9,19 @@ in [README.md](README.md#-versioning); earlier entries are grouped under
 the pre-policy version `0.0.0+1` the repo carried while the policy did not
 yet exist.
 
+## [0.0.8] - Fixed a real version-drift bug in build.bat's own step order
+
+- **`build.bat`** - it ran `bump_manifest_version.py` (a real, independent
+  bump) *before* `dart run tool/bump_version.dart`, the real source of
+  the app's own native version (`pubspec.yaml`). That let the manifest
+  advance to a version the compiled app hadn't reached yet - exactly the
+  drift class this ecosystem's version-mirror convention exists to
+  prevent. `build.sh`/`build_linux.sh` already had the correct order;
+  `build.bat` now matches: `dart run tool/bump_version.dart` first, then
+  `bump_manifest_version.py --sync` to align the manifest to what the
+  app build actually produced. Verified with a real `flutter build
+  windows` run through the fixed script.
+
 ## [0.0.7] - Removed the hardcoded admin/admin credential default
 
 - **`server_info.dart`/`login_screen.dart`** - the login screen no longer
