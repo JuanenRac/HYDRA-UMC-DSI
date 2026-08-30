@@ -55,6 +55,21 @@ REQUIRED_MANIFEST_KEYS = (
 )
 VERSION_HEADING = re.compile(r"(?im)^#{1,3}\s*\[?(\d+\.\d+\.\d+)(?:\]|\s|$)")
 SEMVER = re.compile(r"^\d+\.\d+\.\d+$")
+BUILD_RUN_SECTION_MARKERS = (
+    "BUILD & RUN",
+    "COMPILACIÓN Y EJECUCIÓN",
+    "COMPILATION ET EXÉCUTION",
+    "COMPILAZIONE ED ESECUZIONE",
+    "ERSTELLEN UND AUSFÜHREN",
+    "BUILD & AUSFÜHRUNG",
+    "ビルドと実行",
+    "构建与运行",
+)
+
+
+def has_build_run_section(text: str) -> bool:
+    """Accept the translated BUILD & RUN heading in every public README."""
+    return any(marker in text for marker in BUILD_RUN_SECTION_MARKERS)
 
 
 def fail(message: str) -> None:
@@ -139,7 +154,7 @@ def main() -> int:
         fail(f"build-test files missing: {', '.join(missing_build_test_files)}")
     readmes_without_build_run = [
         name for name in REQUIRED_DOCUMENTS if name.startswith("README")
-        and "## 🛠️ BUILD & RUN" not in (ROOT / name).read_text(encoding="utf-8", errors="replace")
+        and not has_build_run_section((ROOT / name).read_text(encoding="utf-8", errors="replace"))
     ]
     if readmes_without_build_run:
         fail(f"README BUILD & RUN section missing: {', '.join(readmes_without_build_run)}")
