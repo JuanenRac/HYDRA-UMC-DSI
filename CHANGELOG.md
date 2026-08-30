@@ -9,6 +9,23 @@ in [README.md](README.md#-versioning); earlier entries are grouped under
 the pre-policy version `0.0.0+1` the repo carried while the policy did not
 yet exist.
 
+## [0.0.7] - Removed the hardcoded admin/admin credential default
+
+- **`server_info.dart`/`login_screen.dart`** - the login screen no longer
+  pre-fills `admin`/`admin`. Every real HYDRA-UMC-SERVER now refuses to
+  seed that source-known default account on a real production first
+  start (see that repo's own changelog: production requires explicit
+  `HYDRA_UMC_BOOTSTRAP_ADMIN_USERNAME`/`_PASSWORD`) - pre-filling a
+  credential that no longer exists on a real deployment was actively
+  misleading, not a convenience. `_submit()` now also refuses to send an
+  empty username or password rather than letting an empty field reach
+  the server as a real login attempt.
+- `SECURITY.md` documents the real expectation: the kiosk never carries
+  a built-in credential: the operator enters what the server bootstrap
+  process actually issued, and should clear it before the display
+  changes hands.
+- Verified: `flutter analyze` clean, `flutter test` 6/6 passing.
+
 ## [0.0.6] - Removed dead enable/disable command plumbing
 
 - Found in a live ecosystem bug audit: `state/robot_view_model.dart`'s

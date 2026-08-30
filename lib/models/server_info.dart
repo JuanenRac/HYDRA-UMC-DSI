@@ -23,13 +23,9 @@ class ServerInfo {
   final int uptimeSeconds;
   final String nickname; // user-assigned label, not from the server
 
-  // Login credentials - every real HYDRA-UMC STUDIO server in this ecosystem
-  // seeds the same default admin/admin account on its own first-ever start
-  // (see that project's own server.ts + users.ts; a server can also have
-  // additional lower-privilege "operator" accounts, created from
-  // Config > Users in the browser UI). Defaults to admin/admin so a fresh
-  // "add server" doesn't require typing credentials for what's already
-  // public knowledge in the server's own source.
+  // Credentials are always supplied by the operator. Production servers never
+  // create a source-known administrator account, so discovery must not turn
+  // into an implicit admin/admin login attempt.
   final String username;
   final String password;
 
@@ -44,8 +40,8 @@ class ServerInfo {
     this.robotCount = 0,
     this.uptimeSeconds = 0,
     this.nickname = '',
-    this.username = 'admin',
-    this.password = 'admin',
+    this.username = '',
+    this.password = '',
   });
 
   String get baseUrl => 'http://$host:$port';

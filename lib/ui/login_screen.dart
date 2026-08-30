@@ -29,8 +29,8 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final _hostCtrl = TextEditingController(text: '192.168.1.100');
   final _portCtrl = TextEditingController(text: '3000');
-  final _userCtrl = TextEditingController(text: 'admin');
-  final _passCtrl = TextEditingController(text: 'admin');
+  final _userCtrl = TextEditingController();
+  final _passCtrl = TextEditingController();
   bool _isSubmitting = false;
 
   StreamSubscription<ServerInfo>? _scanSub;
@@ -162,7 +162,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _submit() async {
     final host = _hostCtrl.text.trim();
     final port = int.tryParse(_portCtrl.text.trim()) ?? 3000;
-    if (host.isEmpty) return;
+    if (host.isEmpty || _userCtrl.text.trim().isEmpty || _passCtrl.text.isEmpty) return;
     setState(() => _isSubmitting = true);
     final server = ServerInfo(host: host, port: port, username: _userCtrl.text.trim(), password: _passCtrl.text);
     await context.read<RobotViewModel>().login(server);
