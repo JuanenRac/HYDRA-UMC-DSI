@@ -46,6 +46,18 @@ class RobotViewModel extends ChangeNotifier {
   HydraApiClient? apiClient;
   HydraWebSocket? _ws;
   Timer? _metricsTimer;
+
+  // Per-command-name debounce for _sendAtomicCommand()'s own network send -
+  // a dragged Slider's onChanged fires many times a second (setSpeed's own
+  // real caller, ui/control_screen.dart), and until this existed every one
+  // of those ticks fired its own real POST /api/robot/:id/command, unlike
+  // HYDRA-UMC-ANDROID-CONTROL's own equivalent sendAtomicCommand(), which
+  // already debounces setSpeed 300ms for exactly this reason - this port
+  // (and HYDRA-UMC-IOS-CONTROL's own, fixed the same way) had the same gap
+  // the Android app already closed. Keyed by command name so debouncing
+  // 'speed' can never coalesce away or delay an unrelated command (e.g. a
+  // jog or E-STOP) that happens to fire during the same debounce window.
+  final Map<String, Timer> _debounceTimers = {};
   Timer? _hydraInfoTimer;
 
   // Per-robot generation counter guarding _sendAtomicCommand()'s own
@@ -313,6 +325,7 @@ class RobotViewModel extends ChangeNotifier {
     Map<String, dynamic>? params,
     bool propagateToCombined = false,
     dynamic robotIdOverride,
+    Duration debounce = Duration.zero,
     required void Function(RobotView) localMutate,
   }) async {
     final robotId = robotIdOverride ?? selectedRobotId;
@@ -337,7 +350,10 @@ class RobotViewModel extends ChangeNotifier {
     // Deep-copy snapshot of every affected robot's raw state before
     // mutating, so a failed write can roll back cleanly (see
     // HYDRA-UMC-IOS-CONTROL's own header comment for why a shallow copy
-    // wouldn't work here).
+    // wouldn't work here). Applied unconditionally, even when `debounce`
+    // delays the actual network send below - a dragged Slider still needs
+    // instant per-tick visual feedback (see setSpeed's own comment); only
+    // the real POST round-trip is worth coalescing away.
     final snapshots = <dynamic, Map<String, dynamic>>{};
     final myGeneration = <dynamic, int>{};
     for (final id in affectedIds) {
@@ -353,36 +369,51 @@ class RobotViewModel extends ChangeNotifier {
     final payload = <String, dynamic>{'command': command};
     if (params != null) payload['params'] = params;
 
-    try {
-      await client.postRobotCommand(robotId, payload);
-      lastError = '';
-    } catch (e) {
-      // Catches everything, not just HydraApiException - a plain network
-      // failure must still roll back the optimistic mutation and surface
-      // the error, especially critical for a touchscreen jog pendant/E-STOP
-      // (see control_screen.dart) where a silently-failed STOP is
-      // dangerous.
-      for (final entry in snapshots.entries) {
-        // Skip the rollback if a newer command for this same robot has
-        // already started since this one's snapshot was taken (see
-        // _commandGeneration's own header comment) - this failure is stale,
-        // and restoring its snapshot now would overwrite whatever that
-        // newer command already applied.
-        if (_commandGeneration[entry.key] != myGeneration[entry.key]) continue;
-        final r = state.robotById(entry.key);
-        if (r != null) {
-          r.raw
-            ..clear()
-            ..addAll(entry.value);
+    Future<void> send() async {
+      try {
+        await client.postRobotCommand(robotId, payload);
+        lastError = '';
+      } catch (e) {
+        // Catches everything, not just HydraApiException - a plain network
+        // failure must still roll back the optimistic mutation and surface
+        // the error, especially critical for a touchscreen jog pendant/E-STOP
+        // (see control_screen.dart) where a silently-failed STOP is
+        // dangerous.
+        for (final entry in snapshots.entries) {
+          // Skip the rollback if a newer command for this same robot has
+          // already started since this one's snapshot was taken (see
+          // _commandGeneration's own header comment) - this failure is stale,
+          // and restoring its snapshot now would overwrite whatever that
+          // newer command already applied.
+          if (_commandGeneration[entry.key] != myGeneration[entry.key]) continue;
+          final r = state.robotById(entry.key);
+          if (r != null) {
+            r.raw
+              ..clear()
+              ..addAll(entry.value);
+          }
         }
+        lastError = 'TX error [$command]: $e';
+        if (e.toString().contains('401') || e.toString().contains('403')) {
+          isLoggedIn = false;
+          connectionStatus = 'disconnected';
+          _ws?.disconnect();
+        }
+        notifyListeners();
       }
-      lastError = 'TX error [$command]: $e';
-      if (e.toString().contains('401') || e.toString().contains('403')) {
-        isLoggedIn = false;
-        connectionStatus = 'disconnected';
-        _ws?.disconnect();
-      }
-      notifyListeners();
+    }
+
+    // Debounced (same real mechanism as HYDRA-UMC-ANDROID-CONTROL's own
+    // sendAtomicCommand): cancel any still-pending send for this exact
+    // command name, then schedule a new one after `debounce` - a rapid
+    // burst of calls for the same command (e.g. every Slider drag frame)
+    // collapses into exactly one real POST once the drag settles, instead
+    // of one POST per frame.
+    _debounceTimers.remove(command)?.cancel();
+    if (debounce > Duration.zero) {
+      _debounceTimers[command] = Timer(debounce, send);
+    } else {
+      await send();
     }
   }
 
@@ -429,10 +460,14 @@ class RobotViewModel extends ChangeNotifier {
     _sendAtomicCommand('pump', params: {'index': index, 'state': newState}, localMutate: (r) => r.setPump(index, newState));
   }
 
+  /// Debounced (300ms, matching HYDRA-UMC-ANDROID-CONTROL's own setSpeed) -
+  /// a dragged Slider's onChanged (ui/control_screen.dart) fires this many
+  /// times a second.
   void setSpeed(double speed, double acceleration) {
     _sendAtomicCommand(
       'speed',
       params: {'speed': speed, 'acceleration': acceleration},
+      debounce: const Duration(milliseconds: 300),
       localMutate: (r) {
         r.setSpeed(speed);
         r.setAcceleration(acceleration);
@@ -457,6 +492,9 @@ class RobotViewModel extends ChangeNotifier {
     _ws?.disconnect();
     _metricsTimer?.cancel();
     _hydraInfoTimer?.cancel();
+    for (final timer in _debounceTimers.values) {
+      timer.cancel();
+    }
     apiClient?.close();
     super.dispose();
   }

@@ -9,6 +9,23 @@ in [README.md](README.md#-versioning); earlier entries are grouped under
 the pre-policy version `0.0.0+1` the repo carried while the policy did not
 yet exist.
 
+## [0.0.9] - Debounced the speed/acceleration slider's real network send
+
+- **`lib/state/robot_view_model.dart`** - `setSpeed()` now debounces its
+  real `POST /api/robot/:id/command` send by 300ms, matching
+  HYDRA-UMC-ANDROID-CONTROL's own `sendAtomicCommand(..., debounceMs =
+  300)` and the same real fix just applied to HYDRA-UMC-IOS-CONTROL
+  (this repo's own upstream port source - the omission propagated here
+  too). Every drag frame of the speed/acceleration `Slider`
+  (`ui/control_screen.dart`) used to fire its own real network request -
+  the local optimistic UI update still applies instantly every frame
+  (unchanged), only the actual round-trip is now coalesced into one real
+  send once the drag settles, cancelling any still-pending send for the
+  same command name (`_sendAtomicCommand`'s new `debounce` parameter,
+  backed by a per-command `Timer` map). Every other real-time control
+  (jog, E-STOP/play/pause/stop, valve/pump toggles) already sent
+  immediately and is unaffected.
+
 ## [0.0.8] - Fixed a real version-drift bug in build.bat's own step order
 
 - **`build.bat`** - it ran `bump_manifest_version.py` (a real, independent
