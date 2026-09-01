@@ -174,15 +174,12 @@ Dieses Projekt ist Teil eines weit größeren Robotik-Ökosystems desselben Auto
 
 ---
 
-## 👤 Autor
-
+## 👤 AUTOR
 **JuanenRac** (Electro Hobby 3D)
 📧 electrohobby3d@gmail.com
-📺 youtube.com/@electrohobby3d
+📺 [youtube.com/@electrohobby3d](https://youtube.com/@electrohobby3d)
 
----
-
-## 📜 Lizenz
+## 📜 LIZENZ
 
 GNU General Public License v3.0 (GPL-3.0) für den Quellcode - siehe [`LICENSE`](LICENSE).
 

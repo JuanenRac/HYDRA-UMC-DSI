@@ -172,15 +172,12 @@ Este proyecto forma parte de un ecosistema de robótica mucho más amplio del mi
 
 ---
 
-## 👤 Autor
-
+## 👤 AUTOR
 **JuanenRac** (Electro Hobby 3D)
 📧 electrohobby3d@gmail.com
-📺 youtube.com/@electrohobby3d
+📺 [youtube.com/@electrohobby3d](https://youtube.com/@electrohobby3d)
 
----
-
-## 📜 Licencia
+## 📜 LICENCIA
 
 Licencia Pública General de GNU v3.0 (GPL-3.0) para el código fuente - ver [`LICENSE`](LICENSE).
 
