@@ -122,7 +122,14 @@ HYDRA-UMC-DSI/
 │   │   ├── discovery.dart           # Escaneo concurrente de las subredes locales reales de este dispositivo
 │   │   └── auth_prefs.dart          # Conexión y token persistidos (shared_preferences)
 │   ├── state/
-│   │   └── robot_view_model.dart    # Único ChangeNotifier que escucha cada pantalla
+│   │   ├── robot_view_model.dart    # Único ChangeNotifier que escucha cada pantalla
+│   │   └── hydra_error.dart         # Superficie de error tipada para RobotViewModel (sin BuildContext propio)
+│   ├── services/
+│   │   └── backlight.dart           # Retroiluminación adaptativa según la hora del día
+│   ├── l10n/                        # Localizaciones reales generadas (7 idiomas) - ver l10n.yaml en la raíz del repo
+│   │   ├── app_localizations.dart   # Clase base generada
+│   │   ├── app_localizations_en.dart, _es.dart, _it.dart, _fr.dart, _de.dart, _ja.dart, _zh.dart
+│   │   └── language_prefs.dart      # Override de idioma persistido (shared_preferences)
 │   └── ui/
 │       ├── login_screen.dart        # Campos de host/puerto/usuario/contraseña + "Buscar en la red local"
 │       ├── main_screen.dart         # Barra de navegación táctil horizontal (6 pestañas) - en el espíritu de KlipperScreen
@@ -139,7 +146,10 @@ HYDRA-UMC-DSI/
 ├── linux/                            # Runner de escritorio GTK - el target REAL, ventana fija 1280x720
 ├── windows/                          # Runner de escritorio Windows - solo verificación en máquina de desarrollo
 ├── docs/ARCHITECTURE.md
-├── test/widget_test.dart
+├── tools/
+│   └── ci_validate.py               # Validación de manifiesto/CHANGELOG/docs usada por CI
+├── bump_manifest_version.py          # Sincroniza la versión de hydra-umc.project.json con la nativa (--sync)
+├── test/                             # widget_test, format_uptime_test, localization_test, robot_view_model_test
 ├── README.md                         # documento original (inglés)
 └── README_spa.md / README_ita.md / README_fra.md / README_deu.md / README_zho.md / README_jpn.md  # traducciones
 ```

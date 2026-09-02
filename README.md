@@ -122,7 +122,14 @@ HYDRA-UMC-DSI/
 │   │   ├── discovery.dart           # Concurrent scan of this device's own real local subnet(s)
 │   │   └── auth_prefs.dart          # Persisted connection + token (shared_preferences)
 │   ├── state/
-│   │   └── robot_view_model.dart    # Single ChangeNotifier every screen listens to
+│   │   ├── robot_view_model.dart    # Single ChangeNotifier every screen listens to
+│   │   └── hydra_error.dart         # Typed error surface for RobotViewModel (no BuildContext of its own)
+│   ├── services/
+│   │   └── backlight.dart           # Adaptive backlight by time of day
+│   ├── l10n/                        # Real generated localizations (7 languages) - see l10n.yaml at repo root
+│   │   ├── app_localizations.dart   # Generated base class
+│   │   ├── app_localizations_en.dart, _es.dart, _it.dart, _fr.dart, _de.dart, _ja.dart, _zh.dart
+│   │   └── language_prefs.dart      # Persisted language override (shared_preferences)
 │   └── ui/
 │       ├── login_screen.dart        # Host/port/user/pass fields + "Scan local network"
 │       ├── main_screen.dart         # Horizontal touch nav bar (6 tabs) - KlipperScreen-in-spirit
@@ -139,7 +146,10 @@ HYDRA-UMC-DSI/
 ├── linux/                            # GTK desktop runner - the REAL target, fixed 1280x720 window
 ├── windows/                          # Windows desktop runner - dev-machine verification only
 ├── docs/ARCHITECTURE.md
-├── test/widget_test.dart
+├── tools/
+│   └── ci_validate.py               # Manifest/CHANGELOG/docs validation used by CI
+├── bump_manifest_version.py          # Syncs hydra-umc.project.json's version to the native one (--sync)
+├── test/                             # widget_test, format_uptime_test, localization_test, robot_view_model_test
 ├── README.md                         # this file
 └── README_spa.md / README_ita.md / README_fra.md / README_deu.md / README_zho.md / README_jpn.md  # translations
 ```

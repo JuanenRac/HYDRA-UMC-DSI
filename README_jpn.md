@@ -110,7 +110,14 @@ HYDRA-UMC-DSI/
 │   │   ├── discovery.dart           # このデバイス自身の実際のローカルサブネットの並行スキャン
 │   │   └── auth_prefs.dart          # 永続化された接続情報 + トークン（shared_preferences）
 │   ├── state/
-│   │   └── robot_view_model.dart    # すべての画面がリッスンする単一の ChangeNotifier
+│   │   ├── robot_view_model.dart    # すべての画面がリッスンする単一の ChangeNotifier
+│   │   └── hydra_error.dart         # RobotViewModel向けの型付きエラーサーフェス(独自のBuildContextを持たない)
+│   ├── services/
+│   │   └── backlight.dart           # 時間帯に応じた適応型バックライト
+│   ├── l10n/                        # 実際に生成されたローカライゼーション(7言語) - リポジトリルートのl10n.yamlを参照
+│   │   ├── app_localizations.dart   # 生成されたベースクラス
+│   │   ├── app_localizations_en.dart, _es.dart, _it.dart, _fr.dart, _de.dart, _ja.dart, _zh.dart
+│   │   └── language_prefs.dart      # 永続化された言語上書き設定(shared_preferences)
 │   └── ui/
 │       ├── login_screen.dart        # ホスト/ポート/ユーザー/パスワードフィールド + 「ローカルネットワークをスキャン」
 │       ├── main_screen.dart         # 水平タッチナビゲーションバー（6 タブ）——精神的には KlipperScreen に近い
@@ -127,7 +134,10 @@ HYDRA-UMC-DSI/
 ├── linux/                            # GTK デスクトップランナー——実際のターゲット、固定 1280x720 ウィンドウ
 ├── windows/                          # Windows デスクトップランナー——開発機での検証専用
 ├── docs/ARCHITECTURE.md
-├── test/widget_test.dart
+├── tools/
+│   └── ci_validate.py               # CI が使用するマニフェスト/CHANGELOG/ドキュメント検証
+├── bump_manifest_version.py          # hydra-umc.project.json のバージョンをネイティブ版と同期(--sync)
+├── test/                             # widget_test、format_uptime_test、localization_test、robot_view_model_test
 ├── README.md                         # 本ファイル
 └── README_spa.md / README_ita.md / README_fra.md / README_deu.md / README_zho.md / README_jpn.md  # 翻訳
 ```

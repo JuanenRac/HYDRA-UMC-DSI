@@ -110,7 +110,14 @@ HYDRA-UMC-DSI/
 │   │   ├── discovery.dart           # 本设备自身真实本地子网的并发扫描
 │   │   └── auth_prefs.dart          # 持久化的连接信息 + 令牌（shared_preferences）
 │   ├── state/
-│   │   └── robot_view_model.dart    # 每个界面都监听的单一 ChangeNotifier
+│   │   ├── robot_view_model.dart    # 每个界面都监听的单一 ChangeNotifier
+│   │   └── hydra_error.dart         # 面向 RobotViewModel 的类型化错误接口（自身无 BuildContext）
+│   ├── services/
+│   │   └── backlight.dart           # 根据时间自适应调节背光
+│   ├── l10n/                        # 真实生成的本地化文件（7 种语言）——见仓库根目录的 l10n.yaml
+│   │   ├── app_localizations.dart   # 生成的基类
+│   │   ├── app_localizations_en.dart, _es.dart, _it.dart, _fr.dart, _de.dart, _ja.dart, _zh.dart
+│   │   └── language_prefs.dart      # 持久化的语言覆盖设置（shared_preferences）
 │   └── ui/
 │       ├── login_screen.dart        # 主机/端口/用户/密码字段 + “扫描本地网络”
 │       ├── main_screen.dart         # 水平触控导航栏（6 个选项卡）——精神上接近 KlipperScreen
@@ -127,7 +134,10 @@ HYDRA-UMC-DSI/
 ├── linux/                            # GTK 桌面运行器——真正的目标平台，固定 1280x720 窗口
 ├── windows/                          # Windows 桌面运行器——仅供开发机验证
 ├── docs/ARCHITECTURE.md
-├── test/widget_test.dart
+├── tools/
+│   └── ci_validate.py               # CI 使用的清单/CHANGELOG/文档校验
+├── bump_manifest_version.py          # 将 hydra-umc.project.json 的版本与原生版本同步(--sync)
+├── test/                             # widget_test、format_uptime_test、localization_test、robot_view_model_test
 ├── README.md                         # 本文件
 └── README_spa.md / README_ita.md / README_fra.md / README_deu.md / README_zho.md / README_jpn.md  # 翻译
 ```
