@@ -13,6 +13,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../l10n/app_localizations.dart';
 import '../models/hydra_state.dart';
 import '../state/robot_view_model.dart';
 import 'widgets/status_led.dart';
@@ -23,6 +24,7 @@ class DashboardScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final vm = context.watch<RobotViewModel>();
+    final l10n = AppLocalizations.of(context)!;
     final robots = vm.robots;
     final metrics = vm.metrics;
 
@@ -31,7 +33,7 @@ class DashboardScreen extends StatelessWidget {
         if (metrics != null) _MetricsBar(metrics: metrics),
         Expanded(
           child: robots.isEmpty
-              ? const Center(child: Text('No robots reported by the server', style: TextStyle(color: Colors.grey)))
+              ? Center(child: Text(l10n.controlNoRobots, style: const TextStyle(color: Colors.grey)))
               : GridView.builder(
                   padding: const EdgeInsets.all(16),
                   gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
@@ -66,7 +68,10 @@ class _MetricsBar extends StatelessWidget {
           const SizedBox(width: 20),
           _stat(Icons.thermostat, '${metrics.temp.toStringAsFixed(0)}°C'),
           const Spacer(),
-          Text('uptime ${(metrics.uptime / 3600).toStringAsFixed(1)}h', style: const TextStyle(color: Colors.grey, fontSize: 12)),
+          Text(
+            AppLocalizations.of(context)!.dashboardUptime(formatUptime(metrics.uptime)),
+            style: const TextStyle(color: Colors.grey, fontSize: 12),
+          ),
         ],
       ),
     );
@@ -93,6 +98,7 @@ class _RobotCard extends StatelessWidget {
     // Combined-robot display shown on the FOLLOWER side only, resolved by
     // id - same convention as HYDRA-UMC-STUDIO's own Dashboard Overview.
     final leaders = allRobots.where((other) => other.id != robot.id && other.combinedWith.contains(robot.id)).toList();
+    final l10n = AppLocalizations.of(context)!;
 
     return Card(
       color: robot.online ? const Color(0xFF12161C) : const Color(0xFF0A0C10),
@@ -116,13 +122,13 @@ class _RobotCard extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                     decoration: BoxDecoration(color: const Color(0xFF10B981).withValues(alpha: 0.2), borderRadius: BorderRadius.circular(6)),
-                    child: const Text('RUNNING', style: TextStyle(fontSize: 9, color: Color(0xFF10B981), fontWeight: FontWeight.bold)),
+                    child: Text(l10n.dashboardRunning, style: const TextStyle(fontSize: 9, color: Color(0xFF10B981), fontWeight: FontWeight.bold)),
                   ),
               ],
             ),
-            Text('Role: ${robot.role}', style: const TextStyle(color: Colors.grey, fontSize: 12)),
+            Text(l10n.dashboardRole(robot.role), style: const TextStyle(color: Colors.grey, fontSize: 12)),
             if (leaders.isNotEmpty)
-              Text('Combined With: ${leaders.map((r) => r.name).join(', ')}', style: const TextStyle(color: Colors.amber, fontSize: 12)),
+              Text(l10n.dashboardCombinedWith(leaders.map((r) => r.name).join(', ')), style: const TextStyle(color: Colors.amber, fontSize: 12)),
             const SizedBox(height: 6),
             Text(robot.model, style: const TextStyle(color: Colors.white70, fontSize: 13)),
             Text(robot.manufacturer, style: const TextStyle(color: Color(0xFF00E5FF), fontSize: 12)),
@@ -161,4 +167,20 @@ class _RobotCard extends StatelessWidget {
       child: Text(label, style: TextStyle(fontSize: 10, color: color.shade200, fontWeight: FontWeight.bold)),
     );
   }
+}
+
+/// Formats seconds into a human-readable uptime string (e.g. "2d 4h 15m") -
+/// same algorithm ui/metrics_screen.dart's own _formatUptime() already
+/// uses, and the same one ported into HYDRA-UMC-IOS-CONTROL's own
+/// dashboard_screen.dart from HYDRA-UMC-ANDROID-CONTROL - this Dashboard's
+/// metrics bar was still showing a raw hours-with-one-decimal figure while
+/// this app's own dedicated Metrics screen already had the nicer format,
+/// an inconsistency within this same app fixed here to match.
+String formatUptime(int seconds) {
+  final d = seconds ~/ 86400;
+  final h = (seconds % 86400) ~/ 3600;
+  final m = (seconds % 3600) ~/ 60;
+  if (d > 0) return '${d}d ${h}h ${m}m';
+  if (h > 0) return '${h}h ${m}m';
+  return '${m}m';
 }

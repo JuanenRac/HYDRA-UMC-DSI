@@ -18,6 +18,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../l10n/app_localizations.dart';
 import '../state/robot_view_model.dart';
 
 class MetricsScreen extends StatelessWidget {
@@ -26,6 +27,7 @@ class MetricsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final vm = context.watch<RobotViewModel>();
+    final l10n = AppLocalizations.of(context)!;
     final metrics = vm.metrics;
     final info = vm.hydraInfo;
 
@@ -38,49 +40,60 @@ class MetricsScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Compute Module 5 - Host Metrics', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          Text(l10n.metricsHostTitle, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           const SizedBox(height: 16),
           Wrap(
             spacing: 16,
             runSpacing: 16,
             children: [
-              _MetricTile(icon: Icons.memory, label: 'CPU Load', value: '${metrics.cpuLoad}%', color: _loadColor(metrics.cpuLoad)),
-              _MetricTile(icon: Icons.storage, label: 'Memory Usage', value: '${metrics.memoryUsage}%', color: _loadColor(metrics.memoryUsage)),
+              _MetricTile(icon: Icons.memory, label: l10n.metricsCpuLoad, value: '${metrics.cpuLoad}%', color: _loadColor(metrics.cpuLoad)),
+              _MetricTile(
+                icon: Icons.storage,
+                label: l10n.metricsMemoryUsage,
+                value: '${metrics.memoryUsage}%',
+                color: _loadColor(metrics.memoryUsage),
+              ),
               _MetricTile(
                 icon: Icons.thermostat,
-                label: 'Temperature',
+                label: l10n.metricsTemperature,
                 value: '${metrics.temp.toStringAsFixed(1)}°C',
                 color: _tempColor(metrics.temp),
               ),
-              _MetricTile(icon: Icons.timer, label: 'Uptime', value: _formatUptime(metrics.uptime), color: const Color(0xFF00E5FF)),
+              _MetricTile(icon: Icons.timer, label: l10n.metricsUptime, value: _formatUptime(metrics.uptime), color: const Color(0xFF00E5FF)),
             ],
           ),
           const SizedBox(height: 28),
           if (info != null) ...[
-            const Text('Server', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            Text(l10n.metricsServerTitle, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 16),
             Wrap(
               spacing: 16,
               runSpacing: 16,
               children: [
-                _MetricTile(icon: Icons.dns, label: 'Hostname', value: '${info['hostname'] ?? '?'}', color: Colors.white70, small: true),
+                _MetricTile(
+                  icon: Icons.dns,
+                  label: l10n.metricsHostname,
+                  value: '${info['hostname'] ?? '?'}',
+                  color: Colors.white70,
+                  small: true,
+                ),
                 _MetricTile(
                   icon: Icons.developer_board,
-                  label: 'Controllers',
+                  label: l10n.metricsControllers,
                   value: '${info['controllerCount'] ?? 0}',
                   color: Colors.white70,
                   small: true,
                 ),
                 _MetricTile(
                   icon: Icons.precision_manufacturing,
-                  label: 'Robots',
+                  label: l10n.metricsRobots,
                   value: '${info['robotCount'] ?? 0}',
                   color: Colors.white70,
                   small: true,
                 ),
                 _MetricTile(
                   icon: Icons.tag,
-                  label: 'App Version',
+                  label: l10n.metricsAppVersion,
                   value: '${info['appVersion'] ?? '?'}',
                   color: Colors.white70,
                   small: true,

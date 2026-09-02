@@ -17,7 +17,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../l10n/app_localizations.dart';
 import '../services/backlight.dart';
+import '../state/hydra_error.dart';
 import '../state/robot_view_model.dart';
 import 'camera_screen.dart';
 import 'control_screen.dart';
@@ -49,7 +51,7 @@ class _NavEntry {
 class _MainScreenState extends State<MainScreen> {
   int _index = 0;
   RobotViewModel? _vm;
-  String _lastShownError = '';
+  HydraError? _lastShownError;
 
   int? _cleanSecondsLeft;
   Timer? _cleanTimer;
@@ -84,14 +86,14 @@ class _MainScreenState extends State<MainScreen> {
     setState(() => _cleanSecondsLeft = null);
   }
 
-  static const _entries = [
-    _NavEntry(Icons.dashboard, 'Dashboard', DashboardScreen()),
-    _NavEntry(Icons.gamepad, 'Control', ControlScreen()),
-    _NavEntry(Icons.videocam, 'Camera', CameraScreen()),
-    _NavEntry(Icons.view_in_ar, '3D View', ThreeDScreen()),
-    _NavEntry(Icons.monitor_heart, 'Metrics', MetricsScreen()),
-    _NavEntry(Icons.settings, 'Settings', SettingsScreen()),
-  ];
+  static List<_NavEntry> _entries(AppLocalizations l10n) => [
+        _NavEntry(Icons.dashboard, l10n.navDashboard, const DashboardScreen()),
+        _NavEntry(Icons.gamepad, l10n.navControl, const ControlScreen()),
+        _NavEntry(Icons.videocam, l10n.navCamera, const CameraScreen()),
+        _NavEntry(Icons.view_in_ar, l10n.nav3d, const ThreeDScreen()),
+        _NavEntry(Icons.monitor_heart, l10n.navMetrics, const MetricsScreen()),
+        _NavEntry(Icons.settings, l10n.navSettings, const SettingsScreen()),
+      ];
 
   @override
   void initState() {
@@ -126,11 +128,11 @@ class _MainScreenState extends State<MainScreen> {
   /// the operator happens to be looking at.
   void _onVmChanged() {
     if (!mounted) return;
-    final err = _vm?.lastError ?? '';
-    if (err.isNotEmpty && err != _lastShownError) {
+    final err = _vm?.lastError;
+    if (err != null && !identical(err, _lastShownError)) {
       _lastShownError = err;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(err), backgroundColor: const Color(0xFFB91C1C)),
+        SnackBar(content: Text(err.localize(AppLocalizations.of(context)!)), backgroundColor: const Color(0xFFB91C1C)),
       );
     }
   }
@@ -150,6 +152,8 @@ class _MainScreenState extends State<MainScreen> {
     // widget when either of those two specific values actually changes.
     final serverName = context.select<RobotViewModel, String?>((vm) => vm.activeServer?.displayName);
     final connectionStatus = context.select<RobotViewModel, String>((vm) => vm.connectionStatus);
+    final l10n = AppLocalizations.of(context)!;
+    final entries = _entries(l10n);
     return Scaffold(
       body: SafeArea(
         child: Stack(
@@ -159,13 +163,14 @@ class _MainScreenState extends State<MainScreen> {
                 _TopNavBar(
                   serverName: serverName ?? 'HYDRA-UMC DSI',
                   connectionStatus: connectionStatus,
-                  entries: _entries,
+                  entries: entries,
                   selectedIndex: _index,
                   onSelect: (i) => setState(() => _index = i),
                   onCleanTap: _startScreenClean,
+                  cleanTooltip: l10n.cleanScreenTooltip(_screenCleanDuration.inSeconds),
                 ),
                 Expanded(
-                  child: IndexedStack(index: _index, children: _entries.map((e) => e.screen).toList()),
+                  child: IndexedStack(index: _index, children: entries.map((e) => e.screen).toList()),
                 ),
               ],
             ),
@@ -193,6 +198,7 @@ class _ScreenCleanOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Positioned.fill(
       child: Stack(
         children: [
@@ -220,18 +226,18 @@ class _ScreenCleanOverlay extends StatelessWidget {
                     const Icon(Icons.cleaning_services, size: 64, color: Colors.white54),
                     const SizedBox(height: 16),
                     Text(
-                      'Cleaning mode',
+                      l10n.cleanModeTitle,
                       style: Theme.of(context).textTheme.headlineSmall?.copyWith(color: Colors.white),
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Touch input is disabled - $secondsLeft s left',
+                      l10n.cleanModeBody(secondsLeft),
                       style: const TextStyle(color: Colors.white70, fontSize: 16),
                     ),
                     const SizedBox(height: 24),
-                    const Text(
-                      'Long-press here to end early',
-                      style: TextStyle(color: Colors.white38, fontSize: 13),
+                    Text(
+                      l10n.cleanModeDismissHint,
+                      style: const TextStyle(color: Colors.white38, fontSize: 13),
                     ),
                   ],
                 ),
@@ -256,6 +262,7 @@ class _TopNavBar extends StatelessWidget {
   final int selectedIndex;
   final ValueChanged<int> onSelect;
   final VoidCallback onCleanTap;
+  final String cleanTooltip;
 
   const _TopNavBar({
     required this.serverName,
@@ -264,6 +271,7 @@ class _TopNavBar extends StatelessWidget {
     required this.selectedIndex,
     required this.onSelect,
     required this.onCleanTap,
+    required this.cleanTooltip,
   });
 
   @override
@@ -313,7 +321,7 @@ class _TopNavBar extends StatelessWidget {
           ),
           IconButton(
             icon: const Icon(Icons.cleaning_services, color: Colors.white70),
-            tooltip: 'Clean screen (locks touch input for 30s)',
+            tooltip: cleanTooltip,
             onPressed: onCleanTap,
           ),
         ],

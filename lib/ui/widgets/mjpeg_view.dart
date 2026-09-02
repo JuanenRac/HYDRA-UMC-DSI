@@ -19,6 +19,8 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
+import '../../l10n/app_localizations.dart';
+
 class MjpegView extends StatefulWidget {
   final String url;
   const MjpegView({super.key, required this.url});
@@ -116,7 +118,7 @@ class _MjpegViewState extends State<MjpegView> {
     if (_frame == null) {
       return Center(
         child: _hasError
-            ? const Text('Stream unavailable', style: TextStyle(color: Colors.grey))
+            ? Text(AppLocalizations.of(context)!.cameraStreamUnavailable, style: const TextStyle(color: Colors.grey))
             : const CircularProgressIndicator(),
       );
     }

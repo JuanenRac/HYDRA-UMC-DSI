@@ -19,6 +19,8 @@ import 'dart:convert';
 
 import 'package:web_socket_channel/web_socket_channel.dart';
 
+import '../state/hydra_error.dart';
+
 enum WsStatus { connecting, connected, disconnected }
 
 const Duration reconnectDelay = Duration(seconds: 3);
@@ -29,7 +31,7 @@ class HydraWebSocket {
   String? token;
   final void Function(WsStatus status) onStatus;
   final void Function(Map<String, dynamic> payload) onSettings;
-  final void Function(String message) onError;
+  final void Function(HydraError error) onError;
   /// A real targeted delta (server.ts's own broadcastRobotDelta(), sent
   /// only once this connection declares schema 2 via ?remoteApiVersion=2
   /// below - see DISEÑO_SYNC_DELTAS.txt section 2/3). Optional: a caller
@@ -79,7 +81,7 @@ class HydraWebSocket {
         },
         onError: (Object e) {
           onStatus(WsStatus.disconnected);
-          onError('WebSocket connection lost: $e');
+          onError(HydraError(HydraErrorKind.wsConnectionLost, {'error': '$e'}));
           _channel = null;
           _scheduleReconnect();
         },
@@ -101,7 +103,7 @@ class HydraWebSocket {
       onStatus(WsStatus.connected);
     } catch (e) {
       onStatus(WsStatus.disconnected);
-      onError('WebSocket connect failed: $e');
+      onError(HydraError(HydraErrorKind.wsConnectFailed, {'error': '$e'}));
       _channel = null;
       _scheduleReconnect();
     }
@@ -116,7 +118,7 @@ class HydraWebSocket {
     }
     final err = msg['error'];
     if (err is String && err.isNotEmpty) {
-      onError(err);
+      onError(HydraError(HydraErrorKind.serverMessage, {'message': err}));
       return;
     }
     final type = msg['type'];

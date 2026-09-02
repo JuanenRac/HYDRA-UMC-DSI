@@ -22,14 +22,50 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../app_version.dart';
+import '../l10n/app_localizations.dart';
 import '../state/robot_view_model.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
 
+  static String _connectionStatusLabel(AppLocalizations l10n, String status) {
+    switch (status) {
+      case 'connected':
+        return l10n.connStatusConnected;
+      case 'connecting':
+        return l10n.connStatusConnecting;
+      case 'error':
+        return l10n.connStatusError;
+      case 'disconnected':
+      default:
+        return l10n.connStatusDisconnected;
+    }
+  }
+
+  static String _languageDisplayName(String code) {
+    switch (code) {
+      case 'es':
+        return 'Español';
+      case 'fr':
+        return 'Français';
+      case 'de':
+        return 'Deutsch';
+      case 'it':
+        return 'Italiano';
+      case 'ja':
+        return '日本語';
+      case 'zh':
+        return '简体中文';
+      case 'en':
+      default:
+        return 'English';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final vm = context.watch<RobotViewModel>();
+    final l10n = AppLocalizations.of(context)!;
     final server = vm.activeServer;
     final info = vm.hydraInfo;
     return ListView(
@@ -37,28 +73,46 @@ class SettingsScreen extends StatelessWidget {
       children: [
         ListTile(
           leading: const Icon(Icons.dns),
-          title: Text(server?.displayName ?? 'Not connected'),
+          title: Text(server?.displayName ?? l10n.settingsNotConnected),
           subtitle: Text(server != null ? '${server.host}:${server.port}' : ''),
         ),
         ListTile(
           leading: const Icon(Icons.wifi_tethering),
-          title: Text('Status: ${vm.connectionStatus}'),
+          title: Text(l10n.settingsStatus(_connectionStatusLabel(l10n, vm.connectionStatus))),
         ),
         if (info != null) ...[
-          ListTile(leading: const Icon(Icons.dns_outlined), title: Text('Product: ${info['product'] ?? '?'}')),
-          ListTile(leading: const Icon(Icons.numbers), title: Text('Remote API version: ${info['remoteApiVersion'] ?? '?'}')),
-          ListTile(leading: const Icon(Icons.tag), title: Text('App version: ${info['appVersion'] ?? '?'}')),
+          ListTile(leading: const Icon(Icons.dns_outlined), title: Text(l10n.settingsProduct('${info['product'] ?? '?'}'))),
+          ListTile(leading: const Icon(Icons.numbers), title: Text(l10n.settingsRemoteApiVersion('${info['remoteApiVersion'] ?? '?'}'))),
+          ListTile(leading: const Icon(Icons.tag), title: Text(l10n.settingsAppVersion('${info['appVersion'] ?? '?'}'))),
         ],
         const Divider(),
         ListTile(
+          leading: const Icon(Icons.language),
+          title: Text(l10n.settingsLanguage),
+          trailing: DropdownButton<String?>(
+            value: vm.languageOverride?.languageCode,
+            underline: const SizedBox.shrink(),
+            items: [
+              DropdownMenuItem<String?>(value: null, child: Text(l10n.settingsLanguageSystem)),
+              for (final locale in AppLocalizations.supportedLocales)
+                DropdownMenuItem<String?>(
+                  value: locale.languageCode,
+                  child: Text(_languageDisplayName(locale.languageCode)),
+                ),
+            ],
+            onChanged: (code) => vm.setLanguage(code),
+          ),
+        ),
+        const Divider(),
+        ListTile(
           leading: const Icon(Icons.logout, color: Colors.redAccent),
-          title: const Text('Sign Out'),
+          title: Text(l10n.settingsSignOut),
           onTap: () => vm.logout(),
         ),
         const Divider(),
         ListTile(
           leading: const Icon(Icons.info_outline),
-          title: const Text('HYDRA-UMC DSI version'),
+          title: Text(l10n.settingsDsiVersion),
           subtitle: const Text('$kAppVersion (build $kAppBuildNumber)'),
         ),
       ],

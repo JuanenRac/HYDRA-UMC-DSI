@@ -22,14 +22,17 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 
+import '../l10n/language_prefs.dart';
 import '../models/hydra_state.dart';
 import '../models/server_info.dart';
 import '../network/auth_prefs.dart';
 import '../network/hydra_api_client.dart';
 import '../network/hydra_websocket.dart';
+import 'hydra_error.dart';
 
 class SystemMetrics {
   final int cpuLoad;
@@ -41,6 +44,7 @@ class SystemMetrics {
 
 class RobotViewModel extends ChangeNotifier {
   final AuthPrefs _authPrefs = AuthPrefs();
+  final LanguagePrefs _languagePrefs = LanguagePrefs();
 
   HydraState state = HydraState();
   HydraApiClient? apiClient;
@@ -75,13 +79,25 @@ class RobotViewModel extends ChangeNotifier {
 
   ServerInfo? activeServer;
   bool isLoggedIn = false;
-  String lastError = '';
+  HydraError? lastError;
   String connectionStatus = 'disconnected';
   dynamic selectedRobotId;
   SystemMetrics? metrics;
   Map<String, dynamic>? hydraInfo;
 
+  // Explicit language override (null = follow the OS locale) - persisted
+  // via LanguagePrefs, loaded in init(), read by main.dart's own
+  // MaterialApp.locale and changed from ui/settings_screen.dart.
+  Locale? languageOverride;
+
+  Future<void> setLanguage(String? languageCode) async {
+    await _languagePrefs.saveLanguage(languageCode);
+    languageOverride = await _languagePrefs.loadLocale();
+    notifyListeners();
+  }
+
   Future<void> init() async {
+    languageOverride = await _languagePrefs.loadLocale();
     final saved = await _authPrefs.loadConnection();
     final token = await _authPrefs.loadToken();
     if (saved != null) {
@@ -110,7 +126,7 @@ class RobotViewModel extends ChangeNotifier {
       final resp = await client.login(server.username, server.password);
       final token = resp['token'] as String?;
       if (resp['success'] != true || token == null) {
-        lastError = 'Login failed: server rejected credentials';
+        lastError = const HydraError(HydraErrorKind.loginFailed);
         notifyListeners();
         return false;
       }
@@ -119,12 +135,12 @@ class RobotViewModel extends ChangeNotifier {
       activeServer = server;
       await _authPrefs.saveConnection(server.host, server.port);
       await _authPrefs.saveToken(token, server.username);
-      lastError = '';
+      lastError = null;
       notifyListeners();
       await connect();
       return true;
     } catch (e) {
-      lastError = 'Login error: $e';
+      lastError = HydraError(HydraErrorKind.loginError, {'error': '$e'});
       notifyListeners();
       return false;
     }
@@ -152,7 +168,7 @@ class RobotViewModel extends ChangeNotifier {
       _ensureSelectedRobot();
       notifyListeners();
     } catch (e) {
-      lastError = 'Initial fetch failed: $e';
+      lastError = HydraError(HydraErrorKind.fetchFailed, {'error': '$e'});
       connectionStatus = 'error';
       // A restored session (see init()) can reach here with a token the
       // server no longer accepts (expired/revoked while the app was
@@ -189,12 +205,19 @@ class RobotViewModel extends ChangeNotifier {
         notifyListeners();
       },
       onDelta: _applyRobotDelta,
-      onError: (message) {
-        lastError = message;
-        if (message.contains('denied') || message.contains('token')) {
-          isLoggedIn = false;
-          connectionStatus = 'disconnected';
-          _ws?.disconnect();
+      onError: (error) {
+        lastError = error;
+        // Only a server-relayed message ever carries the real
+        // "denied"/"token" auth-rejection text - a client-side connection
+        // failure (wsConnectionLost/wsConnectFailed) is a generic
+        // connectivity problem, never an auth one.
+        if (error.kind == HydraErrorKind.serverMessage) {
+          final message = error.params['message'] ?? '';
+          if (message.contains('denied') || message.contains('token')) {
+            isLoggedIn = false;
+            connectionStatus = 'disconnected';
+            _ws?.disconnect();
+          }
         }
         notifyListeners();
       },
@@ -332,14 +355,14 @@ class RobotViewModel extends ChangeNotifier {
     if (robotId == null) return;
     final target = state.robotById(robotId);
     if (target == null) {
-      lastError = 'Robot not found';
+      lastError = const HydraError(HydraErrorKind.robotNotFound);
       notifyListeners();
       return;
     }
 
     final client = apiClient;
     if (client == null) {
-      lastError = 'Not connected to a server';
+      lastError = const HydraError(HydraErrorKind.notConnected);
       notifyListeners();
       return;
     }
@@ -372,7 +395,7 @@ class RobotViewModel extends ChangeNotifier {
     Future<void> send() async {
       try {
         await client.postRobotCommand(robotId, payload);
-        lastError = '';
+        lastError = null;
       } catch (e) {
         // Catches everything, not just HydraApiException - a plain network
         // failure must still roll back the optimistic mutation and surface
@@ -393,7 +416,7 @@ class RobotViewModel extends ChangeNotifier {
               ..addAll(entry.value);
           }
         }
-        lastError = 'TX error [$command]: $e';
+        lastError = HydraError(HydraErrorKind.txError, {'command': command, 'error': '$e'});
         if (e.toString().contains('401') || e.toString().contains('403')) {
           isLoggedIn = false;
           connectionStatus = 'disconnected';
@@ -426,7 +449,7 @@ class RobotViewModel extends ChangeNotifier {
       case 'stop':
         _sendAtomicCommand(command, propagateToCombined: true, localMutate: (r) => r.stop());
       default:
-        lastError = 'Unknown command: $command';
+        lastError = HydraError(HydraErrorKind.unknownCommand, {'command': command});
         notifyListeners();
     }
   }

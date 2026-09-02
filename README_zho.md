@@ -39,7 +39,8 @@
 - **3D 视图**（`lib/ui/three_d_screen.dart`）—— **并非**像 iOS/Android 应用那样嵌入 STUDIO 真实 Three.js 场景的 WebView——`webview_flutter` 在 Linux 桌面上根本没有实现,而完整的浏览器引擎对这块低功耗嵌入式面板而言是过重的运行时负担。取而代之的是:一个小型的原生等距 X/Y/Z 位置指示器（`CustomPainter`,不涉及 3D 引擎）,并附有一条屏幕提示,指向本主板自身通过 HDMI 连接的显示器上的真实 3D 场景。完整推理见 `docs/ARCHITECTURE.md` 第 4 节。
 - **系统指标**（`lib/ui/metrics_screen.dart`）—— 拥有自己专属的选项卡（不像 iOS/Android 那样折叠进仪表盘中）,包含来自 `GET /api/system/metrics` 的 CPU/内存/温度/运行时间图块,以及来自 `GET /api/hydra-info` 的主机名/控制器数量/机器人数量/应用版本。
 - **设置**（`lib/ui/settings_screen.dart`）—— 连接信息、服务器身份、退出登录,以及本应用自身的版本（见下文[版本管理](#-版本管理)）。
-- **看板自启动**（`kiosk/hydra-umc-dsi.service`、`kiosk/install_kiosk.sh`）—— 一个 systemd 单元,通过 `cage` 在 `tty1` 上全屏启动本应用,`Restart=always`。详见下文“在真实 CM5 上运行”。
+- **看板自启动**（`kiosk/hydra-umc-dsi.service`、`kiosk/install_kiosk.sh`）—— 一个 systemd 单元,通过 `cage` 在 `tty1` 上全屏启动本应用,`Restart=always`。详见下文”在真实 CM5 上运行”。
+- **7 语言界面**（`lib/l10n/`，标准的 `flutter gen-l10n` 流程）—— 英语、西班牙语、法语、德语、意大利语、日语和中文，与本生态系统的其他客户端保持一致。`设置 > 语言` 中的持久化设置默认跟随系统语言；`RobotViewModel.lastError` 现在是带类型的 `HydraError`，而不是预先格式化好的英文文本，因此业务逻辑层的错误提示也能正确本地化，而不只是界面上的静态文本。
 
 **状态:雏形 + 全部 6 个目录界面均已实现并连接到真实的 REMOTE_API.md 契约。** `flutter analyze` 干净通过,`flutter build windows` 生成一个可运行的二进制文件,`flutter test` 通过——具体哪些在这个 Windows 工作环境中能够验证、哪些不能,详见下文“构建”,因为真正的目标平台是 Linux。
 

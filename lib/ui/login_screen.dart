@@ -15,6 +15,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../l10n/app_localizations.dart';
 import '../models/server_info.dart';
 import '../network/discovery.dart';
 import '../state/robot_view_model.dart';
@@ -55,6 +56,7 @@ class _LoginScreenState extends State<LoginScreen> {
   /// by [ServerInfo.connectionId] since a server both paths agree on would
   /// otherwise show up twice.
   Future<void> _openScanDialog() async {
+    final l10n = AppLocalizations.of(context)!;
     final found = <ServerInfo>[];
     final foundNotifier = ValueNotifier<List<ServerInfo>>(const []);
     var mdnsDone = false;
@@ -104,7 +106,7 @@ class _LoginScreenState extends State<LoginScreen> {
         return AlertDialog(
           title: Row(
             children: [
-              const Expanded(child: Text('Scanning local network…')),
+              Expanded(child: Text(l10n.loginScanTitle)),
               ValueListenableBuilder<bool>(
                 valueListenable: scanningNotifier,
                 builder: (context, isScanning, _) => isScanning
@@ -124,7 +126,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     valueListenable: scanningNotifier,
                     builder: (context, isScanning, _) => Center(
                       child: Text(
-                        isScanning ? 'Looking for HYDRA-UMC STUDIO servers…' : 'No servers found on this network.',
+                        isScanning ? l10n.loginScanSearching : l10n.loginScanNoneFound,
                         textAlign: TextAlign.center,
                       ),
                     ),
@@ -150,7 +152,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Close')),
+            TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(l10n.scanClose)),
           ],
         );
       },
@@ -172,6 +174,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final vm = context.watch<RobotViewModel>();
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       body: Center(
         child: ConstrainedBox(
@@ -188,7 +191,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w900, letterSpacing: 2),
                 ),
                 const SizedBox(height: 4),
-                Text('Sign in to a HYDRA-UMC STUDIO server', style: Theme.of(context).textTheme.bodyMedium),
+                Text(l10n.loginSubtitle, style: Theme.of(context).textTheme.bodyMedium),
                 const SizedBox(height: 32),
                 Row(
                   children: [
@@ -197,7 +200,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: TextField(
                         controller: _hostCtrl,
                         style: const TextStyle(fontSize: 16),
-                        decoration: const InputDecoration(labelText: 'Server IP', border: OutlineInputBorder()),
+                        decoration: InputDecoration(labelText: l10n.loginServerIp, border: const OutlineInputBorder()),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -207,7 +210,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         controller: _portCtrl,
                         keyboardType: TextInputType.number,
                         style: const TextStyle(fontSize: 16),
-                        decoration: const InputDecoration(labelText: 'Port', border: OutlineInputBorder()),
+                        decoration: InputDecoration(labelText: l10n.loginPort, border: const OutlineInputBorder()),
                       ),
                     ),
                   ],
@@ -218,7 +221,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: TextButton.icon(
                     onPressed: _isSubmitting ? null : _openScanDialog,
                     icon: const Icon(Icons.wifi_find),
-                    label: const Text('Scan local network', style: TextStyle(fontSize: 15)),
+                    label: Text(l10n.loginScanNetwork, style: const TextStyle(fontSize: 15)),
                     style: TextButton.styleFrom(minimumSize: const Size(0, 48)),
                   ),
                 ),
@@ -229,7 +232,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: TextField(
                         controller: _userCtrl,
                         style: const TextStyle(fontSize: 16),
-                        decoration: const InputDecoration(labelText: 'Username', border: OutlineInputBorder()),
+                        decoration: InputDecoration(labelText: l10n.loginUsername, border: const OutlineInputBorder()),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -238,16 +241,16 @@ class _LoginScreenState extends State<LoginScreen> {
                         controller: _passCtrl,
                         obscureText: true,
                         style: const TextStyle(fontSize: 16),
-                        decoration: const InputDecoration(labelText: 'Password', border: OutlineInputBorder()),
+                        decoration: InputDecoration(labelText: l10n.loginPassword, border: const OutlineInputBorder()),
                       ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 24),
-                if (vm.lastError.isNotEmpty)
+                if (vm.lastError != null)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 12),
-                    child: Text(vm.lastError, style: const TextStyle(color: Colors.redAccent)),
+                    child: Text(vm.lastError!.localize(l10n), style: const TextStyle(color: Colors.redAccent)),
                   ),
                 SizedBox(
                   width: double.infinity,
@@ -257,7 +260,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     icon: _isSubmitting
                         ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
                         : const Icon(Icons.login),
-                    label: Text(_isSubmitting ? 'Signing in…' : 'Sign In', style: const TextStyle(fontSize: 17)),
+                    label: Text(_isSubmitting ? l10n.loginSigningIn : l10n.loginSignIn, style: const TextStyle(fontSize: 17)),
                   ),
                 ),
               ],

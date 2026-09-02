@@ -9,6 +9,37 @@ in [README.md](README.md#-versioning); earlier entries are grouped under
 the pre-policy version `0.0.0+1` the repo carried while the policy did not
 yet exist.
 
+## [0.1.0]
+
+- **Full 7-language UI localization** - this app had no `intl`/
+  `flutter_localizations` at all before this release; every screen showed
+  hardcoded English regardless of device locale, unlike the rest of the
+  ecosystem's UIs. Added the standard `flutter gen-l10n` pipeline
+  (`lib/l10n/app_*.arb`, one real translation per key - Spanish, French,
+  German, Italian, Japanese, Chinese, no placeholders) covering every
+  screen's chrome including the screen-cleaning-mode overlay and the
+  dedicated Metrics screen, plus a persisted language override
+  (`Settings > Language`, `LanguagePrefs` via `shared_preferences`) that
+  defaults to the OS locale when unset.
+- **Business-logic error messages now localizable too**: `RobotViewModel.
+  lastError` was a raw English `String` built inside a `ChangeNotifier`
+  with no `BuildContext` to localize from. Replaced with a typed
+  `HydraError` (kind + raw parameters, never pre-formatted text), same
+  seam HYDRA-UMC-IOS-CONTROL's own 0.0.9 release introduced - the UI layer
+  resolves it via `AppLocalizations` only when it actually renders a
+  message, and a server-relayed WS error message is correctly left
+  untouched (already resolved server-side).
+- **Human-readable uptime on the Dashboard** (`ui/dashboard_screen.dart`'s
+  new `formatUptime()`) - was a raw hours-with-one-decimal figure, now the
+  same "2d 4h 15m" format `ui/metrics_screen.dart`'s own dedicated Metrics
+  screen already used, fixing an inconsistency within this same app.
+- Real test coverage: `test/localization_test.dart` builds an actual
+  widget tree under `Locale('es')`/`Locale('ja')` and asserts on resolved
+  strings and interpolated placeholders; `test/format_uptime_test.dart`
+  covers the minutes-only/hours-and-minutes/days-hours-minutes/zero-day-
+  boundary cases. `flutter analyze`: 0 issues. `flutter test`: all
+  passing.
+
 ## [0.0.9] - Debounced the speed/acceleration slider's real network send
 
 - **`lib/state/robot_view_model.dart`** - `setSpeed()` now debounces its

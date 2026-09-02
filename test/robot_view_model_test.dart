@@ -34,6 +34,7 @@ import 'package:http/testing.dart';
 
 import 'package:hydra_umc_dsi/models/hydra_state.dart';
 import 'package:hydra_umc_dsi/network/hydra_api_client.dart';
+import 'package:hydra_umc_dsi/state/hydra_error.dart';
 import 'package:hydra_umc_dsi/state/robot_view_model.dart';
 
 // Every nested map/list below is explicitly typed <String, dynamic> /
@@ -126,14 +127,15 @@ void main() {
 
       expect(vm.robots.firstWhere((r) => r.id == 1).isPlaying, isFalse, reason: 'robot 1 should roll back to its pre-mutation snapshot');
       expect(vm.robots.firstWhere((r) => r.id == 2).isPlaying, isFalse, reason: 'combinedWith sibling should roll back too');
-      expect(vm.lastError, contains('play'));
+      expect(vm.lastError?.kind, HydraErrorKind.txError);
+      expect(vm.lastError?.params['command'], 'play');
     });
 
     test('a successful command keeps the mutation and clears lastError', () async {
       final vm = RobotViewModel();
       vm.state = HydraState(_rawStateWith(robot1Playing: false, robot2Playing: false, combinedWith: const []));
       vm.selectedRobotId = 1;
-      vm.lastError = 'stale error from a previous attempt';
+      vm.lastError = const HydraError(HydraErrorKind.loginFailed);
       vm.apiClient = HydraApiClient(
         'testhost',
         3000,
@@ -145,7 +147,7 @@ void main() {
       await Future<void>.delayed(Duration.zero);
 
       expect(vm.robots.firstWhere((r) => r.id == 1).isPlaying, isTrue);
-      expect(vm.lastError, isEmpty);
+      expect(vm.lastError, isNull);
     });
 
     test('jog() rolls back position on failure without touching an uncombined sibling', () async {

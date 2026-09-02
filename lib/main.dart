@@ -13,8 +13,10 @@
 // =============================================================================
 
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 
+import 'l10n/app_localizations.dart';
 import 'state/robot_view_model.dart';
 import 'ui/login_screen.dart';
 import 'ui/main_screen.dart';
@@ -30,25 +32,39 @@ class HydraUmcDsiApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (_) => RobotViewModel()..init(),
-      child: MaterialApp(
-        title: 'HYDRA-UMC DSI',
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          brightness: Brightness.dark,
-          scaffoldBackgroundColor: const Color(0xFF07090C),
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: const Color(0xFF00E5FF),
+      child: Consumer<RobotViewModel>(
+        builder: (context, vm, _) => MaterialApp(
+          title: 'HYDRA-UMC DSI',
+          debugShowCheckedModeBanner: false,
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          // null lets Flutter resolve the OS locale itself against
+          // supportedLocales (falling back to English) - only set once the
+          // user has made an explicit choice in ui/settings_screen.dart,
+          // see state/robot_view_model.dart's own languageOverride.
+          locale: vm.languageOverride,
+          theme: ThemeData(
             brightness: Brightness.dark,
-            surface: const Color(0xFF12161C),
+            scaffoldBackgroundColor: const Color(0xFF07090C),
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: const Color(0xFF00E5FF),
+              brightness: Brightness.dark,
+              surface: const Color(0xFF12161C),
+            ),
+            useMaterial3: true,
+            // Larger default tap targets ecosystem-wide would be a bigger
+            // change than this app needs - individual widgets (JoystickPad,
+            // the nav bar, playback buttons) already size themselves for
+            // touch directly, see each file's own header comment.
+            visualDensity: VisualDensity.standard,
           ),
-          useMaterial3: true,
-          // Larger default tap targets ecosystem-wide would be a bigger
-          // change than this app needs - individual widgets (JoystickPad,
-          // the nav bar, playback buttons) already size themselves for
-          // touch directly, see each file's own header comment.
-          visualDensity: VisualDensity.standard,
+          home: const _RootGate(),
         ),
-        home: const _RootGate(),
       ),
     );
   }

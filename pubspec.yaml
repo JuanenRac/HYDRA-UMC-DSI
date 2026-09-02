@@ -7,7 +7,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43
 # followed by an optional build number separated by a +.
-version: 0.0.9+7
+version: 0.1.0+7
 environment:
   sdk: ^3.13.0
 
@@ -29,6 +29,10 @@ dependencies:
   # server, ported directly (see network/discovery.dart header).
   multicast_dns: ^0.3.3+1
 
+  flutter_localizations:
+    sdk: flutter
+  intl: ^0.20.2
+
   # NOTE: no cupertino_icons (this app never renders iOS-style widgets) and
   # no webview_flutter - that package ships no Linux desktop implementation
   # at all, which is this app's real deployment target (see docs/ARCHITECTURE.md
@@ -45,3 +49,9 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+  # Generates lib/l10n/app_localizations.dart from lib/l10n/app_*.arb (see
+  # l10n.yaml) via `flutter gen-l10n` - the standard Flutter localization
+  # pipeline, same 7 languages (en/es/fr/de/it/ja/zh) every other client in
+  # this ecosystem already ships.
+  generate: true

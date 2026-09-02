@@ -18,6 +18,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
+import '../l10n/app_localizations.dart';
 import '../models/hydra_state.dart';
 import '../state/robot_view_model.dart';
 import 'widgets/digital_readout.dart';
@@ -37,11 +38,12 @@ class _ControlScreenState extends State<ControlScreen> {
   @override
   Widget build(BuildContext context) {
     final vm = context.watch<RobotViewModel>();
+    final l10n = AppLocalizations.of(context)!;
     final robots = vm.robots;
     final robot = vm.selectedRobot;
 
     if (robots.isEmpty) {
-      return const Center(child: Text('No robots reported by the server', style: TextStyle(color: Colors.grey)));
+      return Center(child: Text(l10n.controlNoRobots, style: const TextStyle(color: Colors.grey)));
     }
 
     return Column(
@@ -52,7 +54,7 @@ class _ControlScreenState extends State<ControlScreen> {
             width: 320,
             child: DropdownButtonFormField<dynamic>(
               initialValue: robot?.id,
-              decoration: const InputDecoration(labelText: 'Robot', border: OutlineInputBorder(), isDense: true),
+              decoration: InputDecoration(labelText: l10n.controlRobotLabel, border: const OutlineInputBorder(), isDense: true),
               items: robots.map((r) => DropdownMenuItem(value: r.id, child: Text(r.name))).toList(),
               onChanged: (id) => vm.selectRobot(id),
             ),
@@ -69,9 +71,9 @@ class _ControlScreenState extends State<ControlScreen> {
                   Column(
                     children: [
                       const SizedBox(height: 8),
-                      if (robot.hasXYTable) _targetSelector(),
+                      if (robot.hasXYTable) _targetSelector(l10n),
                       const SizedBox(height: 8),
-                      _jogStepSelector(),
+                      _jogStepSelector(l10n),
                       const SizedBox(height: 12),
                       JoystickPad(
                         enabled: robot.online,
@@ -94,9 +96,9 @@ class _ControlScreenState extends State<ControlScreen> {
                           const SizedBox(height: 8),
                           Wrap(spacing: 10, runSpacing: 10, children: _telemetryTiles(robot)),
                           const SizedBox(height: 20),
-                          _speedAccelSliders(vm, robot),
+                          _speedAccelSliders(vm, robot, l10n),
                           const SizedBox(height: 16),
-                          _ioRow(vm, robot),
+                          _ioRow(vm, robot, l10n),
                         ],
                       ),
                     ),
@@ -106,8 +108,8 @@ class _ControlScreenState extends State<ControlScreen> {
             ),
           )
         else
-          const Expanded(child: Center(child: Text('Select a robot', style: TextStyle(color: Colors.grey)))),
-        _playbackBar(vm, robot),
+          Expanded(child: Center(child: Text(l10n.controlSelectRobot, style: const TextStyle(color: Colors.grey)))),
+        _playbackBar(vm, robot, l10n),
       ],
     );
   }
@@ -123,23 +125,23 @@ class _ControlScreenState extends State<ControlScreen> {
     ];
   }
 
-  Widget _targetSelector() {
+  Widget _targetSelector(AppLocalizations l10n) {
     return SegmentedButton<String>(
-      segments: const [
-        ButtonSegment(value: 'robot', label: Text('ARM')),
-        ButtonSegment(value: 'xytable', label: Text('XY TABLE')),
+      segments: [
+        ButtonSegment(value: 'robot', label: Text(l10n.controlTargetArm)),
+        ButtonSegment(value: 'xytable', label: Text(l10n.controlTargetXyTable)),
       ],
       selected: {_jogTarget},
       onSelectionChanged: (s) => setState(() => _jogTarget = s.first),
     );
   }
 
-  Widget _jogStepSelector() {
+  Widget _jogStepSelector(AppLocalizations l10n) {
     const steps = [0.1, 1.0, 5.0, 10.0, 25.0, 50.0, 90.0, 100.0];
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        const Text('Step: ', style: TextStyle(color: Colors.grey)),
+        Text(l10n.controlStepLabel, style: const TextStyle(color: Colors.grey)),
         DropdownButton<double>(
           value: _jogStep,
           items: steps.map((s) => DropdownMenuItem(value: s, child: Text(s.toString()))).toList(),
@@ -149,13 +151,13 @@ class _ControlScreenState extends State<ControlScreen> {
     );
   }
 
-  Widget _speedAccelSliders(RobotViewModel vm, RobotView robot) {
+  Widget _speedAccelSliders(RobotViewModel vm, RobotView robot, AppLocalizations l10n) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
-            const SizedBox(width: 90, child: Text('Speed', style: TextStyle(color: Colors.grey))),
+            SizedBox(width: 90, child: Text(l10n.controlSpeed, style: const TextStyle(color: Colors.grey))),
             Expanded(
               child: Slider(
                 value: robot.speed.clamp(10, 500),
@@ -171,7 +173,7 @@ class _ControlScreenState extends State<ControlScreen> {
         ),
         Row(
           children: [
-            const SizedBox(width: 90, child: Text('Acceleration', style: TextStyle(color: Colors.grey))),
+            SizedBox(width: 90, child: Text(l10n.controlAcceleration, style: const TextStyle(color: Colors.grey))),
             Expanded(
               child: Slider(
                 value: robot.acceleration.clamp(10, 500),
@@ -189,19 +191,19 @@ class _ControlScreenState extends State<ControlScreen> {
     );
   }
 
-  Widget _ioRow(RobotViewModel vm, RobotView robot) {
+  Widget _ioRow(RobotViewModel vm, RobotView robot, AppLocalizations l10n) {
     return Wrap(
       spacing: 8,
       children: [
         for (var i = 0; i < robot.valves.length; i++)
           FilterChip(
-            label: Text('Valve $i'),
+            label: Text(l10n.controlValve(i)),
             selected: (robot.valves[i] ?? false) as bool,
             onSelected: (_) => vm.toggleValve(i),
           ),
         for (var i = 0; i < robot.pumps.length; i++)
           FilterChip(
-            label: Text('Pump $i'),
+            label: Text(l10n.controlPump(i)),
             selected: (robot.pumps[i] ?? false) as bool,
             onSelected: (_) => vm.togglePump(i),
           ),
@@ -209,7 +211,7 @@ class _ControlScreenState extends State<ControlScreen> {
     );
   }
 
-  Widget _playbackBar(RobotViewModel vm, RobotView? robot) {
+  Widget _playbackBar(RobotViewModel vm, RobotView? robot, AppLocalizations l10n) {
     final isCombined = (robot?.combinedWith.isNotEmpty ?? false);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
@@ -220,7 +222,7 @@ class _ControlScreenState extends State<ControlScreen> {
           _LongPressButton(
             color: Colors.red,
             icon: Icons.dangerous,
-            tooltip: isCombined ? 'E-STOP ALL (hold)' : 'E-STOP (hold)',
+            tooltip: isCombined ? l10n.controlEstopAllHold : l10n.controlEstopHold,
             onConfirm: () {
               HapticFeedback.heavyImpact();
               vm.sendCommand('stop');
@@ -244,7 +246,7 @@ class _ControlScreenState extends State<ControlScreen> {
           _LongPressButton(
             color: const Color(0xFF991B1B),
             icon: Icons.stop,
-            tooltip: isCombined ? 'STOP ALL (hold)' : 'STOP (hold)',
+            tooltip: isCombined ? l10n.controlStopAllHold : l10n.controlStopHold,
             enabled: robot != null && robot.online && (robot.isPlaying || robot.isPaused),
             onConfirm: () {
               HapticFeedback.mediumImpact();

@@ -33,6 +33,12 @@ migrate_working_dir/
 /build/
 /coverage/
 
+# `flutter gen-l10n` output (see l10n.yaml, pubspec.yaml's `generate: true`) -
+# regenerated from lib/l10n/app_*.arb by every `flutter pub get`/build/test.
+# The real source of truth is the .arb files, which stay tracked.
+lib/l10n/app_localizations.dart
+lib/l10n/app_localizations_*.dart
+
 # Symbolication related
 app.*.symbols
 

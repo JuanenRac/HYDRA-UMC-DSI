@@ -40,6 +40,7 @@ Compute Module 5 上の HYDRA-UMC 自身の 5"/7" DSI タッチスクリーン�
 - **システム指標**（`lib/ui/metrics_screen.dart`）—— iOS/Android のようにダッシュボードに折りたたまれるのではなく、専用のタブを持ち、`GET /api/system/metrics` からの CPU/メモリ/温度/稼働時間タイルと、`GET /api/hydra-info` からのホスト名/コントローラー数/ロボット数/アプリバージョンを表示します。
 - **設定**（`lib/ui/settings_screen.dart`）—— 接続情報、サーバー識別情報、サインアウト、そして本アプリ自身のバージョン（下記の[バージョン管理](#-バージョン管理)参照）。
 - **キオスク自動起動**（`kiosk/hydra-umc-dsi.service`、`kiosk/install_kiosk.sh`）—— `cage` 経由で `tty1` 上に本アプリをフルスクリーン起動する systemd ユニット、`Restart=always`。詳細は下記「実際の CM5 上での実行」を参照してください。
+- **7言語対応UI**（`lib/l10n/`、標準の `flutter gen-l10n` パイプライン）—— 英語・スペイン語・フランス語・ドイツ語・イタリア語・日本語・中国語に対応し、このエコシステムの他のクライアントと同じです。`設定 > 言語` に保存される上書き設定はデフォルトでOSのロケールに従います。`RobotViewModel.lastError` は整形済みの英語テキストではなく型付きの `HydraError` になっているため、ビジネスロジック側のエラーメッセージも画面の静的なテキストと同様に正しくローカライズされます。
 
 **状態：雛形 + 全 6 のカタログ画面が実装され、実際の REMOTE_API.md 契約に接続済み。** `flutter analyze` はクリーン、`flutter build windows` は動作するバイナリを生成し、`flutter test` はパスします——この Windows 作業環境から何が検証でき何が検証できなかったかの正確な内容は、下記「ビルド」を参照してください。実際のターゲットは Linux であるためです。
 

@@ -41,6 +41,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../l10n/app_localizations.dart';
 import '../models/hydra_state.dart';
 import '../state/robot_view_model.dart';
 
@@ -50,10 +51,11 @@ class ThreeDScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final vm = context.watch<RobotViewModel>();
+    final l10n = AppLocalizations.of(context)!;
     final robot = vm.selectedRobot;
 
     if (robot == null) {
-      return const Center(child: Text('No robot selected', style: TextStyle(color: Colors.grey)));
+      return Center(child: Text(l10n.threedNoRobotSelected, style: const TextStyle(color: Colors.grey)));
     }
 
     return Padding(
@@ -64,7 +66,7 @@ class ThreeDScreen extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  '${robot.name} - live position',
+                  l10n.threedLivePosition(robot.name),
                   style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ),
@@ -74,14 +76,14 @@ class ThreeDScreen extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(color: Colors.amber.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(8)),
-            child: const Row(
+            child: Row(
               children: [
-                Icon(Icons.info_outline, size: 16, color: Colors.amber),
-                SizedBox(width: 8),
+                const Icon(Icons.info_outline, size: 16, color: Colors.amber),
+                const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Simplified schematic view - the full 3D scene (real robot mesh, kinematics) is available on this board\'s own HDMI-connected monitor via the browser UI.',
-                    style: TextStyle(fontSize: 12, color: Colors.amber),
+                    l10n.threedSchematicNotice,
+                    style: const TextStyle(fontSize: 12, color: Colors.amber),
                   ),
                 ),
               ],
