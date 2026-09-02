@@ -148,6 +148,8 @@ HYDRA-UMC-DSI/
 Este proyecto forma parte de un ecosistema de robótica mucho más amplio del mismo autor (JuanenRac / Electro Hobby 3D), que abarca el control de la plataforma central, nodos de IA de visión y cognitiva, orquestación de enjambres, gemelos digitales, analítica de datos e integración industrial a lo largo de muchos proyectos. Vale la pena conocerlos, ya que una petición podría en realidad referirse a uno de ellos en vez de a este repositorio.
 
 **Directamente relacionados con HYDRA-UMC-DSI**
+- **[HYDRA-UMC-STUDIO](https://github.com/JuanenRac/HYDRA-UMC-STUDIO)** — el servidor al que este panel se conecta mediante el contrato real `REMOTE_API.md` (descubrimiento, inicio de sesión, comandos atómicos, sincronización por WebSocket).
+- **[HYDRA-UMC-SUITE](https://github.com/JuanenRac/HYDRA-UMC-SUITE)**, **[HYDRA-UMC-ANDROID-CONTROL](https://github.com/JuanenRac/HYDRA-UMC-ANDROID-CONTROL)**, **[HYDRA-UMC-IOS-CONTROL](https://github.com/JuanenRac/HYDRA-UMC-IOS-CONTROL)** — clientes hermanos que hablan exactamente el mismo contrato `REMOTE_API.md` que este panel; la app de iOS en particular es de donde se portó el descubrimiento mDNS real de este panel.
 - **[HYDRA-UMC-WATCH](https://github.com/JuanenRac/HYDRA-UMC-WATCH)** — dispositivo wearable de alerta de seguridad que complementa este panel táctil, llevando los avisos a la muñeca del operario además de a la propia pantalla de la placa.
 - **[HYDRA-UMC-COGNITIVE-NODE](https://github.com/JuanenRac/HYDRA-UMC-COGNITIVE-NODE)** — añade control por voz directamente en este panel táctil.
 - **[HYDRA-UMC-VOICE-UI](https://github.com/JuanenRac/HYDRA-UMC-VOICE-UI)** — añade control por voz directamente en este panel táctil.

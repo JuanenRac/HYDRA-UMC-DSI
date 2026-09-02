@@ -136,6 +136,8 @@ HYDRA-UMC-DSI/
 本プロジェクトは、同一著者（JuanenRac／Electro Hobby 3D）による、はるかに大規模なロボティクスエコシステムの一部であり、コアプラットフォーム制御、ビジョンおよび認知 AI ノード、群制御オーケストレーション、デジタルツイン、データ分析、そして多数のプロジェクトにまたがる産業統合を扱っています。ご要望が実際にはこれらのプロジェクトのいずれかに関するものであり、本リポジトリのものではない可能性もあるため、知っておく価値があります。
 
 **HYDRA-UMC DSI と直接関連**
+- **[HYDRA-UMC-STUDIO](https://github.com/JuanenRac/HYDRA-UMC-STUDIO)** —— このパネルが実際の `REMOTE_API.md` 契約(ディスカバリー、ログイン、アトミックコマンド、WebSocket同期)を通じて接続するサーバー。
+- **[HYDRA-UMC-SUITE](https://github.com/JuanenRac/HYDRA-UMC-SUITE)**、**[HYDRA-UMC-ANDROID-CONTROL](https://github.com/JuanenRac/HYDRA-UMC-ANDROID-CONTROL)**、**[HYDRA-UMC-IOS-CONTROL](https://github.com/JuanenRac/HYDRA-UMC-IOS-CONTROL)** —— このパネルと全く同じ `REMOTE_API.md` 契約を話す兄弟クライアント。特にiOSアプリは、このパネルの実際のmDNSディスカバリーの移植元である。
 - **[HYDRA-UMC-WATCH](https://github.com/JuanenRac/HYDRA-UMC-WATCH)** —— 本タッチパネルを補完するウェアラブル安全警報デバイスで、ボード自身の画面に加えて、操作員の手首にも警告を伝えます。
 - **[HYDRA-UMC-COGNITIVE-NODE](https://github.com/JuanenRac/HYDRA-UMC-COGNITIVE-NODE)** —— 本タッチパネルに直接音声制御を追加します。
 - **[HYDRA-UMC-VOICE-UI](https://github.com/JuanenRac/HYDRA-UMC-VOICE-UI)** —— 本タッチパネルに直接音声制御を追加します。

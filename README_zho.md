@@ -136,6 +136,8 @@ HYDRA-UMC-DSI/
 本项目是同一作者（JuanenRac / Electro Hobby 3D）打造的更大规模机器人生态系统的一部分,涵盖核心平台控制、视觉与认知 AI 节点、群体编排、数字孪生、数据分析,以及跨众多项目的工业集成。值得了解,因为某个请求实际所指的可能正是这些项目之一,而非本仓库。
 
 **与 HYDRA-UMC-DSI 直接相关**
+- **[HYDRA-UMC-STUDIO](https://github.com/JuanenRac/HYDRA-UMC-STUDIO)** —— 本面板通过真实的 `REMOTE_API.md` 契约(发现、登录、原子命令、WebSocket 同步)连接的服务器。
+- **[HYDRA-UMC-SUITE](https://github.com/JuanenRac/HYDRA-UMC-SUITE)**、**[HYDRA-UMC-ANDROID-CONTROL](https://github.com/JuanenRac/HYDRA-UMC-ANDROID-CONTROL)**、**[HYDRA-UMC-IOS-CONTROL](https://github.com/JuanenRac/HYDRA-UMC-IOS-CONTROL)** —— 与本面板讲完全相同 `REMOTE_API.md` 契约的兄弟客户端;iOS 应用尤其是本面板真实 mDNS 发现功能的移植来源。
 - **[HYDRA-UMC-WATCH](https://github.com/JuanenRac/HYDRA-UMC-WATCH)** —— 一款与本触控面板互补的可穿戴安全警报设备,除了主板自身的屏幕之外,还能将警告传达到操作员的手腕上。
 - **[HYDRA-UMC-COGNITIVE-NODE](https://github.com/JuanenRac/HYDRA-UMC-COGNITIVE-NODE)** —— 直接在本触控面板上增加语音控制。
 - **[HYDRA-UMC-VOICE-UI](https://github.com/JuanenRac/HYDRA-UMC-VOICE-UI)** —— 直接在本触控面板上增加语音控制。
