@@ -28,7 +28,7 @@ Compute Module 5 上の HYDRA-UMC 自身の 5"/7" DSI タッチスクリーン�
 
 ## 🏗️ 実装済みの内容
 
-- **ログイン**（`lib/ui/login_screen.dart`、`lib/state/robot_view_model.dart`）—— タッチ操作向けに調整されたサーバー IP/ポート + ユーザー名/パスワードフィールド、`admin`/`admin` に対する `POST /api/login`（事前入力済み——本エコシステム内のすべてのサーバーが自身の初回起動時に用意するデフォルトアカウント。追加の低権限「オペレーター」アカウントはブラウザ UI の Config > Users から作成可能）、`shared_preferences` を通じて起動をまたいで永続化されるセッショントークン——アプリの再起動だけでなく CM5 の電源サイクルをまたいでもサインイン状態を維持することが期待されるキオスクパネルにとって重要です。「ローカルネットワークをスキャン」ダイアログ（`lib/network/discovery.dart`）は、IP を事前に知らなくてもサーバーを見つけられます——本アプリが動作している CM5 自体が、それが接続すべきまさにそのコントローラーであることが多いため、ここでは特に有用です。
+- **ログイン**（`lib/ui/login_screen.dart`、`lib/state/robot_view_model.dart`）—— サーバー IP/ポートフィールドは妥当な LAN 既定値で事前入力済み、ユーザー名/パスワードフィールドはタッチ操作向けに調整され既定では空欄（ハードコードされた認証情報は事前入力されません——各サーバーが実運用での初回起動時にデフォルトアカウントを作成しなくなったのに合わせ、初期の `admin`/`admin` 事前入力は削除されました)、オペレーターが入力したアカウントに対する `POST /api/login`。追加の低権限「オペレーター」アカウントはブラウザ UI の Config > Users から作成可能です。`shared_preferences` を通じて起動をまたいで永続化されるセッショントークン——アプリの再起動だけでなく CM5 の電源サイクルをまたいでもサインイン状態を維持することが期待されるキオスクパネルにとって重要です。「ローカルネットワークをスキャン」ダイアログ（`lib/network/discovery.dart`）は、IP を事前に知らなくてもサーバーを見つけられます——本アプリが動作している CM5 自体が、それが接続すべきまさにそのコントローラーであることが多いため、ここでは特に有用です。
 - **ネットワークディスカバリー**（`lib/network/discovery.dart`）—— 同じ「ローカルネットワークをスキャン」ダイアログから 2 つの経路が並行して動作します：実際の mDNS/Bonjour（`discoverMdns()`、`multicast_dns` パッケージ経由で `server.ts` 自身が公開する `_hydra._tcp` を照会）と、このデバイス自身の実際のローカルサブネットに対する `GET /api/hydra-info` の並行総当たりスキャン（`scanSubnets()`）——host:port で重複排除。HYDRA-UMC-IOS-CONTROL から移植されたもので、同アプリは本エコシステムで最初に実際の mDNS ディスカバリーを追加したクライアントです。
 - **原子的な指令同期**（`lib/state/robot_view_model.dart` 自身の `_sendAtomicCommand()`）—— すべての書き込み（有効化/無効化/再生/一時停止/停止/ジョグ/バルブ/ポンプ/速度/ビジョン）は、実際の `POST /api/robot/:id/command` エンドポイントを使用し、正しい統合ロボット（`combinedWith`）の伝播、およびリクエストが失敗した場合の変更前スナップショットへのロールバックを備えています——実際のロボットから数フィート離れた場所にあるジョグペンダント/緊急停止にとって特に重要です。
 - **リアルタイム WebSocket 同期**（`lib/network/hydra_websocket.dart`）—— 常に `?token=` を付加し、`"settings"` と `"delta"` の両方のブロードキャストタイプを処理し、切断時には自動的に再接続します。
@@ -70,7 +70,7 @@ flutter build linux              # 実際のターゲット——実際の Linux
 flutter run -d windows           # または実際の Linux マシン上で -d linux、ライブなデスクトップシミュレーション開発ループ用
 ```
 
-**Linux 検証に関する正直な注記：** 本リポジトリは、Linux ビルドツールチェーンが利用できない Windows マシン上で作成されました（`wsl --status` で確認済み——WSL ディストリビューションはインストールされていません）。`flutter build linux` は、この作業環境からこのコードに対して実際に実行されたことは一度もありません。`flutter build windows` は、タスクが明示的に許可しているスモークテストの代替として使用されました。何が検証され何が検証されなかったかの正確なリストは `docs/ARCHITECTURE.md` 第 7 節を、フォローアップは `mejoras_futuras.txt` を参照してください。
+**Linux 検証に関する正直な注記：** 本リポジトリは、Linux ビルドツールチェーンが利用できない Windows マシン上で作成されました（`wsl --status` で確認済み——WSL ディストリビューションはインストールされていません）。`flutter build linux` は、この作業環境からこのコードに対して実際に実行されたことは一度もありません。`flutter build windows` は、タスクが明示的に許可しているスモークテストの代替として使用されました。何が検証され何が検証されなかったかの正確なリストは `docs/ARCHITECTURE.md` 第 7 節を、フォローアップは下記の「既知のフォローアップ」を参照してください。
 
 ## 🔢 バージョン管理
 
@@ -84,6 +84,14 @@ flutter run -d windows           # または実際の Linux マシン上で -d l
 ### 実際の CM5 上での実行
 
 `build_linux.sh` が `build/linux/*/release/bundle/` を生成したら、`bundle/` ディレクトリ全体を CM5 の `/opt/hydra-umc-dsi/bundle/` にコピーし（実行ファイル自体だけでなく、隣にある `.so` ファイルにも依存しているため）、`sudo kiosk/install_kiosk.sh` を実行して `kiosk/hydra-umc-dsi.service` をインストール・有効化してください。これは、[`cage`](https://github.com/cage-kiosk/cage)（ちょうど 1 つのフルスクリーンクライアントを実行する最小限の Wayland キオスクコンポジター）経由で `tty1` 上に本アプリをフルスクリーン起動する systemd ユニットで、`Restart=always` が設定されているため、クラッシュしても空白画面になるのではなく再起動されます。[`flutter-pi`](https://github.com/ardera/flutter-pi)（ウィンドウシステムをまったく使わずに動作する、Raspberry Pi 向けのサードパーティ製ベアメタル Flutter エンジン埋め込みツール）ではなくこちらが選ばれた具体的な理由は、`build_linux.sh` 自身の実際の `flutter build linux` 出力をそのまま再利用できるためです——flutter-pi は代わりに Flutter エンジンに対して直接ビルドするため、本リポジトリがすでに生成しているビルドにそのまま追加できるものではなく、独自の別個のビルドステップが必要になります。**正直な注記：** 記述・レビュー済みですが、実際の CM5 や他の Linux マシンに対して実際に実行されたことは一度もありません——`flutter build linux` 自体と同じ未検証の状態です（`docs/ARCHITECTURE.md` 第 7 節参照）。CM5 が実際に実行する Raspberry Pi OS イメージに対して確認が必要な正確な前提（root サービスユーザー、`tty1` の所有権）については、`kiosk/hydra-umc-dsi.service` 自身のヘッダーコメントを参照してください。
+
+## 🗺️ 既知のフォローアップ
+
+このアプリのコードに実際に残っている、検証済みのギャップです——曖昧な TODO ではなく、それぞれ上記のコードまたはドキュメントの具体的な箇所に対応しています。
+
+- **リモートアクセスの切り替えはまだ独立していません** —— `REMOTE_API.md` の第 1 節では `X-Hydra-Client` の値として `suite`、`android`、`ios` のみが認識されます。本アプリは `dsi` を送信しますが、これは認識されない値であり、現状では常にフィルタなしで通過します。修正には HYDRA-UMC-STUDIO 自身の `SystemSettings.remoteAccess` 型と Config > Remote Access タブへの 4 つ目のトグルの追加が必要です——これは別リポジトリのサーバーコードへの変更であり、本リポジトリの範囲外です。`docs/ARCHITECTURE.md` 第 3 節を参照してください。
+- **3D View に実際のネイティブ 3D レンダラーはありません** —— `ui/three_d_screen.dart` は現在、STUDIO の実際の Three.js シーンを埋め込む代わりに、小さな等角投影の X/Y/Z 位置インジケーターを描画しています（`webview_flutter` には Linux 実装が存在しません——詳しい理由は `docs/ARCHITECTURE.md` 第 4 節を参照）。この画面向けの実際のネイティブ 3D レンダラーは今後の課題であり、着手されていません。
+- **実際の Linux/CM5 ハードウェアでの実行はまだ行われていません** —— `flutter build linux`、`build_linux.sh`、および自動起動ユニット `kiosk/hydra-umc-dsi.service` は作成・レビュー済みですが、この作業環境(WSL ディストリビューションがインストールされていない Windows マシン)からは、実際の Linux マシンや CM5 自体に対して一度も実行されていません。初めて実行する人は、それを形式的なものとしてではなく、このプラットフォームターゲットの実際の初回ビルド/デプロイとして扱うべきです——`docs/ARCHITECTURE.md` 第 7 節および上記の「実際の CM5 上での実行」を参照してください。
 
 ## 📂 リポジトリ構成
 

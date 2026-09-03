@@ -51,8 +51,7 @@ verify app logic without a Mac (see that repo's own README "Why Flutter,
 not native Swift" section). This app is the first one in the ecosystem to
 actually add a `linux/` platform folder, because it is the first Flutter
 app here whose real deployment target genuinely is Linux (the CM5's own
-OS), not a stand-in for a platform this dev machine can't build. Both
-The project documentation has been corrected to reflect this distinction.
+OS), not a stand-in for a platform this dev machine can't build.
 
 ## 3. Wi-Fi transport - REMOTE_API.md, same contract as every other client
 
@@ -71,7 +70,7 @@ identical to sending no header at all). HYDRA-UMC-STUDIO's own
 would need a 4th toggle added server-side before the project owner could
 disable this app's own remote access independently of the other three -
 that's a change to a different repository's server code, out of scope for
-this one. Tracked in `mejoras_futuras.txt`.
+this one. Tracked in the root README's own "Known Follow-ups" section.
 
 ## 4. The one screen that isn't a straight port: 3D View
 
@@ -96,8 +95,8 @@ tool head right now," with an explicit on-screen note pointing to the real
 3D scene on this same board's HDMI-connected monitor rather than silently
 shipping a degraded substitute with no explanation. See
 `ui/three_d_screen.dart`'s own header comment for the full reasoning, and
-`mejoras_futuras.txt` for what a real native 3D renderer for this screen
-would need.
+the root README's own "Known Follow-ups" section for what a real native
+3D renderer for this screen would need.
 
 ## 5. Horizontal touch navigation, not a phone-style bottom nav
 
@@ -145,7 +144,8 @@ was hand-edited for the fixed 1280x720/non-resizable window - but that
 code path has only been read, not compiled, from this working environment.
 Whoever runs `build_linux.sh` for the first time on a real Linux machine
 (or the CM5 itself) should treat that as the actual first real build of
-this platform target, not a formality - see `mejoras_futuras.txt`.
+this platform target, not a formality - see the root README's own
+"Known Follow-ups" section.
 
 ## 8. Relationship to the rest of the ecosystem
 

@@ -28,7 +28,7 @@
 
 ## 🏗️ 已实现的功能
 
-- **登录**（`lib/ui/login_screen.dart`、`lib/state/robot_view_model.dart`）—— 面向触控设计的服务器 IP/端口 + 用户名/密码字段,`POST /api/login` 面向 `admin`/`admin`（已预填——本生态系统中每台服务器在自身首次启动时预置的默认账户;可从浏览器界面的 Config > Users 中创建额外的低权限“操作员”账户）,会话令牌通过 `shared_preferences` 在多次启动之间持久化——这对于一个应当在 CM5 断电重启后依然保持登录状态、而不仅仅是应用重新启动后保持登录的看板面板来说非常重要。一个“扫描本地网络”对话框（`lib/network/discovery.dart`）无需预先知道 IP 即可找到服务器——这在这里尤其有用,因为本应用运行所在的 CM5,往往正是它应该连接的那个控制器本身。
+- **登录**（`lib/ui/login_screen.dart`、`lib/state/robot_view_model.dart`）—— 服务器 IP/端口字段预填了合理的局域网默认值,用户名/密码字段面向触控设计,默认留空（不预填任何硬编码凭据——一旦每台服务器在真实生产环境首次启动时不再自动创建该默认账户,最初的 `admin`/`admin` 预填就被移除了）,`POST /api/login` 针对操作员实际输入的账户;可从浏览器界面的 Config > Users 中创建额外的低权限“操作员”账户。会话令牌通过 `shared_preferences` 在多次启动之间持久化——这对于一个应当在 CM5 断电重启后依然保持登录状态、而不仅仅是应用重新启动后保持登录的看板面板来说非常重要。一个“扫描本地网络”对话框（`lib/network/discovery.dart`）无需预先知道 IP 即可找到服务器——这在这里尤其有用,因为本应用运行所在的 CM5,往往正是它应该连接的那个控制器本身。
 - **网络发现**（`lib/network/discovery.dart`）—— 两条路径从同一个“扫描本地网络”对话框并行运行:真实的 mDNS/Bonjour（`discoverMdns()`，通过 `multicast_dns` 包查询 `server.ts` 自身发布的 `_hydra._tcp`）,以及针对本设备自身真实本地子网的并发暴力扫描 `GET /api/hydra-info`（`scanSubnets()`）,按 host:port 去重——从 HYDRA-UMC-IOS-CONTROL 移植而来,后者是本生态系统中第一个加入真实 mDNS 发现的客户端。
 - **原子化指令同步**（`lib/state/robot_view_model.dart` 自身的 `_sendAtomicCommand()`）—— 每一次写入（启用/禁用/播放/暂停/停止/点动/阀门/泵/速度/视觉）都使用真实的 `POST /api/robot/:id/command` 端点,具备正确的合并机器人（`combinedWith`）传播机制,并在请求失败时回滚到变更前的快照——这对于距离真实机器人仅几英尺远的点动手柄/紧急停止尤为重要。
 - **实时 WebSocket 同步**（`lib/network/hydra_websocket.dart`）—— 始终附带 `?token=`,同时处理 `"settings"` 和 `"delta"` 两种广播类型,断线后自动重连。
@@ -70,7 +70,7 @@ flutter build linux              # 真正的目标平台——必须在真实的
 flutter run -d windows           # 或在真实 Linux 机器上使用 -d linux，用于实时桌面模拟开发循环
 ```
 
-**关于 Linux 验证的诚实说明：** 本仓库是在一台没有可用 Linux 构建工具链的 Windows 机器上编写的（通过 `wsl --status` 确认——未安装任何 WSL 发行版）。从这个工作环境中,`flutter build linux` 从未真正针对这份代码运行过;`flutter build windows` 被用作任务明确允许的冒烟测试替代方案。具体哪些已验证、哪些未验证的确切清单,见 `docs/ARCHITECTURE.md` 第 7 节,后续工作见 `mejoras_futuras.txt`。
+**关于 Linux 验证的诚实说明：** 本仓库是在一台没有可用 Linux 构建工具链的 Windows 机器上编写的（通过 `wsl --status` 确认——未安装任何 WSL 发行版）。从这个工作环境中,`flutter build linux` 从未真正针对这份代码运行过;`flutter build windows` 被用作任务明确允许的冒烟测试替代方案。具体哪些已验证、哪些未验证的确切清单,见 `docs/ARCHITECTURE.md` 第 7 节,后续工作见下方的"已知后续事项"。
 
 ## 🔢 版本管理
 
@@ -84,6 +84,14 @@ flutter run -d windows           # 或在真实 Linux 机器上使用 -d linux�
 ### 在真实 CM5 上运行
 
 在 `build_linux.sh` 生成 `build/linux/*/release/bundle/` 之后,将整个 `bundle/` 目录复制到 CM5 的 `/opt/hydra-umc-dsi/bundle/`（它依赖二进制文件旁边的 `.so` 文件,而不仅仅是可执行文件本身）,然后运行 `sudo kiosk/install_kiosk.sh` 来安装并启用 `kiosk/hydra-umc-dsi.service`——一个 systemd 单元,通过 [`cage`](https://github.com/cage-kiosk/cage)（一个极简的 Wayland 看板合成器,只运行一个全屏客户端）在 `tty1` 上全屏启动本应用,并设置 `Restart=always`,这样崩溃时会重新启动应用,而不是留下一块黑屏。之所以选择它而非 [`flutter-pi`](https://github.com/ardera/flutter-pi)（一个面向 Raspberry Pi 的第三方裸机 Flutter 引擎嵌入器,完全不依赖任何窗口系统运行）,具体原因是它能够原样复用 `build_linux.sh` 自身真实的 `flutter build linux` 输出——而 flutter-pi 是直接针对 Flutter 引擎构建的,因此需要自己独立的构建步骤,而不能直接套用本仓库已经产生的构建结果。**诚实说明：** 已编写并审查,但从未真正在真实 CM5 或任何其他 Linux 主机上运行过——与 `flutter build linux` 本身相同的未验证状态（见 `docs/ARCHITECTURE.md` 第 7 节）。具体需要针对 CM5 实际运行的树莓派操作系统镜像核实哪些假设（root 服务用户、`tty1` 所有权）,见 `kiosk/hydra-umc-dsi.service` 自身的头部注释。
+
+## 🗺️ 已知后续事项
+
+这些是本应用代码中真实存在、已验证的缺口——不是含糊的 TODO,每一项都能追溯到上文代码或文档中的具体位置:
+
+- **远程访问开关尚未独立** —— `REMOTE_API.md` 第 1 节的 `X-Hydra-Client` 值目前只识别 `suite`、`android` 和 `ios`;本应用发送的是 `dsi`,一个不被识别的值,目前从不被拦截,因此其发现请求会无条件通过。修复此问题需要在 HYDRA-UMC-STUDIO 自身的 `SystemSettings.remoteAccess` 类型及其 Config > Remote Access 标签页中添加第 4 个开关——这是对另一个仓库服务器代码的修改,不在本仓库范围内。见 `docs/ARCHITECTURE.md` 第 3 节。
+- **3D 视图没有真正的原生 3D 渲染器** —— `ui/three_d_screen.dart` 目前绘制的是一个小型等距 X/Y/Z 位置指示器,而不是嵌入 STUDIO 真正的 Three.js 场景(`webview_flutter` 没有任何 Linux 实现——完整原因见 `docs/ARCHITECTURE.md` 第 4 节)。为此屏幕实现真正的原生 3D 渲染器是未来的工作,尚未开始。
+- **仍缺少在真实 Linux/CM5 硬件上的实际运行** —— `flutter build linux`、`build_linux.sh` 以及自启动单元 `kiosk/hydra-umc-dsi.service` 已经编写并审查过,但从本工作环境(一台未安装任何 WSL 发行版的 Windows 机器)从未真正针对真实 Linux 机器或 CM5 本身运行过。第一次运行它们的人应将其视为该平台目标真正的首次构建/部署,而不是走个形式——见 `docs/ARCHITECTURE.md` 第 7 节及上文的"在真实 CM5 上运行"。
 
 ## 📂 仓库结构
 
