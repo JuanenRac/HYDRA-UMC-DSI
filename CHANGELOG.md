@@ -9,6 +9,14 @@ in [README.md](README.md#-versioning); earlier entries are grouped under
 the pre-policy version `0.0.0+1` the repo carried while the policy did not
 yet exist.
 
+## [0.1.2]
+
+- **Verified the `build.sh`/`build_linux.sh` exit-trap fix from 0.1.1 with
+  a real re-run**: `build_linux.sh` invoked again end to end, non-
+  interactively (closed stdin), now correctly reports exit code 0 for a
+  genuinely successful build instead of the stale exit code 1 the
+  unfixed trap used to report.
+
 ## [0.1.1]
 
 - **First real `flutter build linux` verification** - until now, only
