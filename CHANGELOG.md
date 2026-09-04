@@ -9,6 +9,26 @@ in [README.md](README.md#-versioning); earlier entries are grouped under
 the pre-policy version `0.0.0+1` the repo carried while the policy did not
 yet exist.
 
+## [0.1.1]
+
+- **First real `flutter build linux` verification** - until now, only
+  `flutter build windows` had ever actually been run against this code (no
+  Linux build toolchain was available in the original working
+  environment). A real Ubuntu 24.04 WSL2 environment with the full Linux
+  desktop toolchain (`cmake`, `ninja-build`, `libgtk-3-dev`, `clang`) now
+  runs `build_linux.sh` end to end and produces a genuine
+  `build/linux/x64/release/bundle/hydra_umc_dsi` - confirmed to actually
+  launch (not just compile: it stayed running under a real X11 display,
+  not just a passing exit code). The real CM5's aarch64 hardware itself,
+  and the `kiosk/hydra-umc-dsi.service` autostart flow, remain unverified
+  - see README.md's "Known Follow-ups".
+- Fixed `build.sh`/`build_linux.sh`'s own exit-trap: under `set -e`, the
+  final "press any key to close" `read` failed (and was mistaken for a
+  build failure, exit code 1) whenever either script ran without an
+  interactive terminal attached (stdin closed, as in CI or a piped
+  invocation) - it now tolerates that case instead of masking a real
+  build success as a failure.
+
 ## [0.1.0]
 
 - **Full 7-language UI localization** - this app had no `intl`/

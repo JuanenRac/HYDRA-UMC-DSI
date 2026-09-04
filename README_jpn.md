@@ -42,7 +42,7 @@ Compute Module 5 上の HYDRA-UMC 自身の 5"/7" DSI タッチスクリーン�
 - **キオスク自動起動**（`kiosk/hydra-umc-dsi.service`、`kiosk/install_kiosk.sh`）—— `cage` 経由で `tty1` 上に本アプリをフルスクリーン起動する systemd ユニット、`Restart=always`。詳細は下記「実際の CM5 上での実行」を参照してください。
 - **7言語対応UI**（`lib/l10n/`、標準の `flutter gen-l10n` パイプライン）—— 英語・スペイン語・フランス語・ドイツ語・イタリア語・日本語・中国語に対応し、このエコシステムの他のクライアントと同じです。`設定 > 言語` に保存される上書き設定はデフォルトでOSのロケールに従います。`RobotViewModel.lastError` は整形済みの英語テキストではなく型付きの `HydraError` になっているため、ビジネスロジック側のエラーメッセージも画面の静的なテキストと同様に正しくローカライズされます。
 
-**状態：雛形 + 全 6 のカタログ画面が実装され、実際の REMOTE_API.md 契約に接続済み。** `flutter analyze` はクリーン、`flutter build windows` は動作するバイナリを生成し、`flutter test` はパスします——この Windows 作業環境から何が検証でき何が検証できなかったかの正確な内容は、下記「ビルド」を参照してください。実際のターゲットは Linux であるためです。
+**状態：雛形 + 全 6 のカタログ画面が実装され、実際の REMOTE_API.md 契約に接続済み。** `flutter analyze` はクリーン、`flutter build windows` と `flutter build linux`(WSL2 経由)はどちらも動作するバイナリを生成し、`flutter test` はパスします——何が検証済みで何がまだかの正確な内容(この WSL2 検証と実際の CM5 実機との間に残るギャップも含む)は、下記「ビルド」を参照してください。
 
 ## 🚀 ビルド
 
@@ -70,7 +70,7 @@ flutter build linux              # 実際のターゲット——実際の Linux
 flutter run -d windows           # または実際の Linux マシン上で -d linux、ライブなデスクトップシミュレーション開発ループ用
 ```
 
-**Linux 検証に関する正直な注記：** 本リポジトリは、Linux ビルドツールチェーンが利用できない Windows マシン上で作成されました（`wsl --status` で確認済み——WSL ディストリビューションはインストールされていません）。`flutter build linux` は、この作業環境からこのコードに対して実際に実行されたことは一度もありません。`flutter build windows` は、タスクが明示的に許可しているスモークテストの代替として使用されました。何が検証され何が検証されなかったかの正確なリストは `docs/ARCHITECTURE.md` 第 7 節を、フォローアップは下記の「既知のフォローアップ」を参照してください。
+**Linux 検証に関する正直な注記：** `flutter build linux --release` は、実際の Linux デスクトップツールチェーン(`cmake`、`ninja-build`、`libgtk-3-dev`、`clang`)を備えた本物の Ubuntu 24.04 WSL2 環境から、このコードに対して実際に実行されるようになりました——クリーンにビルドが通り、本物の `build/linux/x64/release/bundle/hydra_umc_dsi` を生成し、実際に起動することも確認済みです(実際の X11 ディスプレイ上で動作し続け、終了コード 0 だけではありません)。単なるスモークテストの代替としての `flutter build windows` にとどまりません。これが**カバーしていない**もの:WSL2 のユーザースペースは x86_64 であり、CM5 の実際の aarch64 の Raspberry Pi OS ではないこと、そして `kiosk/hydra-umc-dsi.service` の自動起動フローは依然として実際の Linux マシン上で一度も実行されていないことです。何が検証され何が検証されなかったかの正確なリストは `docs/ARCHITECTURE.md` 第 7 節を、残っている作業は下記の「既知のフォローアップ」を参照してください。
 
 ## 🔢 バージョン管理
 
@@ -83,7 +83,7 @@ flutter run -d windows           # または実際の Linux マシン上で -d l
 
 ### 実際の CM5 上での実行
 
-`build_linux.sh` が `build/linux/*/release/bundle/` を生成したら、`bundle/` ディレクトリ全体を CM5 の `/opt/hydra-umc-dsi/bundle/` にコピーし（実行ファイル自体だけでなく、隣にある `.so` ファイルにも依存しているため）、`sudo kiosk/install_kiosk.sh` を実行して `kiosk/hydra-umc-dsi.service` をインストール・有効化してください。これは、[`cage`](https://github.com/cage-kiosk/cage)（ちょうど 1 つのフルスクリーンクライアントを実行する最小限の Wayland キオスクコンポジター）経由で `tty1` 上に本アプリをフルスクリーン起動する systemd ユニットで、`Restart=always` が設定されているため、クラッシュしても空白画面になるのではなく再起動されます。[`flutter-pi`](https://github.com/ardera/flutter-pi)（ウィンドウシステムをまったく使わずに動作する、Raspberry Pi 向けのサードパーティ製ベアメタル Flutter エンジン埋め込みツール）ではなくこちらが選ばれた具体的な理由は、`build_linux.sh` 自身の実際の `flutter build linux` 出力をそのまま再利用できるためです——flutter-pi は代わりに Flutter エンジンに対して直接ビルドするため、本リポジトリがすでに生成しているビルドにそのまま追加できるものではなく、独自の別個のビルドステップが必要になります。**正直な注記：** 記述・レビュー済みですが、実際の CM5 や他の Linux マシンに対して実際に実行されたことは一度もありません——`flutter build linux` 自体と同じ未検証の状態です（`docs/ARCHITECTURE.md` 第 7 節参照）。CM5 が実際に実行する Raspberry Pi OS イメージに対して確認が必要な正確な前提（root サービスユーザー、`tty1` の所有権）については、`kiosk/hydra-umc-dsi.service` 自身のヘッダーコメントを参照してください。
+`build_linux.sh` が `build/linux/*/release/bundle/` を生成したら、`bundle/` ディレクトリ全体を CM5 の `/opt/hydra-umc-dsi/bundle/` にコピーし（実行ファイル自体だけでなく、隣にある `.so` ファイルにも依存しているため）、`sudo kiosk/install_kiosk.sh` を実行して `kiosk/hydra-umc-dsi.service` をインストール・有効化してください。これは、[`cage`](https://github.com/cage-kiosk/cage)（ちょうど 1 つのフルスクリーンクライアントを実行する最小限の Wayland キオスクコンポジター）経由で `tty1` 上に本アプリをフルスクリーン起動する systemd ユニットで、`Restart=always` が設定されているため、クラッシュしても空白画面になるのではなく再起動されます。[`flutter-pi`](https://github.com/ardera/flutter-pi)（ウィンドウシステムをまったく使わずに動作する、Raspberry Pi 向けのサードパーティ製ベアメタル Flutter エンジン埋め込みツール）ではなくこちらが選ばれた具体的な理由は、`build_linux.sh` 自身の実際の `flutter build linux` 出力をそのまま再利用できるためです——flutter-pi は代わりに Flutter エンジンに対して直接ビルドするため、本リポジトリがすでに生成しているビルドにそのまま追加できるものではなく、独自の別個のビルドステップが必要になります。**正直な注記：** 記述・レビュー済みですが、実際の CM5 や他の Linux マシンに対して実際に実行されたことは一度もありません——WSL2 下で検証済みとなった `flutter build linux` 自体とは異なり、このキオスク自動起動フローは依然として完全に未検証のままです（`docs/ARCHITECTURE.md` 第 7 節参照）。CM5 が実際に実行する Raspberry Pi OS イメージに対して確認が必要な正確な前提（root サービスユーザー、`tty1` の所有権）については、`kiosk/hydra-umc-dsi.service` 自身のヘッダーコメントを参照してください。
 
 ## 🗺️ 既知のフォローアップ
 
@@ -91,7 +91,7 @@ flutter run -d windows           # または実際の Linux マシン上で -d l
 
 - **リモートアクセスの切り替えはまだ独立していません** —— `REMOTE_API.md` の第 1 節では `X-Hydra-Client` の値として `suite`、`android`、`ios` のみが認識されます。本アプリは `dsi` を送信しますが、これは認識されない値であり、現状では常にフィルタなしで通過します。修正には HYDRA-UMC-STUDIO 自身の `SystemSettings.remoteAccess` 型と Config > Remote Access タブへの 4 つ目のトグルの追加が必要です——これは別リポジトリのサーバーコードへの変更であり、本リポジトリの範囲外です。`docs/ARCHITECTURE.md` 第 3 節を参照してください。
 - **3D View に実際のネイティブ 3D レンダラーはありません** —— `ui/three_d_screen.dart` は現在、STUDIO の実際の Three.js シーンを埋め込む代わりに、小さな等角投影の X/Y/Z 位置インジケーターを描画しています（`webview_flutter` には Linux 実装が存在しません——詳しい理由は `docs/ARCHITECTURE.md` 第 4 節を参照）。この画面向けの実際のネイティブ 3D レンダラーは今後の課題であり、着手されていません。
-- **実際の Linux/CM5 ハードウェアでの実行はまだ行われていません** —— `flutter build linux`、`build_linux.sh`、および自動起動ユニット `kiosk/hydra-umc-dsi.service` は作成・レビュー済みですが、この作業環境(WSL ディストリビューションがインストールされていない Windows マシン)からは、実際の Linux マシンや CM5 自体に対して一度も実行されていません。初めて実行する人は、それを形式的なものとしてではなく、このプラットフォームターゲットの実際の初回ビルド/デプロイとして扱うべきです——`docs/ARCHITECTURE.md` 第 7 節および上記の「実際の CM5 上での実行」を参照してください。
+- **実際の CM5 実機での実行はまだ行われていません** —— `flutter build linux` 自体は既に検証済みです(実際の Ubuntu 24.04 WSL2 ツールチェーン、バイナリが実際に起動することを確認済み——`docs/ARCHITECTURE.md` 第 7 節参照)が、`build_linux.sh` の一連の流れと自動起動ユニット `kiosk/hydra-umc-dsi.service` は、CM5 自体や他の実際の(非 WSL2)Linux マシンに対しては依然として一度も実行されていません。そこで初めて実行する人は、それを形式的なものとしてではなく、このプラットフォームターゲットの実際の初回ハードウェアデプロイとして扱うべきです——上記の「実際の CM5 上での実行」を参照してください。
 
 ## 📂 リポジトリ構成
 

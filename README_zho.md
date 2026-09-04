@@ -42,7 +42,7 @@
 - **看板自启动**（`kiosk/hydra-umc-dsi.service`、`kiosk/install_kiosk.sh`）—— 一个 systemd 单元,通过 `cage` 在 `tty1` 上全屏启动本应用,`Restart=always`。详见下文”在真实 CM5 上运行”。
 - **7 语言界面**（`lib/l10n/`，标准的 `flutter gen-l10n` 流程）—— 英语、西班牙语、法语、德语、意大利语、日语和中文，与本生态系统的其他客户端保持一致。`设置 > 语言` 中的持久化设置默认跟随系统语言；`RobotViewModel.lastError` 现在是带类型的 `HydraError`，而不是预先格式化好的英文文本，因此业务逻辑层的错误提示也能正确本地化，而不只是界面上的静态文本。
 
-**状态:雏形 + 全部 6 个目录界面均已实现并连接到真实的 REMOTE_API.md 契约。** `flutter analyze` 干净通过,`flutter build windows` 生成一个可运行的二进制文件,`flutter test` 通过——具体哪些在这个 Windows 工作环境中能够验证、哪些不能,详见下文“构建”,因为真正的目标平台是 Linux。
+**状态:雏形 + 全部 6 个目录界面均已实现并连接到真实的 REMOTE_API.md 契约。** `flutter analyze` 干净通过,`flutter build windows` 与 `flutter build linux`(通过 WSL2)都能生成可运行的二进制文件,`flutter test` 通过——具体哪些已经验证、哪些还没有,包括这次 WSL2 验证与真实 CM5 硬件之间仍存在的差距,详见下文“构建”。
 
 ## 🚀 构建
 
@@ -70,7 +70,7 @@ flutter build linux              # 真正的目标平台——必须在真实的
 flutter run -d windows           # 或在真实 Linux 机器上使用 -d linux，用于实时桌面模拟开发循环
 ```
 
-**关于 Linux 验证的诚实说明：** 本仓库是在一台没有可用 Linux 构建工具链的 Windows 机器上编写的（通过 `wsl --status` 确认——未安装任何 WSL 发行版）。从这个工作环境中,`flutter build linux` 从未真正针对这份代码运行过;`flutter build windows` 被用作任务明确允许的冒烟测试替代方案。具体哪些已验证、哪些未验证的确切清单,见 `docs/ARCHITECTURE.md` 第 7 节,后续工作见下方的"已知后续事项"。
+**关于 Linux 验证的诚实说明：** `flutter build linux --release` 现在已经真正针对这份代码运行过了,来自一个真实的 Ubuntu 24.04 WSL2 环境,配备真实的 Linux 桌面工具链(`cmake`、`ninja-build`、`libgtk-3-dev`、`clang`)——干净构建成功,生成了一个真实的 `build/linux/x64/release/bundle/hydra_umc_dsi`,并确认它确实能够启动(在真实的 X11 显示环境下运行并保持存活,而不只是退出码为 0),而不再只是用 `flutter build windows` 作为冒烟测试替代方案。这次验证**没有**覆盖的部分:WSL2 的用户空间是 x86_64,并非 CM5 真实的 aarch64 树莓派操作系统,而且 `kiosk/hydra-umc-dsi.service` 的自启动流程仍然从未在任何真实 Linux 主机上运行过。具体哪些已验证、哪些未验证的确切清单,见 `docs/ARCHITECTURE.md` 第 7 节,剩余工作见下方的"已知后续事项"。
 
 ## 🔢 版本管理
 
@@ -83,7 +83,7 @@ flutter run -d windows           # 或在真实 Linux 机器上使用 -d linux�
 
 ### 在真实 CM5 上运行
 
-在 `build_linux.sh` 生成 `build/linux/*/release/bundle/` 之后,将整个 `bundle/` 目录复制到 CM5 的 `/opt/hydra-umc-dsi/bundle/`（它依赖二进制文件旁边的 `.so` 文件,而不仅仅是可执行文件本身）,然后运行 `sudo kiosk/install_kiosk.sh` 来安装并启用 `kiosk/hydra-umc-dsi.service`——一个 systemd 单元,通过 [`cage`](https://github.com/cage-kiosk/cage)（一个极简的 Wayland 看板合成器,只运行一个全屏客户端）在 `tty1` 上全屏启动本应用,并设置 `Restart=always`,这样崩溃时会重新启动应用,而不是留下一块黑屏。之所以选择它而非 [`flutter-pi`](https://github.com/ardera/flutter-pi)（一个面向 Raspberry Pi 的第三方裸机 Flutter 引擎嵌入器,完全不依赖任何窗口系统运行）,具体原因是它能够原样复用 `build_linux.sh` 自身真实的 `flutter build linux` 输出——而 flutter-pi 是直接针对 Flutter 引擎构建的,因此需要自己独立的构建步骤,而不能直接套用本仓库已经产生的构建结果。**诚实说明：** 已编写并审查,但从未真正在真实 CM5 或任何其他 Linux 主机上运行过——与 `flutter build linux` 本身相同的未验证状态（见 `docs/ARCHITECTURE.md` 第 7 节）。具体需要针对 CM5 实际运行的树莓派操作系统镜像核实哪些假设（root 服务用户、`tty1` 所有权）,见 `kiosk/hydra-umc-dsi.service` 自身的头部注释。
+在 `build_linux.sh` 生成 `build/linux/*/release/bundle/` 之后,将整个 `bundle/` 目录复制到 CM5 的 `/opt/hydra-umc-dsi/bundle/`（它依赖二进制文件旁边的 `.so` 文件,而不仅仅是可执行文件本身）,然后运行 `sudo kiosk/install_kiosk.sh` 来安装并启用 `kiosk/hydra-umc-dsi.service`——一个 systemd 单元,通过 [`cage`](https://github.com/cage-kiosk/cage)（一个极简的 Wayland 看板合成器,只运行一个全屏客户端）在 `tty1` 上全屏启动本应用,并设置 `Restart=always`,这样崩溃时会重新启动应用,而不是留下一块黑屏。之所以选择它而非 [`flutter-pi`](https://github.com/ardera/flutter-pi)（一个面向 Raspberry Pi 的第三方裸机 Flutter 引擎嵌入器,完全不依赖任何窗口系统运行）,具体原因是它能够原样复用 `build_linux.sh` 自身真实的 `flutter build linux` 输出——而 flutter-pi 是直接针对 Flutter 引擎构建的,因此需要自己独立的构建步骤,而不能直接套用本仓库已经产生的构建结果。**诚实说明：** 已编写并审查,但从未真正在真实 CM5 或任何其他 Linux 主机上运行过——与已经在 WSL2 下验证过的 `flutter build linux` 本身不同,这个看板自启动流程仍然完全未经验证（见 `docs/ARCHITECTURE.md` 第 7 节）。具体需要针对 CM5 实际运行的树莓派操作系统镜像核实哪些假设（root 服务用户、`tty1` 所有权）,见 `kiosk/hydra-umc-dsi.service` 自身的头部注释。
 
 ## 🗺️ 已知后续事项
 
@@ -91,7 +91,7 @@ flutter run -d windows           # 或在真实 Linux 机器上使用 -d linux�
 
 - **远程访问开关尚未独立** —— `REMOTE_API.md` 第 1 节的 `X-Hydra-Client` 值目前只识别 `suite`、`android` 和 `ios`;本应用发送的是 `dsi`,一个不被识别的值,目前从不被拦截,因此其发现请求会无条件通过。修复此问题需要在 HYDRA-UMC-STUDIO 自身的 `SystemSettings.remoteAccess` 类型及其 Config > Remote Access 标签页中添加第 4 个开关——这是对另一个仓库服务器代码的修改,不在本仓库范围内。见 `docs/ARCHITECTURE.md` 第 3 节。
 - **3D 视图没有真正的原生 3D 渲染器** —— `ui/three_d_screen.dart` 目前绘制的是一个小型等距 X/Y/Z 位置指示器,而不是嵌入 STUDIO 真正的 Three.js 场景(`webview_flutter` 没有任何 Linux 实现——完整原因见 `docs/ARCHITECTURE.md` 第 4 节)。为此屏幕实现真正的原生 3D 渲染器是未来的工作,尚未开始。
-- **仍缺少在真实 Linux/CM5 硬件上的实际运行** —— `flutter build linux`、`build_linux.sh` 以及自启动单元 `kiosk/hydra-umc-dsi.service` 已经编写并审查过,但从本工作环境(一台未安装任何 WSL 发行版的 Windows 机器)从未真正针对真实 Linux 机器或 CM5 本身运行过。第一次运行它们的人应将其视为该平台目标真正的首次构建/部署,而不是走个形式——见 `docs/ARCHITECTURE.md` 第 7 节及上文的"在真实 CM5 上运行"。
+- **仍缺少在真实 CM5 硬件上的实际运行** —— `flutter build linux` 本身现在已经过验证(真实的 Ubuntu 24.04 WSL2 工具链,二进制文件确认能够真正启动——见 `docs/ARCHITECTURE.md` 第 7 节),但 `build_linux.sh` 的完整流程以及自启动单元 `kiosk/hydra-umc-dsi.service` 仍然从未真正针对 CM5 本身或任何其他真实(非 WSL2)Linux 机器运行过。第一次在那里运行它们的人应将其视为该平台目标真正的首次硬件部署,而不是走个形式——见上文的"在真实 CM5 上运行"。
 
 ## 📂 仓库结构
 

@@ -51,7 +51,7 @@ _pause_on_exit() {
     else
         echo "Build FAILED (exit code $status)."
     fi
-    read -n 1 -s -r -p "Press any key to close this window..."
+    read -n 1 -s -r -p "Press any key to close this window..." || true
     echo
 }
 trap _pause_on_exit EXIT

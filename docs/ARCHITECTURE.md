@@ -128,23 +128,39 @@ file does - not duplicated here to avoid the 2 documents drifting apart.
 
 ## 7. Build verification - what was and wasn't actually run
 
-This repo was authored on a Windows machine with no Linux build toolchain
-available (`wsl --status` shows no WSL distro installed) - `flutter build
-linux` was never actually run against this code. What WAS run for real,
-on this exact codebase, before anything here was called done:
+This repo was originally authored on a Windows machine with no Linux build
+toolchain available. That gap has since been closed: a real Ubuntu 24.04
+WSL2 distro, its own Flutter SDK built from source under `~/flutter`
+(kept separate from the Windows-side SDK), and the Linux desktop toolchain
+(`cmake`, `ninja-build`, `libgtk-3-dev`, `clang`) installed via `apt`.
+What has now actually been run for real, on this exact codebase:
 
 - `flutter analyze` - clean, 0 issues.
 - `flutter build windows` - succeeds, produces a running
   `build/windows/x64/runner/Release/hydra_umc_dsi.exe`.
+- `flutter build linux --release` (from WSL2) - succeeds, produces a real
+  `build/linux/x64/release/bundle/hydra_umc_dsi` (a genuine ELF binary,
+  not a stub), linked against `libapp.so` and `libflutter_linux_gtk.so`
+  alongside it. Launched under a real X11 display (WSLg) and stayed
+  running rather than exiting immediately (observed consuming real
+  CPU/memory) - the only console output was the expected
+  software-rendering warnings for a VM with no GPU passthrough, no fatal
+  errors.
 - `flutter test` - the one smoke test in `test/widget_test.dart` passes.
 
-`flutter create --platforms=linux,windows` did generate a real `linux/`
+`flutter create --platforms=linux,windows` generated the real `linux/`
 platform folder (CMake + GTK runner code), and `linux/runner/my_application.cc`
-was hand-edited for the fixed 1280x720/non-resizable window - but that
-code path has only been read, not compiled, from this working environment.
-Whoever runs `build_linux.sh` for the first time on a real Linux machine
-(or the CM5 itself) should treat that as the actual first real build of
-this platform target, not a formality - see the root README's own
+was hand-edited for the fixed 1280x720/non-resizable window - that code
+path has now actually been compiled and run, not just read.
+
+**What remains unverified:** WSL2's Ubuntu 24.04 userspace is x86_64, not
+the CM5's real aarch64 Raspberry Pi OS - a successful WSL2 build confirms
+the Dart/Flutter side and the CMake+GTK runner code are sound against a
+real Linux toolchain, but it is not the same as an actual CM5 run.
+Whoever runs `build_linux.sh` and the `kiosk/hydra-umc-dsi.service`
+autostart unit for the first time on the real CM5 (or any other aarch64
+Linux box) should still treat that as the real first hardware validation
+of this platform target, not a formality - see the root README's own
 "Known Follow-ups" section.
 
 ## 8. Relationship to the rest of the ecosystem
