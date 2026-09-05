@@ -1,8 +1,6 @@
 # Changelog
 
-All notable changes to HYDRA-UMC DSI are summarized here. Full
-session-by-session detail (including dates) lives in a private,
-unpublished internal log.
+All notable changes to HYDRA-UMC DSI are summarized here.
 
 Version numbers below follow the ecosystem-wide auto-bump policy described
 in [README.md](README.md#-versioning); earlier entries are grouped under
