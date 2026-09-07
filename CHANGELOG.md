@@ -1,0 +1,372 @@
+# Changelog
+
+All notable changes to HYDRA-UMC DSI are summarized here.
+
+Version numbers below follow the ecosystem-wide auto-bump policy described
+in [README.md](README.md#-versioning); earlier entries are grouped under
+the pre-policy version `0.0.0+1` the repo carried while the policy did not
+yet exist.
+
+## [0.1.5] - V07-015: a failed logout or a half-written session could resurrect an old token
+
+A second independent revalidation audit found two real gaps by static
+inspection of `AuthPrefs` (`network/auth_prefs.dart`): `clearToken()`
+caught a failed secure-storage `delete()` and only logged it, so a real
+logout could return successfully while the old token was still sitting
+in secure storage - a later `loadToken()` (a real restart, say) could
+resurrect the "cleared" session. Separately, `saveToken()` wrote the
+token and username as two separate secure-storage calls; if the token
+write succeeded but the username write then failed, the catch block
+reported the whole session as in-memory-only while secure storage was
+actually left holding a real, orphaned token with no matching username.
+
+Fixed with a plain, non-secret `hydra_logged_out` marker in ordinary
+SharedPreferences - the real, persistent source of truth `loadToken()`/
+`loadUsername()` now check FIRST, set BEFORE `clearToken()` ever
+attempts the real secure delete (so a failed delete can never
+un-invalidate a real logout), and cleared only by a fresh, successful
+`saveToken()`. `saveToken()` itself now reverts (best-effort) whatever
+it did manage to write if a later step in the same call fails, so
+secure storage never holds half of a session. Same real fix ported to
+HYDRA-UMC-IOS-CONTROL's own `AuthPrefs`.
+
+## [0.1.4] - REV-011: real regression found by independent revalidation
+
+An independent revalidation audit reproduced a real gap in v0.1.3's own
+DSI-01 fix (against a real fake `SecureTokenBackend`, no real platform
+channel):
+
+- **REV-011 [P1]:** `saveToken()` wrapped every secure-storage write so a
+  failure fell back to writing the token in PLAIN `SharedPreferences` -
+  exactly the failure of the protection mechanism itself silently
+  removing the guarantee DSI-01 was meant to provide. A UI-level
+  biometric/lock-screen gate would still do nothing to protect that
+  plaintext copy underneath it. Fixed: a secure-storage write failure now
+  keeps the session in memory ONLY, for the current app run - never
+  written to disk in plaintext. A real restart/power-cycle on a device
+  whose secure storage is genuinely broken now requires logging in
+  again, rather than the token quietly living in a plaintext file. Never
+  regresses a device where secure storage genuinely works (this app's
+  real, intended kiosk deployment target). A pre-DSI-01 legacy plaintext
+  token is still migrated in and read normally - that is reading
+  pre-existing data, not a new plaintext write.
+- 2 new regression tests (one asserting the plaintext file is never
+  touched, one proving a fresh app instance genuinely cannot recover an
+  in-memory-only session - the real, deliberate trade-off this fix
+  makes); the 2 existing tests that used to assert the old plaintext
+  fallback as correct behavior were rewritten to assert the fix instead.
+  `flutter analyze`/`flutter test` both clean.
+
+## [0.1.3] - DSI-01/DOC-17: real secure storage for the session token
+
+- **DSI-01 (found in an ecosystem-wide software-improvements audit, P1):**
+  the session token lived in the same plain `SharedPreferences` file as
+  host/port - not a secrets vault, and a UI-level biometric/lock-screen
+  gate (if this kiosk ever grows one) would not protect the persistent
+  copy underneath it. `network/auth_prefs.dart` now reads/writes the
+  token through a new `SecureTokenBackend`, backed by
+  `flutter_secure_storage` (libsecret's Secret Service on Linux - this
+  app's real deployment target). A bare kiosk image may not run a Secret
+  Service provider at all, so every secure call is wrapped: on any
+  failure it falls back to the exact same `SharedPreferences`-backed
+  behavior this file had before this fix, logging a clear, token-free
+  warning instead of silently losing a real session. A token saved under
+  the old plain key is migrated into secure storage (and the old copy
+  removed) the first time it is read back. 7 new tests
+  (`test/auth_prefs_test.dart`) cover the real round trip, the migration,
+  and the no-regression fallback path, all against a fake backend (no
+  real platform channel). Not yet verified against a real Secret Service
+  provider on the actual CM5 kiosk image - that remains real, tracked
+  future verification.
+- **DOC-17 (same audit):** removed the 6 remaining references to private
+  internal planning documents across
+  `CHANGELOG.md`, `docs/ARCHITECTURE.md`, `network/discovery.dart`,
+  `test/robot_view_model_test.dart` and `tool/bump_version.dart` - the
+  reasoning each one supported is now stated in place instead of pointing
+  at a document outside this repository.
+- **New `test/hydra_websocket_test.dart`** (5 tests) - found in an
+  ecosystem-wide software-improvements audit: `network/hydra_websocket.dart`
+  (175 lines, real Timer-based reconnection) had no dedicated test - this
+  app's other tests (uptime formatting, localization, the view model)
+  never touch reconnection state. Real end-to-end tests against a real
+  local `dart:io` WebSocket server (`HttpServer` + `WebSocketTransformer`),
+  not a mock - `WebSocketChannel.connect()` is a real `dart:io` socket
+  under the hood on this platform, so a real local server is what
+  actually exercises the real `onDone`/`onError`/`_scheduleReconnect`
+  logic. Covers: the real handshake gating `WsStatus.connected`, a real
+  settings payload delivered end to end, automatic reconnection after a
+  real connection drop, `disconnect()` cancelling a pending reconnect for
+  good, and the real error reported when nothing is listening (found
+  live: `web_socket_channel`'s own stream can report a refused connection
+  via `onError` before `HydraWebSocket`'s own `await channel.ready` gets
+  a chance to throw - both are the same real outcome from a caller's own
+  point of view, so the test accepts either).
+
+## [0.1.2]
+
+- **Verified the `build.sh`/`build_linux.sh` exit-trap fix from 0.1.1 with
+  a real re-run**: `build_linux.sh` invoked again end to end, non-
+  interactively (closed stdin), now correctly reports exit code 0 for a
+  genuinely successful build instead of the stale exit code 1 the
+  unfixed trap used to report.
+
+## [0.1.1]
+
+- **First real `flutter build linux` verification** - until now, only
+  `flutter build windows` had ever actually been run against this code (no
+  Linux build toolchain was available in the original working
+  environment). A real Ubuntu 24.04 WSL2 environment with the full Linux
+  desktop toolchain (`cmake`, `ninja-build`, `libgtk-3-dev`, `clang`) now
+  runs `build_linux.sh` end to end and produces a genuine
+  `build/linux/x64/release/bundle/hydra_umc_dsi` - confirmed to actually
+  launch (not just compile: it stayed running under a real X11 display,
+  not just a passing exit code). The real CM5's aarch64 hardware itself,
+  and the `kiosk/hydra-umc-dsi.service` autostart flow, remain unverified
+  - see README.md's "Known Follow-ups".
+- Fixed `build.sh`/`build_linux.sh`'s own exit-trap: under `set -e`, the
+  final "press any key to close" `read` failed (and was mistaken for a
+  build failure, exit code 1) whenever either script ran without an
+  interactive terminal attached (stdin closed, as in CI or a piped
+  invocation) - it now tolerates that case instead of masking a real
+  build success as a failure.
+
+## [0.1.0]
+
+- **Full 7-language UI localization** - this app had no `intl`/
+  `flutter_localizations` at all before this release; every screen showed
+  hardcoded English regardless of device locale, unlike the rest of the
+  ecosystem's UIs. Added the standard `flutter gen-l10n` pipeline
+  (`lib/l10n/app_*.arb`, one real translation per key - Spanish, French,
+  German, Italian, Japanese, Chinese, no placeholders) covering every
+  screen's chrome including the screen-cleaning-mode overlay and the
+  dedicated Metrics screen, plus a persisted language override
+  (`Settings > Language`, `LanguagePrefs` via `shared_preferences`) that
+  defaults to the OS locale when unset.
+- **Business-logic error messages now localizable too**: `RobotViewModel.
+  lastError` was a raw English `String` built inside a `ChangeNotifier`
+  with no `BuildContext` to localize from. Replaced with a typed
+  `HydraError` (kind + raw parameters, never pre-formatted text), same
+  seam HYDRA-UMC-IOS-CONTROL's own 0.0.9 release introduced - the UI layer
+  resolves it via `AppLocalizations` only when it actually renders a
+  message, and a server-relayed WS error message is correctly left
+  untouched (already resolved server-side).
+- **Human-readable uptime on the Dashboard** (`ui/dashboard_screen.dart`'s
+  new `formatUptime()`) - was a raw hours-with-one-decimal figure, now the
+  same "2d 4h 15m" format `ui/metrics_screen.dart`'s own dedicated Metrics
+  screen already used, fixing an inconsistency within this same app.
+- Real test coverage: `test/localization_test.dart` builds an actual
+  widget tree under `Locale('es')`/`Locale('ja')` and asserts on resolved
+  strings and interpolated placeholders; `test/format_uptime_test.dart`
+  covers the minutes-only/hours-and-minutes/days-hours-minutes/zero-day-
+  boundary cases. `flutter analyze`: 0 issues. `flutter test`: all
+  passing.
+
+## [0.0.9] - Debounced the speed/acceleration slider's real network send
+
+- **`lib/state/robot_view_model.dart`** - `setSpeed()` now debounces its
+  real `POST /api/robot/:id/command` send by 300ms, matching
+  HYDRA-UMC-ANDROID-CONTROL's own `sendAtomicCommand(..., debounceMs =
+  300)` and the same real fix just applied to HYDRA-UMC-IOS-CONTROL
+  (this repo's own upstream port source - the omission propagated here
+  too). Every drag frame of the speed/acceleration `Slider`
+  (`ui/control_screen.dart`) used to fire its own real network request -
+  the local optimistic UI update still applies instantly every frame
+  (unchanged), only the actual round-trip is now coalesced into one real
+  send once the drag settles, cancelling any still-pending send for the
+  same command name (`_sendAtomicCommand`'s new `debounce` parameter,
+  backed by a per-command `Timer` map). Every other real-time control
+  (jog, E-STOP/play/pause/stop, valve/pump toggles) already sent
+  immediately and is unaffected.
+
+## [0.0.8] - Fixed a real version-drift bug in build.bat's own step order
+
+- **`build.bat`** - it ran `bump_manifest_version.py` (a real, independent
+  bump) *before* `dart run tool/bump_version.dart`, the real source of
+  the app's own native version (`pubspec.yaml`). That let the manifest
+  advance to a version the compiled app hadn't reached yet - exactly the
+  drift class this ecosystem's version-mirror convention exists to
+  prevent. `build.sh`/`build_linux.sh` already had the correct order;
+  `build.bat` now matches: `dart run tool/bump_version.dart` first, then
+  `bump_manifest_version.py --sync` to align the manifest to what the
+  app build actually produced. Verified with a real `flutter build
+  windows` run through the fixed script.
+
+## [0.0.7] - Removed the hardcoded admin/admin credential default
+
+- **`server_info.dart`/`login_screen.dart`** - the login screen no longer
+  pre-fills `admin`/`admin`. Every real HYDRA-UMC-SERVER now refuses to
+  seed that source-known default account on a real production first
+  start (see that repo's own changelog: production requires explicit
+  `HYDRA_UMC_BOOTSTRAP_ADMIN_USERNAME`/`_PASSWORD`) - pre-filling a
+  credential that no longer exists on a real deployment was actively
+  misleading, not a convenience. `_submit()` now also refuses to send an
+  empty username or password rather than letting an empty field reach
+  the server as a real login attempt.
+- `SECURITY.md` documents the real expectation: the kiosk never carries
+  a built-in credential: the operator enters what the server bootstrap
+  process actually issued, and should clear it before the display
+  changes hands.
+- Verified: `flutter analyze` clean, `flutter test` 6/6 passing.
+
+## [0.0.6] - Removed dead enable/disable command plumbing
+
+- Found in a live ecosystem bug audit: `state/robot_view_model.dart`'s
+  `sendCommand()` had `'enable'`/`'disable'` cases that POSTed
+  `command: "enable"`/`"disable"` to `/api/robot/:id/command` and
+  optimistically flipped the robot `online` flag locally via
+  `RobotView.setOnline()`. HYDRA-UMC-SERVER's real handler for that
+  endpoint has no `"enable"`/`"disable"` case in its command `switch` -
+  only `stop`/`play`/`pause`/`jog`/`tool`/`valve`/`pump`/`speed`/`vision`
+  - and always responds `{ success: true }` regardless of whether any
+  case matched, so either command would have silently done nothing
+  server-side (no state change, no broadcast to other clients) while
+  this app's own screen flipped online/offline as if it had worked.
+  `control_screen.dart` never called `sendCommand('enable'/'disable')`
+  and grep found no other call site, so the cases were dead, unreachable
+  code - but they were a real trap for whoever wired a future
+  online/offline button to it. Removed both cases from `sendCommand()`
+  and the now-unused `RobotView.setOnline()` helper it was the only
+  caller of; `robot_view_model_test.dart`'s optimistic-mutation/rollback/
+  combinedWith-propagation coverage now exercises the same
+  `_sendAtomicCommand()` machinery through `sendCommand('play')` instead,
+  a real command the server and `control_screen.dart` both already
+  support. A real online/offline toggle, if ever needed, would require
+  adding a matching case to HYDRA-UMC-SERVER's own command handler first
+  - out of scope here.
+
+## [0.0.5]
+
+- Build version synchronized with `hydra-umc.project.json` and the repository-native version source.
+
+## [0.0.5+6] - Adaptive backlight by time of day
+
+- New `services/backlight.dart` - writes to Linux's own
+  `/sys/class/backlight/*/brightness` (globbed rather than a hardcoded
+  device name, since the real driver directory depends on which panel/
+  bridge chip the actual board uses), scaled against that device's own
+  `max_brightness` rather than a fixed 0-255 assumption. A fixed
+  day/evening/night schedule (100% / 60% / 30%) is checked once at
+  startup and every 15 minutes in `MainScreen`. Every failure path
+  (no `/sys/class/backlight` at all, no device registered, an
+  unwritable file) degrades to a no-op rather than a crash - this is a
+  cosmetic feature, not something that should ever take the kiosk app
+  down.
+- NOT verified against a real DSI panel (no CM5 available this
+  session) - the schedule math and the defensive non-Linux no-op path
+  were both verified with a real `dart run` (all boundary hours check
+  out, `setBrightnessPercent()` correctly returns `false` without
+  throwing on this Windows dev machine). `flutter analyze` clean, real
+  `flutter build windows` succeeded.
+
+## [0.0.4+5] - Screen-cleaning mode
+
+- New cleaning-services icon button in the top nav bar - locks touch
+  input for 30s (a real `AbsorbPointer` overlay, not just a visual dim)
+  so an operator wiping the panel down mid-shift can't accidentally jog
+  a robot or hit E-STOP through the cloth. Auto-dismisses when the
+  countdown reaches zero; a long-press on the overlay itself ends it
+  early (a stray accidental tap during cleaning must not dismiss it, so
+  a deliberate long-press is required, not a plain tap).
+- Verified with `flutter analyze` (no issues) and a real `flutter build
+  windows` (dev-machine verification target per this project's own
+  `build.bat` - the real CM5/Linux target needs `build_linux.sh` run on
+  actual Linux hardware).
+
+## [Unreleased policy]
+
+- **Automatic version bump on every real build.** `build.sh`/`build.bat`/
+  `build_linux.sh` now run `tool/bump_version.dart` before `flutter
+  build`, which bumps `pubspec.yaml`'s `version:` line on every
+  invocation: patch +1, with an odometer-style carry into minor once
+  patch would exceed 9 (`0.0.9` -> `0.1.0`), and a plain monotonic
+  build-number (+1, no carry). No manual version editing from here on.
+  Ported directly from HYDRA-UMC-IOS-CONTROL's own `tool/bump_version.dart`
+  (implemented in parallel against the same owner directive) - same rule,
+  same generated-file shape.
+- `lib/app_version.dart` (generated, not hand-edited) now exposes
+  `kAppVersion`/`kAppBuildNumber`/`kAppVersionFull` at runtime, regenerated
+  by the same script - avoids adding `package_info_plus` as a new runtime
+  dependency (and its unverifiable-on-the-real-CM5 native Linux behavior)
+  just to show the version in the UI.
+- Settings screen (`lib/ui/settings_screen.dart`) now shows the running
+  app's own version and build number, in a tile clearly labeled "HYDRA-UMC
+  DSI version" so it isn't confused with the pre-existing "App version"
+  tile just above it, which reports the *connected server's* own version
+  from `hydraInfo`.
+- All 3 build scripts (`build.bat`, `build.sh`, `build_linux.sh`) now
+  print a visible banner (project name, what the script does, author,
+  license) via real `echo` output at launch, and pause with a keypress
+  prompt at the end - on both success and failure - so a double-clicked
+  script window doesn't close before its output can be read.
+- This file added, seeded from the real project history below.
+
+## 0.0.0+1 and prior (pre-versioning-policy history)
+
+- **Initial commission** - Commissioned alongside HYDRA-UMC-EDITOR-URDF;
+  full spec received in the same message. Stack decision (Flutter vs.
+  Python/Kivy) deliberately left open until implementation start.
+- **Hardware spec correction** - The real DSI panel resolution is
+  1280x720 (not 1280x800 as originally documented), identical at both the
+  5" and 7" physical sizes - one fixed layout serves both, no breakpoints
+  needed. Corrected across this project's own docs and the "Related
+  Projects" block of all 10 sibling repos (5 languages each).
+- **Initial implementation** - Repo actually created from scratch
+  (`flutter create --platforms=linux,windows`, Flutter SDK 3.47.0).
+  Stack decision made: **Flutter**, reusing HYDRA-UMC-IOS-CONTROL's
+  already-written Dart REMOTE_API.md client, state model, and several UI
+  widgets directly (same language, same framework) - a Kivy/Python stack
+  would have meant rewriting all of that from scratch with no ecosystem
+  precedent. (Found and corrected a stale claim along the way: contrary to
+  what the original commission said, HYDRA-UMC-IOS-CONTROL never actually
+  had a `linux/` folder - its real target is iOS, Windows only for
+  Mac-less verification. HYDRA-UMC-DSI is the ecosystem's first Flutter
+  app with a real `linux/` target.) All 6 catalog screens implemented and
+  wired to the real REMOTE_API.md contract: login, dashboard, manual
+  control (real long-press E-STOP/STOP protection), camera (hand-rolled
+  dependency-free MJPEG parser, ported), 3D view (deliberately a native
+  isometric X/Y/Z `CustomPainter` indicator, NOT a WebView - no Linux
+  desktop `webview_flutter` implementation exists, and a full browser
+  engine is too heavy for this embedded panel), and metrics (new
+  dedicated tab, unlike iOS/Android which fold it into the Dashboard).
+  `X-Hydra-Client: dsi` sent (new value, not yet server-recognized for
+  per-client remote-access gating - out of scope, needs a STUDIO-side
+  change). Verified for real: `flutter analyze` clean, `flutter build
+  windows` produced a running `.exe`, `flutter test` passed 1 smoke test.
+  `flutter build linux` (the real target) honestly documented as
+  unverifiable from this Windows machine (no WSL distro installed).
+  Full documentation pass: README.md + 4 translations, LICENSE,
+  `docs/ARCHITECTURE.md`, all build/run scripts. Ecosystem-wide: the other
+  10 project READMEs (5 languages each, 50 files) updated from
+  "planned/not started yet" to this repo's real scaffolded state, and the
+  stale 1280x800 resolution fixed wherever it still lingered
+  (URTC-FLASHER, URTC, HYDRA-UMC).
+- **Second pass** - a critical review of what was actually actionable
+  without real hardware. 2 items resolved:
+  - **Real mDNS discovery** ported directly from HYDRA-UMC-IOS-CONTROL's
+    own `network/discovery.dart` (`multicast_dns` package, same version),
+    with an honest header noting the iOS-only Apple entitlement caveat
+    doesn't apply here, but real-Linux-hardware verification still does.
+    `login_screen.dart`'s "Scan local network" dialog now runs mDNS and
+    subnet scan in parallel, deduplicated.
+  - **Kiosk autostart** on the CM5 (`kiosk/hydra-umc-dsi.service`,
+    `kiosk/install_kiosk.sh`) - a systemd unit launching the build via
+    [`cage`](https://github.com/cage-kiosk/cage) fullscreen on `tty1`,
+    `Restart=always`. Chosen over `flutter-pi` because it reuses
+    `build_linux.sh`'s own output unmodified. Runs as root deliberately
+    (documented), never tested against real hardware (documented).
+  1 item reduced in scope (not eliminated): `robot_view_model_test.dart`
+  added (5 tests: atomic-command rollback, optimistic mutation,
+  `combinedWith` propagation, `lastError` clearing) using `http`'s
+  `MockClient` - no widget-level tests added, matching iOS-Control's own
+  current coverage.
+  3 items evaluated and deliberately left alone: the `dsi` client-type
+  server-side gate (needs a STUDIO change, out of scope), a more complete
+  native 3D view (no mature precedent to port from, and inventing one
+  fresh would go against this project's own "reuse, don't invent" rule),
+  and encrypted credential storage via `flutter_secure_storage` (Linux
+  backend needs a D-Bus secret-service session a minimal `cage` kiosk very
+  plausibly won't have running - risk of a silently broken save/load on
+  real hardware that can't be checked from this machine, so documented
+  instead of implemented blind). Reverified: `flutter pub get`, `flutter
+  analyze` clean, `flutter test` 6/6 passing, `flutter build windows`
+  succeeding. `flutter build linux` still unverifiable from this machine.

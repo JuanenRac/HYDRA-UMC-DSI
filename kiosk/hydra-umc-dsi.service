@@ -1,0 +1,49 @@
+# =============================================================================
+# HYDRA-UMC DSI (Flutter) - kiosk/hydra-umc-dsi.service
+# Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
+# GPL-3.0 - see LICENSE
+#
+# systemd unit that launches this app fullscreen, without any window
+# manager chrome, on the CM5's own DSI touchscreen at boot - the piece
+# mejoras_futuras.txt item 2 flagged as missing. Chosen over flutter-pi
+# (the other candidate documented in README.md) specifically because it
+# reuses build_linux.sh's own real `flutter build linux` output unmodified
+# through cage (github.com/cage-kiosk/cage), a minimal Wayland kiosk
+# compositor that runs exactly one fullscreen client and nothing else -
+# flutter-pi instead needs its own separate build step against the Flutter
+# engine directly, so it isn't a drop-in on top of the build this repo
+# already produces.
+#
+# HONESTY NOTE: authored and reviewed, never actually run against a real
+# CM5 or any other Linux box - there is no Linux machine available in the
+# environment this was written in (see mejoras_futuras.txt item 1 /
+# README.md "Honesty note on Linux verification"). Treat the first real
+# `systemctl start hydra-umc-dsi.service` on real hardware as the first
+# real test of this unit, not a formality - GPU/DRM device permissions,
+# seatd/logind availability, and cage's own exact CLI flags can all differ
+# across Raspberry Pi OS image versions in ways that aren't checkable from
+# here. Runs as root deliberately (see kiosk/install_kiosk.sh's own header
+# comment) to sidestep video/input/seat group-membership questions that
+# can't be verified without the real board either - acceptable for a
+# single-purpose embedded kiosk appliance with no other login use, not a
+# general-purpose desktop.
+# =============================================================================
+
+[Unit]
+Description=HYDRA-UMC DSI kiosk (cage + flutter build linux bundle)
+After=systemd-user-sessions.service
+Conflicts=getty@tty1.service
+After=getty@tty1.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/cage -- /opt/hydra-umc-dsi/bundle/hydra_umc_dsi
+StandardInput=tty
+StandardOutput=journal
+StandardError=journal
+TTYPath=/dev/tty1
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=graphical.target
