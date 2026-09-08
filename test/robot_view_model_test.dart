@@ -150,6 +150,49 @@ void main() {
       expect(vm.lastError, isNull);
     });
 
+    // C08 (item #14 de la lista de pendientes de software/hardware):
+    // "cancelar una orden de robot en curso sin testear en ningun cliente
+    // salvo el relay de voz interno" - every test above starts from an
+    // idle robot (robot1Playing: false); none of them exercised the real
+    // "an order is actually in flight, then gets cancelled" case the
+    // audit named. Same real gap closed today in HYDRA-UMC-ANDROID-CONTROL's
+    // own RobotViewModelSendAtomicCommandTest.kt.
+    test('stop cancels an in-flight order optimistically on both the target robot and its combinedWith sibling', () async {
+      final vm = RobotViewModel();
+      vm.state = HydraState(_rawStateWith(robot1Playing: true, robot2Playing: true, combinedWith: const [2]));
+      vm.selectedRobotId = 1;
+      vm.apiClient = HydraApiClient(
+        'testhost',
+        3000,
+        client: MockClient((request) async => http.Response('{"success": true}', 200)),
+      );
+
+      vm.sendCommand('stop');
+
+      expect(vm.robots.firstWhere((r) => r.id == 1).isPlaying, isFalse, reason: 'robot 1\'s in-flight order must be cancelled immediately');
+      expect(vm.robots.firstWhere((r) => r.id == 2).isPlaying, isFalse, reason: 'the combinedWith sibling\'s order must be cancelled too');
+    });
+
+    test('a failed cancel rolls the in-flight order back to still-playing on both robots', () async {
+      final vm = RobotViewModel();
+      vm.state = HydraState(_rawStateWith(robot1Playing: true, robot2Playing: true, combinedWith: const [2]));
+      vm.selectedRobotId = 1;
+      vm.apiClient = HydraApiClient(
+        'testhost',
+        3000,
+        client: MockClient((request) async => http.Response('server exploded', 500)),
+      );
+
+      vm.sendCommand('stop');
+      expect(vm.robots.firstWhere((r) => r.id == 1).isPlaying, isFalse, reason: 'optimistic cancel applies immediately');
+
+      await Future<void>.delayed(Duration.zero);
+      await Future<void>.delayed(Duration.zero);
+
+      expect(vm.robots.firstWhere((r) => r.id == 1).isPlaying, isTrue, reason: 'the cancel never actually reached the robot - it must roll back to still-playing');
+      expect(vm.robots.firstWhere((r) => r.id == 2).isPlaying, isTrue, reason: 'the combinedWith sibling must be rolled back too');
+    });
+
     test('jog() rolls back position on failure without touching an uncombined sibling', () async {
       final vm = RobotViewModel();
       final raw = _rawStateWith(robot1Playing: true, robot2Playing: true, combinedWith: const []);

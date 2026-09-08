@@ -7,6 +7,18 @@ in [README.md](README.md#-versioning); earlier entries are grouped under
 the pre-policy version `0.0.0+1` the repo carried while the policy did not
 yet exist.
 
+## [0.1.8] - Real coverage for cancelling an in-flight robot order
+
+Found in the same 2026-09-08 audit as C08: every existing
+`_sendAtomicCommand` test started from an idle robot - none exercised the
+real "cancel an order actually in flight" case, the scenario the audit
+specifically named as untested in every client except the internal voice
+relay. Same real gap closed today in HYDRA-UMC-ANDROID-CONTROL's own
+`RobotViewModelSendAtomicCommandTest.kt`. 2 new tests: cancelling an
+in-flight order optimistically stops both the target robot and its
+`combinedWith` sibling immediately, and a failed cancel rolls both back
+to still-playing.
+
 ## [0.1.7] - C08: silent recovery from a WS 1008 close via a real refresh token
 
 Follow-up to 0.1.6: stopping the retry loop and surfacing `wsAuthRejected`
