@@ -209,4 +209,70 @@ void main() {
 
     expect(await authPrefs.loadConnection(), ('192.168.0.42', 8080));
   });
+
+  group('C08: refresh token storage', () {
+    test('saveToken with a refreshToken round-trips it through secure storage only', () async {
+      final secure = FakeSecureTokenBackend();
+      final authPrefs = AuthPrefs(secureBackend: secure);
+
+      await authPrefs.saveToken('secret-token', 'alice', refreshToken: 'secret-refresh-token');
+
+      expect(await authPrefs.loadRefreshToken(), 'secret-refresh-token');
+      expect(secure.store['hydra_refresh_token'], 'secret-refresh-token');
+    });
+
+    test('saveToken with no refreshToken argument leaves a previously-stored one untouched', () async {
+      // A server predating C08 omits refreshToken from POST /api/login's
+      // response - a caller re-saving the token pair in that case must not
+      // be read as "clear the refresh token", since it never said anything
+      // about it either way (see saveToken()'s own doc comment).
+      final secure = FakeSecureTokenBackend();
+      final authPrefs = AuthPrefs(secureBackend: secure);
+      await authPrefs.saveToken('token-1', 'alice', refreshToken: 'refresh-1');
+
+      await authPrefs.saveToken('token-2', 'alice');
+
+      expect(await authPrefs.loadRefreshToken(), 'refresh-1');
+    });
+
+    test('a session with no refresh token (pre-C08, or a fresh install) reports null, not an error', () async {
+      final authPrefs = AuthPrefs(secureBackend: FakeSecureTokenBackend());
+      expect(await authPrefs.loadRefreshToken(), isNull);
+    });
+
+    test('clearToken (real logout) removes the refresh token too', () async {
+      final secure = FakeSecureTokenBackend();
+      final authPrefs = AuthPrefs(secureBackend: secure);
+      await authPrefs.saveToken('secret-token', 'alice', refreshToken: 'secret-refresh-token');
+
+      await authPrefs.clearToken();
+
+      expect(await authPrefs.loadRefreshToken(), isNull);
+      expect(secure.store['hydra_refresh_token'], isNull);
+    });
+
+    test('a partial saveToken (token+username written, refresh token write fails) leaves no orphaned token or username either', () async {
+      final secure = FakeSecureTokenBackend(failWriteKeys: {'hydra_refresh_token'});
+      final authPrefs = AuthPrefs(secureBackend: secure);
+
+      await authPrefs.saveToken('secret-token', 'alice', refreshToken: 'secret-refresh-token');
+
+      expect(secure.store['hydra_token'], isNull, reason: 'the token write must be rolled back too');
+      expect(secure.store['hydra_username'], isNull, reason: 'the username write must be rolled back too');
+      // REV-011's own in-memory fallback still applies - the session
+      // stays usable for the rest of this app run.
+      expect(await authPrefs.loadToken(), 'secret-token');
+    });
+
+    test('when secure storage is genuinely unavailable, the refresh token stays in-memory only, never on disk', () async {
+      final secure = FakeSecureTokenBackend(alwaysFail: true);
+      final authPrefs = AuthPrefs(secureBackend: secure);
+
+      await authPrefs.saveToken('secret-token', 'alice', refreshToken: 'secret-refresh-token');
+
+      expect(await authPrefs.loadRefreshToken(), 'secret-refresh-token', reason: 'in-memory fallback, this app run only');
+      final afterRestart = AuthPrefs(secureBackend: secure);
+      expect(await afterRestart.loadRefreshToken(), isNull, reason: 'never persisted to disk - a real restart loses it, same as the access token');
+    });
+  });
 }

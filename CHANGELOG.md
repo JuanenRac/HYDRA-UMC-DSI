@@ -7,6 +7,30 @@ in [README.md](README.md#-versioning); earlier entries are grouped under
 the pre-policy version `0.0.0+1` the repo carried while the policy did not
 yet exist.
 
+## [0.1.7] - C08: silent recovery from a WS 1008 close via a real refresh token
+
+Follow-up to 0.1.6: stopping the retry loop and surfacing `wsAuthRejected`
+was correct, but still forced a real logout on the single most common
+real cause of a 1008 - the access token's own real time-based expiry, not
+an actual account revocation. This app never stores a password (unlike
+HYDRA-UMC-ANDROID-CONTROL's own "remember me", which does), so recovery
+here mirrors HYDRA-UMC-STUDIO's own client instead: `HydraApiClient`
+gains `refresh()`/`logoutRemote()` against HYDRA-UMC-SERVER's own new
+`POST /api/refresh`/`POST /api/logout` (HYDRA-UMC-SERVER 0.6.2);
+`AuthPrefs` stores the real opaque refresh token `POST /api/login` now
+also returns, through the same secure-storage-only policy (never a
+plaintext fallback) `hydra_token`/`hydra_username` already use.
+`RobotViewModel._attemptTokenRefresh()` tries this before falling through
+to today's forced logout - which still happens exactly when it should
+(no refresh token on file, a genuinely revoked session, or a server
+predating this feature). `RobotViewModel` gained an optional injectable
+`authPrefs` constructor parameter (same DI pattern `HydraApiClient`/
+`AuthPrefs` themselves already use) specifically so this whole
+login->1008->refresh->reconnect lifecycle could get real end-to-end test
+coverage against a real local HTTP+WebSocket server, not just the
+storage layer in isolation. `flutter analyze`/`flutter test` both clean;
+39 tests (8 new).
+
 ## [0.1.6] - A rejected session token no longer retries forever, silently
 
 `network/hydra_websocket.dart`'s own header comment already claimed a
