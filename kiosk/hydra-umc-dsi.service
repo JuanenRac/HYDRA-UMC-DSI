@@ -45,5 +45,9 @@ TTYPath=/dev/tty1
 Restart=always
 RestartSec=2
 
+# C13: a real, initial cgroup memory ceiling - conservative defaults, meant to be refined once real telemetry from this service running on the CM5 exists, never removed back to unlimited.
+MemoryHigh=512M
+MemoryMax=768M
+
 [Install]
 WantedBy=graphical.target
