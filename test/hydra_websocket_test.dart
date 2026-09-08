@@ -173,6 +173,53 @@ void main() {
       timeout: Timeout(reconnectDelay + const Duration(seconds: 15)),
     );
 
+    test(
+      'a real 1008 close (server-rejected token) surfaces wsAuthRejected and never reconnects',
+      () async {
+        // Real bug fixed 2026-09-08: onDone used to always reconnect,
+        // unconditionally, despite this file's own header comment already
+        // claiming a 1008 close was "treated as sign in again" - a token
+        // the server will never accept again just spun forever in
+        // "connecting" -> "disconnected" with no visible error at all.
+        final statuses = <WsStatus>[];
+        final errors = <HydraError>[];
+        final ws = HydraWebSocket(
+          host: '127.0.0.1',
+          port: fakeServer.port,
+          token: 'an-expired-token',
+          onStatus: statuses.add,
+          onSettings: (_) {},
+          onError: errors.add,
+        );
+        final connected = fakeServer.onConnect.first;
+        ws.connect();
+        final serverSocket = await connected;
+
+        // Real close with the real RFC 6455 code, not a mocked event.
+        await serverSocket.close(1008, 'invalid token');
+        await Future<void>.delayed(const Duration(milliseconds: 200));
+
+        expect(errors, hasLength(1));
+        expect(errors.single.kind, HydraErrorKind.wsAuthRejected);
+
+        // Real proof of "never reconnects": wait comfortably past
+        // reconnectDelay and confirm the server never receives a second
+        // real upgrade request.
+        var reconnected = false;
+        final sub = fakeServer.onConnect.listen((_) => reconnected = true);
+        await Future<void>.delayed(reconnectDelay + const Duration(seconds: 2));
+        await sub.cancel();
+
+        expect(reconnected, isFalse);
+        expect(
+          statuses.where((s) => s == WsStatus.connecting).length,
+          1,
+          reason: 'only the initial connect should ever have happened - no retry after a 1008',
+        );
+      },
+      timeout: Timeout(reconnectDelay + const Duration(seconds: 15)),
+    );
+
     test('reports a real connection error when nothing is listening - a real closed port', () async {
       final port = fakeServer.port;
       await fakeServer.close(); // real port, now genuinely refusing connections

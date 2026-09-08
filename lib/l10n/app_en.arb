@@ -109,5 +109,6 @@
   "errWsConnectionLost": "WebSocket connection lost: {error}",
   "@errWsConnectionLost": {"placeholders": {"error": {"type": "String"}}},
   "errWsConnectFailed": "WebSocket connect failed: {error}",
-  "@errWsConnectFailed": {"placeholders": {"error": {"type": "String"}}}
+  "@errWsConnectFailed": {"placeholders": {"error": {"type": "String"}}},
+  "errWsAuthRejected": "Session not authorized - sign in again"
 }

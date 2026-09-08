@@ -25,6 +25,12 @@ enum HydraErrorKind {
   unknownCommand,
   wsConnectionLost,
   wsConnectFailed,
+  // The server closed the WebSocket upgrade with RFC 6455 code 1008
+  // (server.ts's own signal for a missing/invalid/expired token) - no
+  // server message frame ever arrives for this case (the connection is
+  // rejected before any data can flow), so it needs its own kind rather
+  // than reusing serverMessage below.
+  wsAuthRejected,
   // Raw text relayed verbatim from the server's own {"error": "..."} WS
   // frame (network/hydra_websocket.dart's _handleMessage()) - already
   // resolved server-side, in whatever language the shared backend emits
@@ -57,6 +63,8 @@ class HydraError {
         return l10n.errWsConnectionLost(params['error'] ?? '');
       case HydraErrorKind.wsConnectFailed:
         return l10n.errWsConnectFailed(params['error'] ?? '');
+      case HydraErrorKind.wsAuthRejected:
+        return l10n.errWsAuthRejected;
       case HydraErrorKind.serverMessage:
         return params['message'] ?? '';
     }

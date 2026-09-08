@@ -9,9 +9,9 @@
 // {"type":"settings","payload":{...}} message with the current full
 // state, then pushes the same shape to every connected client (sender
 // included) whenever the state changes. A WS closed with code 1008
-// (invalid/expired token) is treated as "sign in again" - see
-// HYDRA-UMC-ANDROID-CONTROL's own HydraWebSocket.kt for the reference
-// handling this mirrors.
+// (invalid/expired token, see wsClosePolicyViolation below) is treated as
+// "sign in again", not retried - see HYDRA-UMC-ANDROID-CONTROL's own
+// HydraWebSocket.kt for the reference handling this mirrors.
 // =============================================================================
 
 import 'dart:async';
@@ -24,6 +24,11 @@ import '../state/hydra_error.dart';
 enum WsStatus { connecting, connected, disconnected }
 
 const Duration reconnectDelay = Duration(seconds: 3);
+
+/// RFC 6455 close code the server sends for a missing/invalid/expired
+/// auth token (server.ts's own /ws upgrade check) - same constant name
+/// as HYDRA-UMC-ANDROID-CONTROL's own HydraWebSocket.kt.
+const int wsClosePolicyViolation = 1008;
 
 class HydraWebSocket {
   final String host;
@@ -76,6 +81,25 @@ class HydraWebSocket {
         (raw) => _handleMessage(raw as String),
         onDone: () {
           onStatus(WsStatus.disconnected);
+          // Real bug fixed 2026-09-08: despite this file's own header
+          // comment already claiming a 1008 close is "treated as sign in
+          // again", this always reconnected here, unconditionally - the
+          // claim was aspirational, not implemented. server.ts closes the
+          // /ws upgrade with exactly this code for a missing/invalid/
+          // expired token and never sends a message frame first (the
+          // connection is rejected before any data can flow), so
+          // _handleMessage()'s own {"error": "..."} check can never catch
+          // this case - retrying the same rejected token every
+          // reconnectDelay forever just spun in "connecting" ->
+          // "disconnected" with no visible error and no path back to the
+          // login screen. Same fix as HYDRA-UMC-IOS-CONTROL's own copy of
+          // this file.
+          if (channel.closeCode == wsClosePolicyViolation) {
+            _closingByUser = true;
+            onError(const HydraError(HydraErrorKind.wsAuthRejected));
+            _channel = null;
+            return;
+          }
           _channel = null;
           _scheduleReconnect();
         },

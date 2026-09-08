@@ -91,5 +91,6 @@
   "errTxError": "Übertragungsfehler [{command}]: {error}",
   "errUnknownCommand": "Unbekannter Befehl: {command}",
   "errWsConnectionLost": "WebSocket-Verbindung verloren: {error}",
-  "errWsConnectFailed": "WebSocket-Verbindung fehlgeschlagen: {error}"
+  "errWsConnectFailed": "WebSocket-Verbindung fehlgeschlagen: {error}",
+  "errWsAuthRejected": "Sitzung nicht autorisiert: erneut anmelden"
 }

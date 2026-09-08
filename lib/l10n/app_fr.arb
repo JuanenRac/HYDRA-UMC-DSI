@@ -91,5 +91,6 @@
   "errTxError": "Erreur de transmission [{command}] : {error}",
   "errUnknownCommand": "Commande inconnue : {command}",
   "errWsConnectionLost": "Connexion WebSocket perdue : {error}",
-  "errWsConnectFailed": "Échec de connexion WebSocket : {error}"
+  "errWsConnectFailed": "Échec de connexion WebSocket : {error}",
+  "errWsAuthRejected": "Session non autorisée : reconnectez-vous"
 }

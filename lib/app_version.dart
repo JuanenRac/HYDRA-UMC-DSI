@@ -6,6 +6,6 @@
 // last build.
 // =============================================================================
 
-const String kAppVersion = '0.1.3';
-const int kAppBuildNumber = 10;
-const String kAppVersionFull = '0.1.3+10';
+const String kAppVersion = '0.1.6';
+const int kAppBuildNumber = 11;
+const String kAppVersionFull = '0.1.6+11';
