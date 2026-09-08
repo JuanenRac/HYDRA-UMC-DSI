@@ -43,8 +43,15 @@ class SystemMetrics {
 }
 
 class RobotViewModel extends ChangeNotifier {
-  final AuthPrefs _authPrefs = AuthPrefs();
+  // C08: injectable for real test coverage of the login()/_attemptTokenRefresh()/
+  // logout() lifecycle - same DI pattern this app already uses for
+  // HydraApiClient's own {http.Client? client} and AuthPrefs' own
+  // {SecureTokenBackend? secureBackend}. Defaults to a real AuthPrefs()
+  // (backed by real platform secure storage) for every actual screen.
+  final AuthPrefs _authPrefs;
   final LanguagePrefs _languagePrefs = LanguagePrefs();
+
+  RobotViewModel({AuthPrefs? authPrefs}) : _authPrefs = authPrefs ?? AuthPrefs();
 
   HydraState state = HydraState();
   HydraApiClient? apiClient;
@@ -134,7 +141,13 @@ class RobotViewModel extends ChangeNotifier {
       isLoggedIn = true;
       activeServer = server;
       await _authPrefs.saveConnection(server.host, server.port);
-      await _authPrefs.saveToken(token, server.username);
+      // C08: server.ts's own POST /api/login now also returns a real
+      // opaque refreshToken (refresh_tokens.ts) - a server predating this
+      // feature simply omits it, and resp['refreshToken'] is null, which
+      // saveToken()'s own optional parameter treats as "nothing to store",
+      // not as "clear whatever was there" (see its own doc comment).
+      final refreshToken = resp['refreshToken'] as String?;
+      await _authPrefs.saveToken(token, server.username, refreshToken: refreshToken);
       lastError = null;
       notifyListeners();
       await connect();
@@ -151,8 +164,58 @@ class RobotViewModel extends ChangeNotifier {
     _ws?.disconnect();
     _metricsTimer?.cancel();
     _hydraInfoTimer?.cancel();
+    // C08: revoke the refresh token server-side too, best-effort (see
+    // HydraApiClient.logoutRemote()'s own doc comment - never blocks or
+    // fails this real, local sign-out), not just discard it locally,
+    // which would otherwise leave it silently valid for the rest of its
+    // real TTL on the server.
+    final client = apiClient;
+    if (client != null) {
+      unawaited(_authPrefs.loadRefreshToken().then((refreshToken) {
+        if (refreshToken != null) unawaited(client.logoutRemote(refreshToken));
+      }));
+    }
     unawaited(_authPrefs.clearToken());
     notifyListeners();
+  }
+
+  // C08: silent recovery from a WS 1008 close, using HYDRA-UMC-SERVER's own
+  // new POST /api/refresh (see HydraApiClient.refresh()'s own doc comment)
+  // - this app never stores a password (auth_prefs.dart's own header
+  // comment on why only the token itself lives in secure storage here), so
+  // HYDRA-UMC-ANDROID-CONTROL's own "replay the remembered password"
+  // approach to this same problem doesn't apply; this instead mirrors
+  // HYDRA-UMC-STUDIO's own refresh-token client, the same real server-side
+  // feature (HYDRA-UMC-SERVER 0.6.2). Fails closed exactly where a real
+  // re-login is still correct: no refresh token on file (a session
+  // established before this feature, or already logged out), or a 401
+  // (the refresh token itself expired, or the account was genuinely
+  // revoked - see refresh_tokens.ts's own consumeRefreshToken() doc
+  // comment for exactly which real account mutations cause that).
+  Future<bool> _attemptTokenRefresh() async {
+    final client = apiClient;
+    final server = activeServer;
+    if (client == null || server == null) return false;
+    final refreshToken = await _authPrefs.loadRefreshToken();
+    if (refreshToken == null) return false;
+    try {
+      final resp = await client.refresh(refreshToken);
+      final newToken = resp['token'] as String?;
+      if (resp['success'] != true || newToken == null) return false;
+      client.authToken = newToken;
+      final username = await _authPrefs.loadUsername() ?? server.username;
+      await _authPrefs.saveToken(newToken, username, refreshToken: resp['refreshToken'] as String?);
+      lastError = null;
+      notifyListeners();
+      // Reopens the WebSocket with the fresh token via _setupWebSocket's
+      // own client.authToken read - same reconnect path connect() itself
+      // already uses, just without re-fetching REST state (the session
+      // was never actually lost, only the WebSocket's own token).
+      _setupWebSocket(server, newToken);
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 
   Future<void> connect() async {
@@ -210,21 +273,30 @@ class RobotViewModel extends ChangeNotifier {
         // A server-relayed message carrying the real "denied"/"token"
         // auth-rejection text, or the WS layer's own wsAuthRejected (a
         // bare 1008 close, no message frame ever sent for that case) both
-        // mean the same thing: this token is dead, stop pretending the
-        // session is still good. A client-side connection failure
-        // (wsConnectionLost/wsConnectFailed) is a generic connectivity
-        // problem, never an auth one.
-        if (error.kind == HydraErrorKind.wsAuthRejected) {
-          isLoggedIn = false;
-          connectionStatus = 'disconnected';
-          _ws?.disconnect();
-        } else if (error.kind == HydraErrorKind.serverMessage) {
-          final message = error.params['message'] ?? '';
-          if (message.contains('denied') || message.contains('token')) {
-            isLoggedIn = false;
-            connectionStatus = 'disconnected';
-            _ws?.disconnect();
-          }
+        // mean the same thing: this token is dead. A client-side
+        // connection failure (wsConnectionLost/wsConnectFailed) is a
+        // generic connectivity problem, never an auth one.
+        //
+        // C08: before concluding the session itself is dead, try
+        // _attemptTokenRefresh() - most real 1008s are just the access
+        // token's own real time-based expiry, not an actual revocation
+        // (see its own doc comment). Only a failed refresh still forces
+        // today's logout - a genuinely revoked session, no refresh token
+        // on file, or a server predating this feature all correctly fall
+        // through to it exactly as before this existed.
+        final isAuthFailure = error.kind == HydraErrorKind.wsAuthRejected ||
+            (error.kind == HydraErrorKind.serverMessage &&
+                ((error.params['message'] ?? '').contains('denied') ||
+                    (error.params['message'] ?? '').contains('token')));
+        if (isAuthFailure) {
+          unawaited(_attemptTokenRefresh().then((recovered) {
+            if (!recovered) {
+              isLoggedIn = false;
+              connectionStatus = 'disconnected';
+              _ws?.disconnect();
+              notifyListeners();
+            }
+          }));
         }
         notifyListeners();
       },
