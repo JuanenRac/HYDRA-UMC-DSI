@@ -207,11 +207,18 @@ class RobotViewModel extends ChangeNotifier {
       onDelta: _applyRobotDelta,
       onError: (error) {
         lastError = error;
-        // Only a server-relayed message ever carries the real
-        // "denied"/"token" auth-rejection text - a client-side connection
-        // failure (wsConnectionLost/wsConnectFailed) is a generic
-        // connectivity problem, never an auth one.
-        if (error.kind == HydraErrorKind.serverMessage) {
+        // A server-relayed message carrying the real "denied"/"token"
+        // auth-rejection text, or the WS layer's own wsAuthRejected (a
+        // bare 1008 close, no message frame ever sent for that case) both
+        // mean the same thing: this token is dead, stop pretending the
+        // session is still good. A client-side connection failure
+        // (wsConnectionLost/wsConnectFailed) is a generic connectivity
+        // problem, never an auth one.
+        if (error.kind == HydraErrorKind.wsAuthRejected) {
+          isLoggedIn = false;
+          connectionStatus = 'disconnected';
+          _ws?.disconnect();
+        } else if (error.kind == HydraErrorKind.serverMessage) {
           final message = error.params['message'] ?? '';
           if (message.contains('denied') || message.contains('token')) {
             isLoggedIn = false;

@@ -7,6 +7,23 @@ in [README.md](README.md#-versioning); earlier entries are grouped under
 the pre-policy version `0.0.0+1` the repo carried while the policy did not
 yet exist.
 
+## [0.1.6] - A rejected session token no longer retries forever, silently
+
+`network/hydra_websocket.dart`'s own header comment already claimed a
+1008 close was "treated as sign in again" - it wasn't; `onDone` always
+rescheduled a reconnect, unconditionally. Real gap found in an ecosystem-
+wide audit: server.ts closes the `/ws` upgrade with RFC 6455 code 1008
+for a missing/invalid/expired token and never sends a message frame
+first, so the existing `{"error": "..."}` check could never catch this
+case - the app just spun forever in "connecting" -> "disconnected" with
+no visible error. Now checks the real close code and, on a 1008, stops
+retrying and surfaces a new, localized `wsAuthRejected` error (all 7
+languages) that `RobotViewModel` treats as a forced logout, same as a
+server-relayed "denied"/"token" message. Same fix ported from
+HYDRA-UMC-IOS-CONTROL's own copy of this file. Real end-to-end
+regression test against a real local WebSocket server
+(`test/hydra_websocket_test.dart`).
+
 ## [0.1.5] - V07-015: a failed logout or a half-written session could resurrect an old token
 
 A second independent revalidation audit found two real gaps by static

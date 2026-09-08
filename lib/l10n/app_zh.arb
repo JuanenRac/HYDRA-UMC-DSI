@@ -91,5 +91,6 @@
   "errTxError": "传输错误 [{command}]：{error}",
   "errUnknownCommand": "未知命令：{command}",
   "errWsConnectionLost": "WebSocket 连接已断开：{error}",
-  "errWsConnectFailed": "WebSocket 连接失败：{error}"
+  "errWsConnectFailed": "WebSocket 连接失败：{error}",
+  "errWsAuthRejected": "会话未授权，请重新登录"
 }

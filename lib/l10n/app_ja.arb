@@ -91,5 +91,6 @@
   "errTxError": "送信エラー [{command}]: {error}",
   "errUnknownCommand": "不明なコマンド: {command}",
   "errWsConnectionLost": "WebSocket接続が切断されました: {error}",
-  "errWsConnectFailed": "WebSocket接続に失敗しました: {error}"
+  "errWsConnectFailed": "WebSocket接続に失敗しました: {error}",
+  "errWsAuthRejected": "セッションが認証されていません。再度ログインしてください"
 }
