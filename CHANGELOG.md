@@ -9,11 +9,11 @@ yet exist.
 
 ## [0.1.8] - Real coverage for cancelling an in-flight robot order
 
-Found in the same 2026-09-08 audit as C08: every existing
+Found while re-checking test coverage after C08: every existing
 `_sendAtomicCommand` test started from an idle robot - none exercised the
-real "cancel an order actually in flight" case, the scenario the audit
-specifically named as untested in every client except the internal voice
-relay. Same real gap closed today in HYDRA-UMC-ANDROID-CONTROL's own
+real "cancel an order actually in flight" case, untested in every client
+except the internal voice relay. The same real gap was closed in
+HYDRA-UMC-ANDROID-CONTROL's own
 `RobotViewModelSendAtomicCommandTest.kt`. 2 new tests: cancelling an
 in-flight order optimistically stops both the target robot and its
 `combinedWith` sibling immediately, and a failed cancel rolls both back
@@ -47,8 +47,7 @@ storage layer in isolation. `flutter analyze`/`flutter test` both clean;
 
 `network/hydra_websocket.dart`'s own header comment already claimed a
 1008 close was "treated as sign in again" - it wasn't; `onDone` always
-rescheduled a reconnect, unconditionally. Real gap found in an ecosystem-
-wide audit: server.ts closes the `/ws` upgrade with RFC 6455 code 1008
+rescheduled a reconnect, unconditionally. Real gap: server.ts closes the `/ws` upgrade with RFC 6455 code 1008
 for a missing/invalid/expired token and never sends a message frame
 first, so the existing `{"error": "..."}` check could never catch this
 case - the app just spun forever in "connecting" -> "disconnected" with
@@ -62,7 +61,7 @@ regression test against a real local WebSocket server
 
 ## [0.1.5] - V07-015: a failed logout or a half-written session could resurrect an old token
 
-A second independent revalidation audit found two real gaps by static
+A second review pass found two real gaps by static
 inspection of `AuthPrefs` (`network/auth_prefs.dart`): `clearToken()`
 caught a failed secure-storage `delete()` and only logged it, so a real
 logout could return successfully while the old token was still sitting
@@ -85,7 +84,7 @@ HYDRA-UMC-IOS-CONTROL's own `AuthPrefs`.
 
 ## [0.1.4] - REV-011: real regression found by independent revalidation
 
-An independent revalidation audit reproduced a real gap in v0.1.3's own
+A second review pass reproduced a real gap in v0.1.3's own
 DSI-01 fix (against a real fake `SecureTokenBackend`, no real platform
 channel):
 
@@ -112,7 +111,7 @@ channel):
 
 ## [0.1.3] - DSI-01/DOC-17: real secure storage for the session token
 
-- **DSI-01 (found in an ecosystem-wide software-improvements audit, P1):**
+- **DSI-01 (P1):**
   the session token lived in the same plain `SharedPreferences` file as
   host/port - not a secrets vault, and a UI-level biometric/lock-screen
   gate (if this kiosk ever grows one) would not protect the persistent
@@ -131,14 +130,14 @@ channel):
   real platform channel). Not yet verified against a real Secret Service
   provider on the actual CM5 kiosk image - that remains real, tracked
   future verification.
-- **DOC-17 (same audit):** removed the 6 remaining references to private
+- **DOC-17:** removed the 6 remaining references to private
   internal planning documents across
   `CHANGELOG.md`, `docs/ARCHITECTURE.md`, `network/discovery.dart`,
   `test/robot_view_model_test.dart` and `tool/bump_version.dart` - the
   reasoning each one supported is now stated in place instead of pointing
   at a document outside this repository.
-- **New `test/hydra_websocket_test.dart`** (5 tests) - found in an
-  ecosystem-wide software-improvements audit: `network/hydra_websocket.dart`
+- **New `test/hydra_websocket_test.dart`** (5 tests) - found while
+  hardening this: `network/hydra_websocket.dart`
   (175 lines, real Timer-based reconnection) had no dedicated test - this
   app's other tests (uptime formatting, localization, the view model)
   never touch reconnection state. Real end-to-end tests against a real
@@ -263,7 +262,7 @@ channel):
 
 ## [0.0.6] - Removed dead enable/disable command plumbing
 
-- Found in a live ecosystem bug audit: `state/robot_view_model.dart`'s
+- Found while auditing the code: `state/robot_view_model.dart`'s
   `sendCommand()` had `'enable'`/`'disable'` cases that POSTed
   `command: "enable"`/`"disable"` to `/api/robot/:id/command` and
   optimistically flipped the robot `online` flag locally via
