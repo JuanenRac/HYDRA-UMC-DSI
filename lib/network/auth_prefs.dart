@@ -10,7 +10,7 @@
 // of the CM5 itself, not just a normal app relaunch, so the session token
 // itself is handled separately below.
 //
-// DSI-01 (found in an ecosystem-wide software-improvements audit, P1): the
+// DSI-01 (P1): the
 // session token used to live in the exact same SharedPreferences file as
 // host/port - a plain, unencrypted store, not a secrets vault. Token
 // reads/writes now go through `SecureTokenBackend`, backed by
@@ -18,7 +18,7 @@
 // this app's actual deployment target - Keychain on iOS/macOS, Keystore-
 // backed encrypted storage on Android/Windows).
 //
-// REV-011 (found in an independent revalidation audit, P1): DSI-01 above
+// REV-011 (P1): DSI-01 above
 // wrapped every secure call so a failure fell back to writing the token in
 // PLAIN SharedPreferences - the exact failure of the protection mechanism
 // itself silently removing the guarantee it was meant to provide. A bare
@@ -32,7 +32,7 @@
 // (and the old copy removed) the first time it is successfully read back
 // - that is reading pre-existing legacy data, not a new plaintext write.
 //
-// V07-015 (found in an independent revalidation audit, P1): two real
+// V07-015 (P1): two real
 // gaps found by static inspection of the two functions below. First,
 // `clearToken()` caught a failed secure-storage `delete()` and just
 // logged it - a real logout could return successfully while the old
