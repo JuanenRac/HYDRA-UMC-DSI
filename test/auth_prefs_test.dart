@@ -1,4 +1,4 @@
-// DSI-01 (ecosystem-wide software-improvements audit, P1): the session
+// DSI-01 (P1): the session
 // token used to live in plain SharedPreferences, indistinguishable from
 // host/port. These tests exercise AuthPrefs against a fake
 // SecureTokenBackend (no real platform channel) covering: the real
@@ -13,7 +13,7 @@ class FakeSecureTokenBackend implements SecureTokenBackend {
   FakeSecureTokenBackend({this.alwaysFail = false, this.failDelete = false, this.failWriteKeys = const {}});
 
   final bool alwaysFail;
-  // V07-015 (found in an independent revalidation audit, P1): a real
+  // V07-015 (P1): a real
   // secure-storage failure is not always "everything is broken" - a
   // transient delete failure, or a write that succeeds for one key and
   // fails for the very next one, is exactly as real and needs its own

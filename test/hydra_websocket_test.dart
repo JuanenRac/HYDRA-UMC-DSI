@@ -3,7 +3,7 @@
 // Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 // GPL-3.0 - see LICENSE
 //
-// Found in an ecosystem-wide software-improvements audit:
+// Found while auditing the code:
 // network/hydra_websocket.dart (175 lines, real Timer-based reconnection)
 // had no dedicated test - this app's other tests (uptime formatting,
 // localization, the view model) never touch reconnection state.
