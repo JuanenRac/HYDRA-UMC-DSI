@@ -33,7 +33,7 @@ dependencies:
     sdk: flutter
   intl: ^0.20.2
 
-  # DSI-01 (ecosystem-wide software-improvements audit): real secrets vault
+  # DSI-01: real secrets vault
   # for the session token - libsecret's Secret Service on Linux (this
   # app's real deployment target), Keychain on iOS/macOS, encrypted
   # Keystore-backed storage on Android/Windows. See network/auth_prefs.dart

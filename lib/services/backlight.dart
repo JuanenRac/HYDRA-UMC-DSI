@@ -3,7 +3,7 @@
 // Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 // GPL-3.0 - see LICENSE
 //
-// Adaptive backlight by time of day (audit idea: "retroiluminación
+// Adaptive backlight by time of day (review note: "retroiluminación
 // adaptativa según la hora del día").
 //
 // Linux's own backlight class exposes brightness control identically for
@@ -87,7 +87,7 @@ class BacklightControl {
 /// Simple fixed day/night schedule - bright during a normal shop-floor
 /// working day, dimmer outside it to reduce glare/eye strain on an
 /// unattended overnight panel. Deliberately a plain function (not a
-/// user-configurable schedule yet) - the audit idea asked for "adaptativa
+/// user-configurable schedule yet) - the review note asked for "adaptativa
 /// según la hora del día", not a full scheduling UI; that's a reasonable
 /// larger follow-up if the fixed schedule below doesn't fit a real
 /// deployment's actual shift hours.
