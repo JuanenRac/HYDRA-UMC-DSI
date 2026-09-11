@@ -155,7 +155,7 @@ void main() {
     });
   });
 
-  group('V07-015 (found in an independent revalidation audit, P1): logout and partial writes', () {
+  group('V07-015 (P1): logout and partial writes', () {
     test('a logout whose secure delete fails must not let a later loadToken() resurrect the old token', () async {
       final secure = FakeSecureTokenBackend(failDelete: true);
       final authPrefs = AuthPrefs(secureBackend: secure);
