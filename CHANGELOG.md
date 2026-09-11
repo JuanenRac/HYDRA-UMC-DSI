@@ -7,6 +7,24 @@ in [README.md](README.md#-versioning); earlier entries are grouped under
 the pre-policy version `0.0.0+1` the repo carried while the policy did not
 yet exist.
 
+## [0.1.9] - Honesty check section in every README
+
+Added a "Honesty check" paragraph right after the intro badges in
+`README.md` and all 6 translated READMEs, naming the real, tested
+networking/state modules (`hydra_api_client.dart`,
+`hydra_websocket.dart`, `discovery.dart`, `auth_prefs.dart`,
+`robot_view_model.dart`, `hydra_error.dart`) and the real test count
+(41 passing across `test/*.dart`; `flutter analyze` clean). States
+plainly that the 3D View screen is a native isometric indicator, not a
+real 3D renderer, and that `flutter build linux` has only ever been
+verified under WSL2 (x86_64), never on the CM5's real aarch64
+hardware, with the `kiosk/hydra-umc-dsi.service` autostart unit still
+completely unverified. Also fixed a stale `test/` directory-listing
+comment that was missing 3 real test files
+(`robot_view_model_silent_refresh_test.dart`, `auth_prefs_test.dart`,
+`hydra_websocket_test.dart`). Documents the real, current state of
+what's implemented vs. planned; no behavior changed.
+
 ## [0.1.8] - Real coverage for cancelling an in-flight robot order
 
 Found while re-checking test coverage after C08: every existing

@@ -26,6 +26,10 @@ Une interface tactile native en Flutter (Dart, avec une vraie cible desktop Linu
 
 **Cette application est l'une des deux voies de contrôle coexistant sur la même carte** - le CM5 pilote également une sortie HDMI pour un moniteur externe complet exécutant l'interface web. Cette application DSI complète cette voie avec une console tactile directe et toujours disponible sur la carte elle-même ; elle ne remplace pas l'interface web.
 
+---
+
+**Vérification d'honnêteté - ce qui fonctionne réellement aujourd'hui :** la couche réseau (`lib/network/hydra_api_client.dart`, `hydra_websocket.dart`, `discovery.dart`, `auth_prefs.dart`) et la couche d'état (`lib/state/robot_view_model.dart`, `hydra_error.dart`) sont réelles et testées (41 tests passants dans `test/*.dart`, incluant un aller-retour réel de connexion/reconnexion/rejet d'authentification WebSocket contre un vrai serveur local, pas un mock), et `flutter analyze` ne signale aucun problème. Les 6 écrans du catalogue sont une UI réelle et câblée, pas des placeholders. Ce qui n'est réellement pas construit : l'écran **3D View** est un petit indicateur isométrique natif X/Y/Z, pas un vrai moteur de rendu 3D - il n'intègre pas la scène Three.js de STUDIO (aucune implémentation Linux de `webview_flutter` n'existe). Ce qui est réel mais non vérifié sur le matériel cible : `flutter build linux --release` a été exécuté et produit un binaire confirmé au démarrage, mais uniquement sous Ubuntu 24.04 WSL2 (x86_64) - jamais sur le véritable aarch64 Raspberry Pi OS du CM5 - et l'unité de démarrage automatique `kiosk/hydra-umc-dsi.service` n'a jamais tourné sur une vraie machine Linux. Voir "Known Follow-ups" ci-dessous et `CHANGELOG.md` pour ce qui a été livré exactement jusqu'à présent.
+
 ## 🏗️ Ce qui est implémenté
 
 - **Connexion** (`lib/ui/login_screen.dart`, `lib/state/robot_view_model.dart`) - champs IP/port du serveur pré-remplis avec une valeur LAN raisonnable, champs nom d'utilisateur/mot de passe dimensionnés pour le tactile et laissés vides par défaut (aucun identifiant n'est pré-rempli - le pré-remplissage initial `admin`/`admin` a été supprimé lorsque chaque serveur a cessé de créer ce compte par défaut lors d'un premier démarrage de production réel), `POST /api/login` avec le compte saisi par l'opérateur ; des comptes supplémentaires à privilège réduit "operator" peuvent être créés depuis Config > Users dans l'interface web. Jeton de session persisté entre les lancements via `shared_preferences` - important sur un panneau de type kiosque censé rester connecté même après un cycle d'extinction/allumage du CM5 lui-même, pas seulement après une relance de l'application. Une boîte de dialogue "Scan local network" (`lib/network/discovery.dart`) trouve les serveurs sans avoir besoin de connaître déjà l'IP - doublement utile ici, puisque le CM5 sur lequel tourne cette application est souvent le contrôleur même auquel elle doit se connecter.
@@ -159,7 +163,7 @@ HYDRA-UMC-DSI/
 ├── tools/
 │   └── ci_validate.py               # Validation manifeste/CHANGELOG/docs utilisée par CI
 ├── bump_manifest_version.py          # Synchronise la version de hydra-umc.project.json avec la version native (--sync)
-├── test/                             # widget_test, format_uptime_test, localization_test, robot_view_model_test
+├── test/                             # widget_test, format_uptime_test, localization_test, robot_view_model_test, robot_view_model_silent_refresh_test, auth_prefs_test, hydra_websocket_test
 ├── README.md                         # document original (anglais)
 └── README_spa.md / README_ita.md / README_fra.md / README_deu.md / README_zho.md / README_jpn.md  # traductions
 ```

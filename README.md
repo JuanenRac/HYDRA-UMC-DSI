@@ -26,6 +26,10 @@ A native Flutter touch UI (Dart, real Linux desktop target) for HYDRA-UMC's own 
 
 **This app is one of two coexisting control surfaces on the same board** - the CM5 also drives an HDMI output for a full external monitor running the browser UI. This DSI app complements that path with a direct, always-on touch console at the board itself; it does not replace the browser UI.
 
+---
+
+**Honesty check - what actually runs today:** the networking layer (`lib/network/hydra_api_client.dart`, `hydra_websocket.dart`, `discovery.dart`, `auth_prefs.dart`) and the state layer (`lib/state/robot_view_model.dart`, `hydra_error.dart`) are real and tested (41 tests passing across `test/*.dart`, including a real WebSocket connect/reconnect/auth-rejection round trip against a genuine local server, not a mock), and `flutter analyze` reports no issues. All 6 catalog screens are real, wired UI, not placeholders. What is genuinely not built: the **3D View** screen is a small native isometric X/Y/Z indicator, not a real 3D renderer - it does not embed STUDIO's Three.js scene (no Linux `webview_flutter` implementation exists). What is real but unverified on target hardware: `flutter build linux --release` has been run and produces a binary confirmed to launch, but only under Ubuntu 24.04 WSL2 (x86_64) - never on the CM5's real aarch64 Raspberry Pi OS - and the `kiosk/hydra-umc-dsi.service` autostart unit has never run on any real Linux machine at all. See "Known Follow-ups" below and `CHANGELOG.md` for exactly what has shipped so far.
+
 ## 🏗️ What's implemented
 
 - **Login** (`lib/ui/login_screen.dart`, `lib/state/robot_view_model.dart`) - server IP/port fields pre-filled with a sane LAN default, username/password fields sized for touch and left blank by default (no hardcoded credential is pre-filled - the initial `admin`/`admin` pre-fill was removed once every server started refusing to seed that default account on a real production first start), `POST /api/login` against whatever account the operator enters; additional lower-privilege "operator" accounts can be created from Config > Users in the browser UI. Session token persisted across launches via `shared_preferences` - important on a kiosk panel expected to stay signed in across a CM5 power-cycle, not just an app relaunch. A "Scan local network" dialog (`lib/network/discovery.dart`) finds servers without needing to already know the IP - doubly useful here, since the CM5 this app runs on is often the very controller it should connect to.
@@ -157,7 +161,7 @@ HYDRA-UMC-DSI/
 ├── tools/
 │   └── ci_validate.py               # Manifest/CHANGELOG/docs validation used by CI
 ├── bump_manifest_version.py          # Syncs hydra-umc.project.json's version to the native one (--sync)
-├── test/                             # widget_test, format_uptime_test, localization_test, robot_view_model_test
+├── test/                             # widget_test, format_uptime_test, localization_test, robot_view_model_test, robot_view_model_silent_refresh_test, auth_prefs_test, hydra_websocket_test
 ├── README.md                         # this file
 └── README_spa.md / README_ita.md / README_fra.md / README_deu.md / README_zho.md / README_jpn.md  # translations
 ```

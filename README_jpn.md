@@ -26,6 +26,10 @@ Compute Module 5 上の HYDRA-UMC 自身の 5"/7" DSI タッチスクリーン�
 
 **本アプリは、同じボード上に共存する 2 つの制御サーフェスのうちの 1 つです**——CM5 は、ブラウザ UI を実行する完全な外部モニター向けの HDMI 出力も同時に駆動します。この DSI アプリはそのパスを補完するもので、ボード自体に直接的で常時稼働するタッチコンソールを提供します。ブラウザ UI を置き換えるものではありません。
 
+---
+
+**正直な現状確認 - 今日実際に動くもの:** ネットワーク層(`lib/network/hydra_api_client.dart`、`hydra_websocket.dart`、`discovery.dart`、`auth_prefs.dart`)と状態層(`lib/state/robot_view_model.dart`、`hydra_error.dart`)は本物でテスト済みである(`test/*.dart` 全体で 41 件のテストが成功しており、モックではなく本物のローカルサーバーに対する本物の WebSocket 接続/再接続/認証拒否の往復テストも含む)。`flutter analyze` も問題を報告していない。カタログの 6 画面はすべて本物の配線されたUIであり、プレースホルダーではない。実際にまだ構築されていないもの: **3D View** 画面は本物の 3D レンダラーではなく、小さなネイティブの等角 X/Y/Z インジケーターにすぎない - STUDIO の本物の Three.js シーンは埋め込まれていない(Linux 版の `webview_flutter` 実装が存在しないため)。本物だが対象ハードウェアでは未検証のもの: `flutter build linux --release` は実行され、実際に起動することが確認されたバイナリを生成しているが、これは Ubuntu 24.04 WSL2(x86_64)上でのみであり、CM5 の実際の aarch64 Raspberry Pi OS 上では一度も実行されていない。また `kiosk/hydra-umc-dsi.service` の自動起動ユニットも、実際の Linux マシン上で一度も実行されたことがない。これまでに何が実際に出荷されたかは、下記の "Known Follow-ups" と `CHANGELOG.md` を参照。
+
 ## 🏗️ 実装済みの内容
 
 - **ログイン**（`lib/ui/login_screen.dart`、`lib/state/robot_view_model.dart`）—— サーバー IP/ポートフィールドは妥当な LAN 既定値で事前入力済み、ユーザー名/パスワードフィールドはタッチ操作向けに調整され既定では空欄（ハードコードされた認証情報は事前入力されません——各サーバーが実運用での初回起動時にデフォルトアカウントを作成しなくなったのに合わせ、初期の `admin`/`admin` 事前入力は削除されました)、オペレーターが入力したアカウントに対する `POST /api/login`。追加の低権限「オペレーター」アカウントはブラウザ UI の Config > Users から作成可能です。`shared_preferences` を通じて起動をまたいで永続化されるセッショントークン——アプリの再起動だけでなく CM5 の電源サイクルをまたいでもサインイン状態を維持することが期待されるキオスクパネルにとって重要です。「ローカルネットワークをスキャン」ダイアログ（`lib/network/discovery.dart`）は、IP を事前に知らなくてもサーバーを見つけられます——本アプリが動作している CM5 自体が、それが接続すべきまさにそのコントローラーであることが多いため、ここでは特に有用です。
@@ -145,7 +149,7 @@ HYDRA-UMC-DSI/
 ├── tools/
 │   └── ci_validate.py               # CI が使用するマニフェスト/CHANGELOG/ドキュメント検証
 ├── bump_manifest_version.py          # hydra-umc.project.json のバージョンをネイティブ版と同期(--sync)
-├── test/                             # widget_test、format_uptime_test、localization_test、robot_view_model_test
+├── test/                             # widget_test、format_uptime_test、localization_test、robot_view_model_test、robot_view_model_silent_refresh_test、auth_prefs_test、hydra_websocket_test
 ├── README.md                         # 本ファイル
 └── README_spa.md / README_ita.md / README_fra.md / README_deu.md / README_zho.md / README_jpn.md  # 翻訳
 ```
