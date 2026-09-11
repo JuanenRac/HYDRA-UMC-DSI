@@ -13,8 +13,8 @@
 // Exercised via sendCommand('play') - a real, server-supported command
 // control_screen.dart actually wires to a button - rather than the former
 // 'enable'/'disable' stand-ins, which HYDRA-UMC-SERVER's own
-// /api/robot/:id/command switch never implemented (found in a live
-// ecosystem bug audit; see robot_view_model.dart's sendCommand() header for
+// /api/robot/:id/command switch never implemented (found while
+// auditing the code; see robot_view_model.dart's sendCommand() header for
 // the removal). This suite only cares about the generic optimistic-mutate/
 // rollback/combinedWith machinery, so any real command exercises it equally
 // well.
