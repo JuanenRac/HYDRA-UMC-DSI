@@ -23,30 +23,61 @@ class DashboardScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final vm = context.watch<RobotViewModel>();
-    final l10n = AppLocalizations.of(context)!;
-    final robots = vm.robots;
-    final metrics = vm.metrics;
-
-    return Column(
+    // Real bug found while auditing this screen: it used to be one single
+    // `context.watch<RobotViewModel>()` at the very top, so ANY
+    // notifyListeners() call on the view model - a metrics tick (every 5s,
+    // see robot_view_model.dart's own _metricsTimer), a WS status change,
+    // or a single robot's live telemetry - rebuilt the ENTIRE screen: the
+    // metrics bar AND every robot card in the grid, whether that update
+    // touched them or not. Split into two independently-`Selector`ed
+    // widgets below so each side of RobotViewModel's single ChangeNotifier
+    // only rebuilds the part of the screen that actually reads it.
+    return const Column(
       children: [
-        if (metrics != null) _MetricsBar(metrics: metrics),
-        Expanded(
-          child: robots.isEmpty
-              ? Center(child: Text(l10n.controlNoRobots, style: const TextStyle(color: Colors.grey)))
-              : GridView.builder(
-                  padding: const EdgeInsets.all(16),
-                  gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                    maxCrossAxisExtent: 300,
-                    mainAxisExtent: 190,
-                    crossAxisSpacing: 14,
-                    mainAxisSpacing: 14,
-                  ),
-                  itemCount: robots.length,
-                  itemBuilder: (context, i) => _RobotCard(robot: robots[i], allRobots: robots),
-                ),
-        ),
+        _MetricsBarSelector(),
+        Expanded(child: _RobotsGridSelector()),
       ],
+    );
+  }
+}
+
+class _MetricsBarSelector extends StatelessWidget {
+  const _MetricsBarSelector();
+
+  @override
+  Widget build(BuildContext context) {
+    final metrics = context.select<RobotViewModel, SystemMetrics?>((vm) => vm.metrics);
+    if (metrics == null) return const SizedBox.shrink();
+    return _MetricsBar(metrics: metrics);
+  }
+}
+
+class _RobotsGridSelector extends StatelessWidget {
+  const _RobotsGridSelector();
+
+  @override
+  Widget build(BuildContext context) {
+    final robots = context.select<RobotViewModel, List<RobotView>>((vm) => vm.robots);
+    final l10n = AppLocalizations.of(context)!;
+
+    if (robots.isEmpty) {
+      return Center(child: Text(l10n.controlNoRobots, style: const TextStyle(color: Colors.grey)));
+    }
+    return GridView.builder(
+      padding: const EdgeInsets.all(16),
+      gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+        maxCrossAxisExtent: 300,
+        mainAxisExtent: 190,
+        crossAxisSpacing: 14,
+        mainAxisSpacing: 14,
+      ),
+      itemCount: robots.length,
+      // RepaintBoundary per card: even when this grid does rebuild (a real
+      // robots-list change), each card's own paint layer stays isolated
+      // instead of the whole grid repainting as one layer.
+      itemBuilder: (context, i) => RepaintBoundary(
+        child: _RobotCard(robot: robots[i], allRobots: robots),
+      ),
     );
   }
 }
