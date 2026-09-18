@@ -7,6 +7,23 @@ in [README.md](README.md#-versioning); earlier entries are grouped under
 the pre-policy version `0.0.0+1` the repo carried while the policy did not
 yet exist.
 
+## [0.2.0] - Reconnect delivery test coverage, narrowed Dashboard rebuilds
+
+- **Reconnect test coverage:** the existing WS reconnect test proved a
+  second real connection was accepted after an abrupt drop, but never
+  proved data delivery actually resumed on it. Added a test that sends a
+  real settings payload on the first socket, forces a drop, then sends a
+  new real payload on the reconnected socket and asserts both are
+  delivered in order.
+- **Dashboard rebuild scope:** `DashboardScreen` used one
+  `context.watch<RobotViewModel>()` at its root, so any change on the
+  shared view model (a metrics tick every 5s, a robot's live telemetry,
+  a WS status change) rebuilt the metrics bar AND every robot card in
+  the grid together. Split into independently-`Selector`ed widgets for
+  the metrics bar and the robot grid, and wrapped each robot card in its
+  own `RepaintBoundary`, so an update to one side no longer rebuilds or
+  repaints the other.
+
 ## [0.1.9] - Honesty check section in every README
 
 Added a "Honesty check" paragraph right after the intro badges in

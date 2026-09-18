@@ -146,6 +146,53 @@ void main() {
     );
 
     test(
+      'delivers a real new settings payload sent on the reconnected socket',
+      () async {
+        // The existing "reconnects on its own..." test above only proves the
+        // server accepts a second real connection and the status sequence
+        // is right - it never sends any payload on either socket, so it
+        // never actually proves data delivery resumes after a real abrupt
+        // disconnect. This exercises the full path: receive a real payload
+        // on the first socket, force a real drop, then prove a real payload
+        // sent on the SECOND (reconnected) socket reaches onSettings too.
+        final received = <Map<String, dynamic>>[];
+        final ws = HydraWebSocket(
+          host: '127.0.0.1',
+          port: fakeServer.port,
+          onStatus: (_) {},
+          onSettings: received.add,
+          onError: (_) {},
+        );
+        final firstConnection = fakeServer.onConnect.first;
+        ws.connect();
+        final serverSocketOne = await firstConnection;
+        serverSocketOne.add(jsonEncode({
+          'type': 'settings',
+          'payload': {'seq': 1},
+        }));
+        await Future<void>.delayed(const Duration(milliseconds: 200));
+
+        final secondConnection = fakeServer.onConnect.first;
+        await serverSocketOne.close();
+        final serverSocketTwo = await secondConnection.timeout(reconnectDelay + const Duration(seconds: 10));
+        await Future<void>.delayed(const Duration(milliseconds: 300));
+
+        serverSocketTwo.add(jsonEncode({
+          'type': 'settings',
+          'payload': {'seq': 2},
+        }));
+        await Future<void>.delayed(const Duration(milliseconds: 200));
+
+        expect(received, [
+          {'seq': 1},
+          {'seq': 2},
+        ]);
+        ws.disconnect();
+      },
+      timeout: Timeout(reconnectDelay + const Duration(seconds: 15)),
+    );
+
+    test(
       'disconnect() cancels a pending reconnect and never reconnects again',
       () async {
         final ws = HydraWebSocket(
