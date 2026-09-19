@@ -54,7 +54,7 @@ in-flight order optimistically stops both the target robot and its
 `combinedWith` sibling immediately, and a failed cancel rolls both back
 to still-playing.
 
-## [0.1.7] - C08: silent recovery from a WS 1008 close via a real refresh token
+## [0.1.7] - silent recovery from a WS 1008 close via a real refresh token
 
 Follow-up to 0.1.6: stopping the retry loop and surfacing `wsAuthRejected`
 was correct, but still forced a real logout on the single most common
@@ -94,7 +94,7 @@ HYDRA-UMC-IOS-CONTROL's own copy of this file. Real end-to-end
 regression test against a real local WebSocket server
 (`test/hydra_websocket_test.dart`).
 
-## [0.1.5] - V07-015: a failed logout or a half-written session could resurrect an old token
+## [0.1.5] - a failed logout or a half-written session could resurrect an old token
 
 A second review pass found two real gaps by static
 inspection of `AuthPrefs` (`network/auth_prefs.dart`): `clearToken()`
@@ -117,13 +117,13 @@ it did manage to write if a later step in the same call fails, so
 secure storage never holds half of a session. Same real fix ported to
 HYDRA-UMC-IOS-CONTROL's own `AuthPrefs`.
 
-## [0.1.4] - REV-011: real regression found by independent revalidation
+## [0.1.4] - real regression found by independent revalidation
 
 A second review pass reproduced a real gap in v0.1.3's own
 DSI-01 fix (against a real fake `SecureTokenBackend`, no real platform
 channel):
 
-- **REV-011 [P1]:** `saveToken()` wrapped every secure-storage write so a
+- `saveToken()` wrapped every secure-storage write so a
   failure fell back to writing the token in PLAIN `SharedPreferences` -
   exactly the failure of the protection mechanism itself silently
   removing the guarantee DSI-01 was meant to provide. A UI-level
