@@ -43,7 +43,7 @@ class SystemMetrics {
 }
 
 class RobotViewModel extends ChangeNotifier {
-  // C08: injectable for real test coverage of the login()/_attemptTokenRefresh()/
+  // injectable for real test coverage of the login/_attemptTokenRefresh/
   // logout() lifecycle - same DI pattern this app already uses for
   // HydraApiClient's own {http.Client? client} and AuthPrefs' own
   // {SecureTokenBackend? secureBackend}. Defaults to a real AuthPrefs()
@@ -141,7 +141,7 @@ class RobotViewModel extends ChangeNotifier {
       isLoggedIn = true;
       activeServer = server;
       await _authPrefs.saveConnection(server.host, server.port);
-      // C08: server.ts's own POST /api/login now also returns a real
+      // server.ts's own POST /api/login now also returns a real
       // opaque refreshToken (refresh_tokens.ts) - a server predating this
       // feature simply omits it, and resp['refreshToken'] is null, which
       // saveToken()'s own optional parameter treats as "nothing to store",
@@ -164,7 +164,7 @@ class RobotViewModel extends ChangeNotifier {
     _ws?.disconnect();
     _metricsTimer?.cancel();
     _hydraInfoTimer?.cancel();
-    // C08: revoke the refresh token server-side too, best-effort (see
+    // revoke the refresh token server-side too, best-effort (see
     // HydraApiClient.logoutRemote()'s own doc comment - never blocks or
     // fails this real, local sign-out), not just discard it locally,
     // which would otherwise leave it silently valid for the rest of its
@@ -179,7 +179,7 @@ class RobotViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  // C08: silent recovery from a WS 1008 close, using HYDRA-UMC-SERVER's own
+  // silent recovery from a WS 1008 close, using HYDRA-UMC-SERVER's own
   // new POST /api/refresh (see HydraApiClient.refresh()'s own doc comment)
   // - this app never stores a password (auth_prefs.dart's own header
   // comment on why only the token itself lives in secure storage here), so
@@ -277,7 +277,7 @@ class RobotViewModel extends ChangeNotifier {
         // connection failure (wsConnectionLost/wsConnectFailed) is a
         // generic connectivity problem, never an auth one.
         //
-        // C08: before concluding the session itself is dead, try
+        // before concluding the session itself is dead, try
         // _attemptTokenRefresh() - most real 1008s are just the access
         // token's own real time-based expiry, not an actual revocation
         // (see its own doc comment). Only a failed refresh still forces
