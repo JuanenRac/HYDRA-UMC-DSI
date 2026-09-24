@@ -77,7 +77,7 @@ void main() {
       expect(prefs.getString('hydra_token'), isNull);
     });
 
-    test('a pre-DSI-01 plaintext token is migrated in and the old copy removed', () async {
+    test('a earlier plaintext token is migrated in and the old copy removed', () async {
       // Simulates an install from before this fix: a real token already
       // sitting in plain SharedPreferences, nothing yet in secure storage.
       SharedPreferences.setMockInitialValues({
@@ -98,7 +98,7 @@ void main() {
     });
   });
 
-  group('when secure storage is genuinely unavailable (REV-011: never falls back to plaintext)', () {
+  group('when secure storage is genuinely unavailable (never falls back to plaintext)', () {
     test('saveToken/loadToken stay usable via an in-memory-only session, never written to disk', () async {
       final secure = FakeSecureTokenBackend(alwaysFail: true);
       final authPrefs = AuthPrefs(secureBackend: secure);
