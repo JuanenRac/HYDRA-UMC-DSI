@@ -3,7 +3,7 @@
 // Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 // GPL-3.0 - see LICENSE
 //
-// C08: real end-to-end coverage for RobotViewModel's own
+// real end-to-end coverage for RobotViewModel's own
 // _attemptTokenRefresh() - a real local dart:io HttpServer serves both the
 // plain HTTP routes (POST /api/login, GET /api/settings, POST /api/refresh)
 // AND the real WebSocket upgrade at /ws (same real-socket approach

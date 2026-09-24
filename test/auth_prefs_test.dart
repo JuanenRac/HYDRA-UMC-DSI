@@ -1,4 +1,4 @@
-// DSI-01 (P1): the session
+// the session
 // token used to live in plain SharedPreferences, indistinguishable from
 // host/port. These tests exercise AuthPrefs against a fake
 // SecureTokenBackend (no real platform channel) covering: the real
@@ -13,7 +13,7 @@ class FakeSecureTokenBackend implements SecureTokenBackend {
   FakeSecureTokenBackend({this.alwaysFail = false, this.failDelete = false, this.failWriteKeys = const {}});
 
   final bool alwaysFail;
-  // V07-015 (P1): a real
+  // a real
   // secure-storage failure is not always "everything is broken" - a
   // transient delete failure, or a write that succeeds for one key and
   // fails for the very next one, is exactly as real and needs its own
@@ -108,7 +108,7 @@ void main() {
       expect(await authPrefs.loadToken(), 'secret-token');
       expect(await authPrefs.loadUsername(), 'alice');
 
-      // REV-011's own real closure criterion: the token must NEVER reach
+      // this project's own real closure criterion: the token must NEVER reach
       // plain SharedPreferences just because secure storage failed - the
       // old, pre-fix behavior this test used to assert as correct.
       final prefs = await SharedPreferences.getInstance();
@@ -117,7 +117,7 @@ void main() {
     });
 
     test('a fresh AuthPrefs instance (simulating a real app restart) cannot recover an in-memory-only session', () async {
-      // REV-011's own real, deliberate trade-off: a device whose secure
+      // this project's own real, deliberate trade-off: a device whose secure
       // storage is genuinely broken cannot promise "survives a restart"
       // without writing the token in plaintext, which this fix refuses to
       // do automatically. A brand-new AuthPrefs instance (same as a real
@@ -155,7 +155,7 @@ void main() {
     });
   });
 
-  group('V07-015 (P1): logout and partial writes', () {
+  group('logout and partial writes', () {
     test('a logout whose secure delete fails must not let a later loadToken() resurrect the old token', () async {
       final secure = FakeSecureTokenBackend(failDelete: true);
       final authPrefs = AuthPrefs(secureBackend: secure);
@@ -193,7 +193,7 @@ void main() {
     test('a real logout still invalidates the session even on a device whose secure storage is entirely unavailable', () async {
       final secure = FakeSecureTokenBackend(alwaysFail: true);
       final authPrefs = AuthPrefs(secureBackend: secure);
-      await authPrefs.saveToken('secret-token', 'alice'); // in-memory only, per REV-011
+      await authPrefs.saveToken('secret-token', 'alice'); // in-memory only, per 
 
       await authPrefs.clearToken();
 
@@ -210,7 +210,7 @@ void main() {
     expect(await authPrefs.loadConnection(), ('192.168.0.42', 8080));
   });
 
-  group('C08: refresh token storage', () {
+  group('refresh token storage', () {
     test('saveToken with a refreshToken round-trips it through secure storage only', () async {
       final secure = FakeSecureTokenBackend();
       final authPrefs = AuthPrefs(secureBackend: secure);
@@ -259,7 +259,7 @@ void main() {
 
       expect(secure.store['hydra_token'], isNull, reason: 'the token write must be rolled back too');
       expect(secure.store['hydra_username'], isNull, reason: 'the username write must be rolled back too');
-      // REV-011's own in-memory fallback still applies - the session
+      // this project's own in-memory fallback still applies - the session
       // stays usable for the rest of this app run.
       expect(await authPrefs.loadToken(), 'secret-token');
     });

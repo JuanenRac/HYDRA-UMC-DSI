@@ -10,7 +10,7 @@
 // of the CM5 itself, not just a normal app relaunch, so the session token
 // itself is handled separately below.
 //
-// DSI-01 (P1): the
+// the
 // session token used to live in the exact same SharedPreferences file as
 // host/port - a plain, unencrypted store, not a secrets vault. Token
 // reads/writes now go through `SecureTokenBackend`, backed by
@@ -18,7 +18,7 @@
 // this app's actual deployment target - Keychain on iOS/macOS, Keystore-
 // backed encrypted storage on Android/Windows).
 //
-// REV-011 (P1): DSI-01 above
+// above
 // wrapped every secure call so a failure fell back to writing the token in
 // PLAIN SharedPreferences - the exact failure of the protection mechanism
 // itself silently removing the guarantee it was meant to provide. A bare
@@ -32,7 +32,7 @@
 // (and the old copy removed) the first time it is successfully read back
 // - that is reading pre-existing legacy data, not a new plaintext write.
 //
-// V07-015 (P1): two real
+// two real
 // gaps found by static inspection of the two functions below. First,
 // `clearToken()` caught a failed secure-storage `delete()` and just
 // logged it - a real logout could return successfully while the old
@@ -91,7 +91,7 @@ class AuthPrefs {
   // once as a migration source.
   static const _keyToken = 'hydra_token';
   static const _keyUsername = 'hydra_username';
-  // C08: the opaque refresh token HYDRA-UMC-SERVER's own POST /api/login
+  // the opaque refresh token HYDRA-UMC-SERVER's own POST /api/login
   // now also returns (refresh_tokens.ts) - same secure-storage treatment
   // as the access token itself (never a legacy plaintext fallback; an
   // in-memory-only session if secure storage is genuinely unavailable).
@@ -100,7 +100,7 @@ class AuthPrefs {
   // "this session predates refresh-token support" - loadRefreshToken()
   // returning null is a normal, expected state, not a broken one.
   static const _keyRefreshToken = 'hydra_refresh_token';
-  // V07-015: a plain, non-secret marker - the real, persistent source of
+  // a plain, non-secret marker - the real, persistent source of
   // truth for "is there still an active session", checked BEFORE ever
   // consulting secure storage. Never holds a token/username itself, so
   // storing it in ordinary SharedPreferences carries none of the risk a
@@ -109,7 +109,7 @@ class AuthPrefs {
 
   final SecureTokenBackend _secure;
 
-  // REV-011: the real, honest fallback for a secure-storage write/read
+  // the real, honest fallback for a secure-storage write/read
   // failure - kept only for this AuthPrefs instance's own lifetime
   // (effectively, this app run), never written to any disk-backed store.
   String? _inMemoryToken;
@@ -130,7 +130,7 @@ class AuthPrefs {
     return (host, port);
   }
 
-  // C08: `refreshToken` is optional and named for backward source
+  // `refreshToken` is optional and named for backward source
   // compatibility with every existing call site - omitting it (a server
   // predating refresh-token support) leaves the previously-stored refresh
   // token, if any, untouched rather than deleting it, since a missing
@@ -148,19 +148,19 @@ class AuthPrefs {
       }
       // Secure storage is now the source of truth - clear any stale
       // plaintext copy left by a pre-DSI-01 session, and any in-memory-
-      // only fallback REV-011 left behind from an earlier failure this
+      // only fallback left behind from an earlier failure this
       // same run.
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove(_keyToken);
       await prefs.remove(_keyUsername);
-      // V07-015: a real, new login supersedes whatever the logged-out
+      // a real, new login supersedes whatever the logged-out
       // marker said before it.
       await prefs.remove(_keyLoggedOut);
       _inMemoryToken = null;
       _inMemoryUsername = null;
       _inMemoryRefreshToken = null;
     } catch (e) {
-      // V07-015: the token write above may already have succeeded before
+      // the token write above may already have succeeded before
       // THIS step failed - reverting it (best-effort) keeps secure
       // storage from silently holding half of a session while this
       // catch block reports the whole thing as in-memory-only below.
@@ -178,7 +178,7 @@ class AuthPrefs {
           // (clearToken()) no longer trusts a stale secure copy anyway.
         }
       }
-      // REV-011: never fall back to a plaintext SharedPreferences write
+      // never fall back to a plaintext SharedPreferences write
       // here - that would silently defeat the whole point of secure
       // storage. This session stays usable for the rest of this app run
       // only; a real restart on this (secure-storage-broken) device
@@ -197,7 +197,7 @@ class AuthPrefs {
   Future<String?> loadToken() async {
     if (_inMemoryToken != null) return _inMemoryToken;
     final prefs = await SharedPreferences.getInstance();
-    // V07-015: a real logout does not trust a secure-storage delete to
+    // a real logout does not trust a secure-storage delete to
     // have actually succeeded before honouring it - this marker is
     // checked before secure storage (or the legacy plaintext fallback
     // below) is ever consulted, so a delete that silently failed can
@@ -237,7 +237,7 @@ class AuthPrefs {
   Future<String?> loadUsername() async {
     if (_inMemoryUsername != null) return _inMemoryUsername;
     final prefs = await SharedPreferences.getInstance();
-    // V07-015: same real logged-out marker loadToken() checks above -
+    // same real logged-out marker loadToken checks above -
     // never report a stale username for a session that was logged out.
     if (prefs.getBool(_keyLoggedOut) ?? false) return null;
     try {
@@ -249,7 +249,7 @@ class AuthPrefs {
     return prefs.getString(_keyUsername);
   }
 
-  /// C08: no legacy plaintext fallback here (unlike loadToken()/
+  /// no legacy plaintext fallback here (unlike loadToken/
   /// loadUsername() above) - this key never existed before refresh-token
   /// support did, so there is nothing to migrate. `null` is a normal,
   /// expected result for a session established before this feature, or
@@ -271,7 +271,7 @@ class AuthPrefs {
     _inMemoryUsername = null;
     _inMemoryRefreshToken = null;
     final prefs = await SharedPreferences.getInstance();
-    // V07-015: set BEFORE attempting the real secure delete below - a
+    // set BEFORE attempting the real secure delete below - a
     // real logout must be honoured even if that delete itself fails
     // (caught and only logged next), never left contingent on it.
     await prefs.setBool(_keyLoggedOut, true);

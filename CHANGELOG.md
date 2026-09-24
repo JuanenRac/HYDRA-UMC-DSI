@@ -44,7 +44,7 @@ what's implemented vs. planned; no behavior changed.
 
 ## [0.1.8] - Real coverage for cancelling an in-flight robot order
 
-Found while re-checking test coverage after C08: every existing
+Found while re-checking test coverage after every existing
 `_sendAtomicCommand` test started from an idle robot - none exercised the
 real "cancel an order actually in flight" case, untested in every client
 except the internal voice relay. The same real gap was closed in
@@ -120,13 +120,13 @@ HYDRA-UMC-IOS-CONTROL's own `AuthPrefs`.
 ## [0.1.4] - real regression found by independent revalidation
 
 A second review pass reproduced a real gap in v0.1.3's own
-DSI-01 fix (against a real fake `SecureTokenBackend`, no real platform
+fix (against a real fake `SecureTokenBackend`, no real platform
 channel):
 
 - `saveToken()` wrapped every secure-storage write so a
   failure fell back to writing the token in PLAIN `SharedPreferences` -
   exactly the failure of the protection mechanism itself silently
-  removing the guarantee DSI-01 was meant to provide. A UI-level
+  removing the guarantee was meant to provide. A UI-level
   biometric/lock-screen gate would still do nothing to protect that
   plaintext copy underneath it. Fixed: a secure-storage write failure now
   keeps the session in memory ONLY, for the current app run - never
@@ -144,9 +144,9 @@ channel):
   fallback as correct behavior were rewritten to assert the fix instead.
   `flutter analyze`/`flutter test` both clean.
 
-## [0.1.3] - DSI-01/DOC-17: real secure storage for the session token
+## [0.1.3] - real secure storage for the session token
 
-- **DSI-01 (P1):**
+- 
   the session token lived in the same plain `SharedPreferences` file as
   host/port - not a secrets vault, and a UI-level biometric/lock-screen
   gate (if this kiosk ever grows one) would not protect the persistent
@@ -165,7 +165,7 @@ channel):
   real platform channel). Not yet verified against a real Secret Service
   provider on the actual CM5 kiosk image - that remains real, tracked
   future verification.
-- **DOC-17:** removed the 6 remaining references to private
+- removed the 6 remaining references to private
   internal planning documents across
   `CHANGELOG.md`, `docs/ARCHITECTURE.md`, `network/discovery.dart`,
   `test/robot_view_model_test.dart` and `tool/bump_version.dart` - the
