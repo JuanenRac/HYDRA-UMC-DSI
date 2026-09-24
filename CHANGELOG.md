@@ -134,7 +134,7 @@ channel):
   whose secure storage is genuinely broken now requires logging in
   again, rather than the token quietly living in a plaintext file. Never
   regresses a device where secure storage genuinely works (this app's
-  real, intended kiosk deployment target). A pre-DSI-01 legacy plaintext
+  real, intended kiosk deployment target). A earlier legacy plaintext
   token is still migrated in and read normally - that is reading
   pre-existing data, not a new plaintext write.
 - 2 new regression tests (one asserting the plaintext file is never

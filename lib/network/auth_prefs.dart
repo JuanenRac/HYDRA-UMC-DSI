@@ -28,7 +28,7 @@
 // that specific (secure-storage-broken) device requires logging in again;
 // this never regresses a device where secure storage genuinely works,
 // this app's real, intended deployment target. A token already saved
-// under the pre-DSI-01 plain key is still migrated into secure storage
+// under the earlier plain key is still migrated into secure storage
 // (and the old copy removed) the first time it is successfully read back
 // - that is reading pre-existing legacy data, not a new plaintext write.
 //
@@ -147,7 +147,7 @@ class AuthPrefs {
         await _secure.write(_keyRefreshToken, refreshToken);
       }
       // Secure storage is now the source of truth - clear any stale
-      // plaintext copy left by a pre-DSI-01 session, and any in-memory-
+      // plaintext copy left by a earlier session, and any in-memory-
       // only fallback left behind from an earlier failure this
       // same run.
       final prefs = await SharedPreferences.getInstance();
@@ -213,7 +213,7 @@ class AuthPrefs {
 
     // No secure-stored token yet - either a fresh device, or secure
     // storage is genuinely unavailable on this real deployment target. A
-    // pre-DSI-01 install may still have one in plain SharedPreferences;
+    // earlier install may still have one in plain SharedPreferences;
     // migrate it in and remove the old copy so it doesn't linger once
     // secure storage IS available.
     final legacyToken = prefs.getString(_keyToken);
