@@ -22,7 +22,7 @@
 </p>
 
 
-一个原生的 Flutter 触控界面（Dart，真实的 Linux 桌面目标），面向 HYDRA-UMC 自身在 Compute Module 5 上的 5"/7" DSI 触摸屏——两种物理面板尺寸共享完全相同的 1280x720 像素分辨率，因此本应用采用一种固定的、非自适应的布局，而不是针对两种尺寸做响应式适配。它使用与 [HYDRA-UMC SUITE](https://github.com/JuanenRac/HYDRA-UMC-SUITE)、[HYDRA-UMC-ANDROID-CONTROL](https://github.com/JuanenRac/HYDRA-UMC-ANDROID-CONTROL) 和 [HYDRA-UMC-IOS-CONTROL](https://github.com/JuanenRac/HYDRA-UMC-IOS-CONTROL) 完全相同的 [`REMOTE_API.md`](https://github.com/JuanenRac/HYDRA-UMC-STUDIO/blob/main/docs/REMOTE_API.md) 契约——发现、登录、原子化的逐机器人指令，以及针对运行中的 [HYDRA-UMC STUDIO](https://github.com/JuanenRac/HYDRA-UMC-STUDIO) 服务器的实时 WebSocket 同步,直接在主板本身上运行,而非通过浏览器标签页。完整设计参见 [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md),包括为何选择 Flutter（而非 Kivy）以及为何 3D 界面不是一个 WebView。
+一个原生的 Flutter 触控界面（Dart，真实的 Linux 桌面目标），面向 HYDRA-UMC 自身在 Compute Module 5 上的 5"/7" DSI 触摸屏——两种物理面板尺寸共享完全相同的 1280x720 像素分辨率，因此本应用采用一种固定的、非自适应的布局，而不是针对两种尺寸做响应式适配。它使用与 [HYDRA-UMC SUITE](https://github.com/JuanenRac/HYDRA-UMC-SUITE)、[HYDRA-UMC-ANDROID-CONTROL](https://github.com/JuanenRac/HYDRA-UMC-ANDROID-CONTROL) 和 [HYDRA-UMC-IOS-CONTROL](https://github.com/JuanenRac/HYDRA-UMC-IOS-CONTROL) 完全相同的 [`REMOTE_API.md`](https://github.com/JuanenRac/HYDRA-UMC-SERVER/blob/main/docs/REMOTE_API.md) 契约——发现、登录、原子化的逐机器人指令，以及针对运行中的 [HYDRA-UMC STUDIO](https://github.com/JuanenRac/HYDRA-UMC-STUDIO) 服务器的实时 WebSocket 同步,直接在主板本身上运行,而非通过浏览器标签页。完整设计参见 [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md),包括为何选择 Flutter（而非 Kivy）以及为何 3D 界面不是一个 WebView。
 
 **本应用是同一块主板上并存的两个控制界面之一**——CM5 同时驱动一个 HDMI 输出,供运行浏览器界面的完整外接显示器使用。这个 DSI 应用与该路径互为补充,在主板本身提供一个直接的、常开的触控控制台;它并不取代浏览器界面。
 
