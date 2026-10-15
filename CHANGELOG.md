@@ -297,7 +297,7 @@ channel):
 
 ## [0.0.6] - Removed dead enable/disable command plumbing
 
-- Found while auditing the code: `state/robot_view_model.dart`'s
+- Found on code review: `state/robot_view_model.dart`'s
   `sendCommand()` had `'enable'`/`'disable'` cases that POSTed
   `command: "enable"`/`"disable"` to `/api/robot/:id/command` and
   optimistically flipped the robot `online` flag locally via
