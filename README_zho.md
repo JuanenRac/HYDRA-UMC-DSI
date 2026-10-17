@@ -28,7 +28,7 @@
 
 ---
 
-**诚实核查 - 今天真正能运行的部分：** 网络层(`lib/network/hydra_api_client.dart`、`hydra_websocket.dart`、`discovery.dart`、`auth_prefs.dart`)和状态层(`lib/state/robot_view_model.dart`、`hydra_error.dart`)都是真实的并经过测试(`test/*.dart` 中 41 个测试全部通过，其中包括针对一个真实本地服务器、而非模拟对象的真实 WebSocket 连接/重连/认证拒绝往返测试),且 `flutter analyze` 没有报告任何问题。目录中的全部 6 个界面都是真实接线好的 UI，而非占位符。真正尚未构建的部分：**3D View** 界面只是一个小型的原生等距 X/Y/Z 指示器，并非真正的 3D 渲染器 - 它并未嵌入 STUDIO 的真实 Three.js 场景(因为不存在 Linux 版本的 `webview_flutter` 实现)。真实但尚未在目标硬件上验证的部分：`flutter build linux --release` 已经运行过，并生成了一个确认可以启动的二进制文件，但仅在 Ubuntu 24.04 WSL2(x86_64)环境下验证过 - 从未在 CM5 真实的 aarch64 Raspberry Pi OS 上运行过；`kiosk/hydra-umc-dsi.service` 自启动单元也从未在任何真实 Linux 机器上运行过。具体已交付的内容请见下方的 "Known Follow-ups" 和 `CHANGELOG.md`。
+**诚实核查 - 今天真正能运行的部分：** 网络层(`lib/network/hydra_api_client.dart`、`hydra_websocket.dart`、`discovery.dart`、`auth_prefs.dart`)和状态层(`lib/state/robot_view_model.dart`、`hydra_error.dart`)都是真实的并经过测试(`test/*.dart` 中 44 个测试全部通过，其中包括针对一个真实本地服务器、而非模拟对象的真实 WebSocket 连接/重连/认证拒绝往返测试),且 `flutter analyze` 没有报告任何问题。目录中的全部 6 个界面都是真实接线好的 UI，而非占位符。真正尚未构建的部分：**3D View** 界面只是一个小型的原生等距 X/Y/Z 指示器，并非真正的 3D 渲染器 - 它并未嵌入 STUDIO 的真实 Three.js 场景(因为不存在 Linux 版本的 `webview_flutter` 实现)。真实但尚未在目标硬件上验证的部分：`flutter build linux --release` 已经运行过，并生成了一个确认可以启动的二进制文件，但仅在 Ubuntu 24.04 WSL2(x86_64)环境下验证过 - 从未在 CM5 真实的 aarch64 Raspberry Pi OS 上运行过；`kiosk/hydra-umc-dsi.service` 自启动单元也从未在任何真实 Linux 机器上运行过。具体已交付的内容请见下方的 "Known Follow-ups" 和 `CHANGELOG.md`。
 
 ## 🏗️ 已实现的功能
 
@@ -44,7 +44,7 @@
 - **系统指标**（`lib/ui/metrics_screen.dart`）—— 拥有自己专属的选项卡（不像 iOS/Android 那样折叠进仪表盘中）,包含来自 `GET /api/system/metrics` 的 CPU/内存/温度/运行时间图块,以及来自 `GET /api/hydra-info` 的主机名/控制器数量/机器人数量/应用版本。
 - **设置**（`lib/ui/settings_screen.dart`）—— 连接信息、服务器身份、退出登录,以及本应用自身的版本（见下文[版本管理](#-版本管理)）。
 - **看板自启动**（`kiosk/hydra-umc-dsi.service`、`kiosk/install_kiosk.sh`）—— 一个 systemd 单元,通过 `cage` 在 `tty1` 上全屏启动本应用,`Restart=always`。详见下文”在真实 CM5 上运行”。
-- **7 语言界面**（`lib/l10n/`，标准的 `flutter gen-l10n` 流程）—— 英语、西班牙语、法语、德语、意大利语、日语和中文，与本生态系统的其他客户端保持一致。`设置 > 语言` 中的持久化设置默认跟随系统语言；`RobotViewModel.lastError` 现在是带类型的 `HydraError`，而不是预先格式化好的英文文本，因此业务逻辑层的错误提示也能正确本地化，而不只是界面上的静态文本。
+- **8 语言界面**（`lib/l10n/`，标准的 `flutter gen-l10n` 流程）—— 英语、西班牙语、法语、德语、意大利语、日语、中文和葡萄牙语，与本生态系统的其他客户端保持一致。`设置 > 语言` 中的持久化设置默认跟随系统语言；`RobotViewModel.lastError` 现在是带类型的 `HydraError`，而不是预先格式化好的英文文本，因此业务逻辑层的错误提示也能正确本地化，而不只是界面上的静态文本。
 
 **状态:雏形 + 全部 6 个目录界面均已实现并连接到真实的 REMOTE_API.md 契约。** `flutter analyze` 干净通过,`flutter build windows` 与 `flutter build linux`(通过 WSL2)都能生成可运行的二进制文件,`flutter test` 通过——具体哪些已经验证、哪些还没有,包括这次 WSL2 验证与真实 CM5 硬件之间仍存在的差距,详见下文“构建”。
 
@@ -126,9 +126,9 @@ HYDRA-UMC-DSI/
 │   │   └── hydra_error.dart         # 面向 RobotViewModel 的类型化错误接口（自身无 BuildContext）
 │   ├── services/
 │   │   └── backlight.dart           # 根据时间自适应调节背光
-│   ├── l10n/                        # 真实生成的本地化文件（7 种语言）——见仓库根目录的 l10n.yaml
+│   ├── l10n/                        # 真实生成的本地化文件（8 种语言）——见仓库根目录的 l10n.yaml
 │   │   ├── app_localizations.dart   # 生成的基类
-│   │   ├── app_localizations_en.dart, _es.dart, _it.dart, _fr.dart, _de.dart, _ja.dart, _zh.dart
+│   │   ├── app_localizations_en.dart, _es.dart, _it.dart, _fr.dart, _de.dart, _ja.dart, _zh.dart, _pt.dart
 │   │   └── language_prefs.dart      # 持久化的语言覆盖设置（shared_preferences）
 │   └── ui/
 │       ├── login_screen.dart        # 主机/端口/用户/密码字段 + “扫描本地网络”
@@ -151,7 +151,7 @@ HYDRA-UMC-DSI/
 ├── bump_manifest_version.py          # 将 hydra-umc.project.json 的版本与原生版本同步(--sync)
 ├── test/                             # widget_test、format_uptime_test、localization_test、robot_view_model_test、robot_view_model_silent_refresh_test、auth_prefs_test、hydra_websocket_test
 ├── README.md                         # 本文件
-└── README_spa.md / README_ita.md / README_fra.md / README_deu.md / README_zho.md / README_jpn.md  # 翻译
+└── README_spa.md / README_ita.md / README_fra.md / README_deu.md / README_zho.md / README_jpn.md / README_por.md  # 翻译
 ```
 
 ## 🔗 相关项目
@@ -265,4 +265,4 @@ HYDRA-UMC-DSI/
 
 源代码采用 **GNU 通用公共许可证 v3.0（GPL-3.0）**——见 [`LICENSE`](LICENSE)。
 
-文档（本 README 及其自身的翻译版本——`README_spa.md`、`README_ita.md`、`README_fra.md`、`README_deu.md`、`README_zho.md`、`README_jpn.md`）依据 **知识共享 署名-相同方式共享 4.0 国际许可协议（CC BY-SA 4.0）** 提供。完整文本见 https://creativecommons.org/licenses/by-sa/4.0/。
+文档（本 README 及其自身的翻译版本——`README_spa.md`、`README_ita.md`、`README_fra.md`、`README_deu.md`、`README_zho.md`、`README_jpn.md`、`README_por.md`）依据 **知识共享 署名-相同方式共享 4.0 国际许可协议（CC BY-SA 4.0）** 提供。完整文本见 https://creativecommons.org/licenses/by-sa/4.0/。

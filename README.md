@@ -28,7 +28,7 @@ A native Flutter touch UI (Dart, real Linux desktop target) for HYDRA-UMC's own 
 
 ---
 
-**Honesty check - what actually runs today:** the networking layer (`lib/network/hydra_api_client.dart`, `hydra_websocket.dart`, `discovery.dart`, `auth_prefs.dart`) and the state layer (`lib/state/robot_view_model.dart`, `hydra_error.dart`) are real and tested (41 tests passing across `test/*.dart`, including a real WebSocket connect/reconnect/auth-rejection round trip against a genuine local server, not a mock), and `flutter analyze` reports no issues. All 6 catalog screens are real, wired UI, not placeholders. What is genuinely not built: the **3D View** screen is a small native isometric X/Y/Z indicator, not a real 3D renderer - it does not embed STUDIO's Three.js scene (no Linux `webview_flutter` implementation exists). What is real but unverified on target hardware: `flutter build linux --release` has been run and produces a binary confirmed to launch, but only under Ubuntu 24.04 WSL2 (x86_64) - never on the CM5's real aarch64 Raspberry Pi OS - and the `kiosk/hydra-umc-dsi.service` autostart unit has never run on any real Linux machine at all. See "Known Follow-ups" below and `CHANGELOG.md` for exactly what has shipped so far.
+**Honesty check - what actually runs today:** the networking layer (`lib/network/hydra_api_client.dart`, `hydra_websocket.dart`, `discovery.dart`, `auth_prefs.dart`) and the state layer (`lib/state/robot_view_model.dart`, `hydra_error.dart`) are real and tested (44 tests passing across `test/*.dart`, including a real WebSocket connect/reconnect/auth-rejection round trip against a genuine local server, not a mock), and `flutter analyze` reports no issues. All 6 catalog screens are real, wired UI, not placeholders. What is genuinely not built: the **3D View** screen is a small native isometric X/Y/Z indicator, not a real 3D renderer - it does not embed STUDIO's Three.js scene (no Linux `webview_flutter` implementation exists). What is real but unverified on target hardware: `flutter build linux --release` has been run and produces a binary confirmed to launch, but only under Ubuntu 24.04 WSL2 (x86_64) - never on the CM5's real aarch64 Raspberry Pi OS - and the `kiosk/hydra-umc-dsi.service` autostart unit has never run on any real Linux machine at all. See "Known Follow-ups" below and `CHANGELOG.md` for exactly what has shipped so far.
 
 ## 🏗️ What's implemented
 
@@ -44,7 +44,7 @@ A native Flutter touch UI (Dart, real Linux desktop target) for HYDRA-UMC's own 
 - **System Metrics** (`lib/ui/metrics_screen.dart`) - its own dedicated tab (not folded into the Dashboard the way iOS/Android do it) with CPU/memory/temperature/uptime tiles from `GET /api/system/metrics`, plus hostname/controller-count/robot-count/app-version from `GET /api/hydra-info`.
 - **Settings** (`lib/ui/settings_screen.dart`) - connection info, server identity, sign out, and this app's own version (see [Versioning](#-versioning) below).
 - **Kiosk autostart** (`kiosk/hydra-umc-dsi.service`, `kiosk/install_kiosk.sh`) - systemd unit launching the app fullscreen on `tty1` via `cage`, `Restart=always`. See "Running on the real CM5" below.
-- **7-language UI** (`lib/l10n/`, standard `flutter gen-l10n` pipeline) - English, Spanish, French, German, Italian, Japanese and Chinese, matching every other client in this ecosystem. A persisted `Settings > Language` override defaults to the OS locale; `RobotViewModel.lastError` is a typed `HydraError` rather than pre-formatted English text, so business-logic error messages localize correctly too, not just static screen chrome.
+- **8-language UI** (`lib/l10n/`, standard `flutter gen-l10n` pipeline) - English, Spanish, French, German, Italian, Japanese, Chinese and Portuguese, matching every other client in this ecosystem. A persisted `Settings > Language` override defaults to the OS locale; `RobotViewModel.lastError` is a typed `HydraError` rather than pre-formatted English text, so business-logic error messages localize correctly too, not just static screen chrome.
 
 **Status: scaffold + all 6 catalog screens implemented and connected to the real REMOTE_API.md contract.** `flutter analyze` clean, `flutter build windows` and `flutter build linux` (via WSL2) both produce a running binary, `flutter test` passes - see "Building" below for exactly what has and hasn't been verified, including the remaining gap between this WSL2 verification and the real CM5 hardware.
 
@@ -138,9 +138,9 @@ HYDRA-UMC-DSI/
 │   │   └── hydra_error.dart         # Typed error surface for RobotViewModel (no BuildContext of its own)
 │   ├── services/
 │   │   └── backlight.dart           # Adaptive backlight by time of day
-│   ├── l10n/                        # Real generated localizations (7 languages) - see l10n.yaml at repo root
+│   ├── l10n/                        # Real generated localizations (8 languages) - see l10n.yaml at repo root
 │   │   ├── app_localizations.dart   # Generated base class
-│   │   ├── app_localizations_en.dart, _es.dart, _it.dart, _fr.dart, _de.dart, _ja.dart, _zh.dart
+│   │   ├── app_localizations_en.dart, _es.dart, _it.dart, _fr.dart, _de.dart, _ja.dart, _zh.dart, _pt.dart
 │   │   └── language_prefs.dart      # Persisted language override (shared_preferences)
 │   └── ui/
 │       ├── login_screen.dart        # Host/port/user/pass fields + "Scan local network"
@@ -163,7 +163,7 @@ HYDRA-UMC-DSI/
 ├── bump_manifest_version.py          # Syncs hydra-umc.project.json's version to the native one (--sync)
 ├── test/                             # widget_test, format_uptime_test, localization_test, robot_view_model_test, robot_view_model_silent_refresh_test, auth_prefs_test, hydra_websocket_test
 ├── README.md                         # this file
-└── README_spa.md / README_ita.md / README_fra.md / README_deu.md / README_zho.md / README_jpn.md  # translations
+└── README_spa.md / README_ita.md / README_fra.md / README_deu.md / README_zho.md / README_jpn.md / README_por.md  # translations
 ```
 
 ## 🔗 Related Projects
@@ -277,4 +277,4 @@ This project is part of the HYDRA-UMC robotics ecosystem by the same author (Jua
 
 GNU General Public License v3.0 (GPL-3.0) for the source code - see [`LICENSE`](LICENSE).
 
-The documentation (this README and its own translations - `README_spa.md`, `README_ita.md`, `README_fra.md`, `README_deu.md`, `README_zho.md`, `README_jpn.md`) is available under **Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)**. Full text at https://creativecommons.org/licenses/by-sa/4.0/.
+The documentation (this README and its own translations - `README_spa.md`, `README_ita.md`, `README_fra.md`, `README_deu.md`, `README_zho.md`, `README_jpn.md`, `README_por.md`) is available under **Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)**. Full text at https://creativecommons.org/licenses/by-sa/4.0/.

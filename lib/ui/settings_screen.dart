@@ -56,6 +56,8 @@ class SettingsScreen extends StatelessWidget {
         return '日本語';
       case 'zh':
         return '简体中文';
+      case 'pt':
+        return 'Português';
       case 'en':
       default:
         return 'English';

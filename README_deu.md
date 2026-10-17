@@ -28,7 +28,7 @@ Eine native Flutter-Touch-UI (Dart, mit echtem Linux-Desktop-Ziel) für HYDRA-UM
 
 ---
 
-**Ehrlichkeitscheck - was heute wirklich läuft:** die Netzwerkschicht (`lib/network/hydra_api_client.dart`, `hydra_websocket.dart`, `discovery.dart`, `auth_prefs.dart`) und die Zustandsschicht (`lib/state/robot_view_model.dart`, `hydra_error.dart`) sind real und getestet (41 bestandene Tests in `test/*.dart`, einschließlich eines echten WebSocket-Verbindungs-/Wiederverbindungs-/Auth-Ablehnungs-Roundtrips gegen einen echten lokalen Server, kein Mock), und `flutter analyze` meldet keine Probleme. Alle 6 Katalog-Bildschirme sind echte, verdrahtete UI, keine Platzhalter. Was tatsächlich nicht gebaut ist: der Bildschirm **3D View** ist ein kleiner nativer isometrischer X/Y/Z-Indikator, kein echter 3D-Renderer - er bettet nicht die echte Three.js-Szene von STUDIO ein (es gibt keine Linux-Implementierung von `webview_flutter`). Was real, aber auf der Zielhardware unverifiziert ist: `flutter build linux --release` wurde ausgeführt und erzeugt eine Binärdatei, die nachweislich startet, aber nur unter Ubuntu 24.04 WSL2 (x86_64) - niemals auf dem echten aarch64 Raspberry Pi OS des CM5 - und die Autostart-Unit `kiosk/hydra-umc-dsi.service` lief noch nie auf einer echten Linux-Maschine. Siehe "Known Follow-ups" weiter unten und `CHANGELOG.md` für das, was bisher genau ausgeliefert wurde.
+**Ehrlichkeitscheck - was heute wirklich läuft:** die Netzwerkschicht (`lib/network/hydra_api_client.dart`, `hydra_websocket.dart`, `discovery.dart`, `auth_prefs.dart`) und die Zustandsschicht (`lib/state/robot_view_model.dart`, `hydra_error.dart`) sind real und getestet (44 bestandene Tests in `test/*.dart`, einschließlich eines echten WebSocket-Verbindungs-/Wiederverbindungs-/Auth-Ablehnungs-Roundtrips gegen einen echten lokalen Server, kein Mock), und `flutter analyze` meldet keine Probleme. Alle 6 Katalog-Bildschirme sind echte, verdrahtete UI, keine Platzhalter. Was tatsächlich nicht gebaut ist: der Bildschirm **3D View** ist ein kleiner nativer isometrischer X/Y/Z-Indikator, kein echter 3D-Renderer - er bettet nicht die echte Three.js-Szene von STUDIO ein (es gibt keine Linux-Implementierung von `webview_flutter`). Was real, aber auf der Zielhardware unverifiziert ist: `flutter build linux --release` wurde ausgeführt und erzeugt eine Binärdatei, die nachweislich startet, aber nur unter Ubuntu 24.04 WSL2 (x86_64) - niemals auf dem echten aarch64 Raspberry Pi OS des CM5 - und die Autostart-Unit `kiosk/hydra-umc-dsi.service` lief noch nie auf einer echten Linux-Maschine. Siehe "Known Follow-ups" weiter unten und `CHANGELOG.md` für das, was bisher genau ausgeliefert wurde.
 
 ## 🏗️ Was implementiert ist
 
@@ -44,7 +44,7 @@ Eine native Flutter-Touch-UI (Dart, mit echtem Linux-Desktop-Ziel) für HYDRA-UM
 - **Systemmetriken** (`lib/ui/metrics_screen.dart`) - ein eigener, dedizierter Tab (nicht wie bei iOS/Android ins Dashboard integriert) mit CPU-/Speicher-/Temperatur-/Laufzeit-Kacheln aus `GET /api/system/metrics`, plus Hostname/Controller-Anzahl/Roboter-Anzahl/App-Version aus `GET /api/hydra-info`.
 - **Einstellungen** (`lib/ui/settings_screen.dart`) - Verbindungsinformationen, Serveridentität, Abmelden und die eigene Version dieser App (siehe [Versionierung](#-versionierung) weiter unten).
 - **Kiosk-Autostart** (`kiosk/hydra-umc-dsi.service`, `kiosk/install_kiosk.sh`) - systemd-Unit, die die App über `cage` im Vollbild auf `tty1` startet, mit `Restart=always`. Siehe "Ausführen auf dem echten CM5" weiter unten.
-- **UI in 7 Sprachen** (`lib/l10n/`, Standard-`flutter gen-l10n`-Pipeline) - Englisch, Spanisch, Französisch, Deutsch, Italienisch, Japanisch und Chinesisch, wie bei den übrigen Clients dieses Ökosystems. Eine gespeicherte Einstellung unter `Einstellungen > Sprache` verwendet standardmäßig die Systemsprache; `RobotViewModel.lastError` ist ein typisierter `HydraError` statt vorformatiertem englischem Text, sodass auch die Fehlermeldungen der Geschäftslogik korrekt lokalisiert werden, nicht nur der statische Bildschirmtext.
+- **UI in 8 Sprachen** (`lib/l10n/`, Standard-`flutter gen-l10n`-Pipeline) - Englisch, Spanisch, Französisch, Deutsch, Italienisch, Japanisch, Chinesisch und Portugiesisch, wie bei den übrigen Clients dieses Ökosystems. Eine gespeicherte Einstellung unter `Einstellungen > Sprache` verwendet standardmäßig die Systemsprache; `RobotViewModel.lastError` ist ein typisierter `HydraError` statt vorformatiertem englischem Text, sodass auch die Fehlermeldungen der Geschäftslogik korrekt lokalisiert werden, nicht nur der statische Bildschirmtext.
 
 **Status: Grundgerüst + alle 6 Katalogbildschirme implementiert und an den echten REMOTE_API.md-Vertrag angebunden.** `flutter analyze` sauber, `flutter build windows` und `flutter build linux` (über WSL2) erzeugen beide eine lauffähige Binärdatei, `flutter test` besteht - siehe "Build" weiter unten für genau das, was bereits verifiziert ist und was nicht, einschließlich der verbleibenden Lücke zwischen dieser WSL2-Verifikation und der echten CM5-Hardware.
 
@@ -140,9 +140,9 @@ HYDRA-UMC-DSI/
 │   │   └── hydra_error.dart         # Typisierte Fehleroberfläche für RobotViewModel (ohne eigenen BuildContext)
 │   ├── services/
 │   │   └── backlight.dart           # Adaptive Hintergrundbeleuchtung nach Tageszeit
-│   ├── l10n/                        # Echte generierte Lokalisierungen (7 Sprachen) - siehe l10n.yaml im Repo-Root
+│   ├── l10n/                        # Echte generierte Lokalisierungen (8 Sprachen) - siehe l10n.yaml im Repo-Root
 │   │   ├── app_localizations.dart   # Generierte Basisklasse
-│   │   ├── app_localizations_en.dart, _es.dart, _it.dart, _fr.dart, _de.dart, _ja.dart, _zh.dart
+│   │   ├── app_localizations_en.dart, _es.dart, _it.dart, _fr.dart, _de.dart, _ja.dart, _zh.dart, _pt.dart
 │   │   └── language_prefs.dart      # Persistierte Sprachüberschreibung (shared_preferences)
 │   └── ui/
 │       ├── login_screen.dart        # Host-/Port-/Benutzer-/Passwort-Felder + "Lokales Netzwerk durchsuchen"
@@ -165,7 +165,7 @@ HYDRA-UMC-DSI/
 ├── bump_manifest_version.py          # Synchronisiert die Version von hydra-umc.project.json mit der nativen (--sync)
 ├── test/                             # widget_test, format_uptime_test, localization_test, robot_view_model_test, robot_view_model_silent_refresh_test, auth_prefs_test, hydra_websocket_test
 ├── README.md                         # Originaldokument (Englisch)
-└── README_spa.md / README_ita.md / README_fra.md / README_deu.md / README_zho.md / README_jpn.md  # Übersetzungen
+└── README_spa.md / README_ita.md / README_fra.md / README_deu.md / README_zho.md / README_jpn.md / README_por.md  # Übersetzungen
 ```
 
 ## 🔗 Verwandte Projekte
@@ -279,4 +279,4 @@ Dieses Projekt ist Teil des HYDRA-UMC-Robotik-Ökosystems desselben Autors (Juan
 
 GNU General Public License v3.0 (GPL-3.0) für den Quellcode - siehe [`LICENSE`](LICENSE).
 
-Die Dokumentation (dieses README und seine Übersetzungen - `README_spa.md`, `README_ita.md`, `README_fra.md`, `README_deu.md`, `README_zho.md`, `README_jpn.md`) steht unter **Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)** zur Verfügung. Vollständiger Text unter https://creativecommons.org/licenses/by-sa/4.0/.
+Die Dokumentation (dieses README und seine Übersetzungen - `README_spa.md`, `README_ita.md`, `README_fra.md`, `README_deu.md`, `README_zho.md`, `README_jpn.md`, `README_por.md`) steht unter **Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)** zur Verfügung. Vollständiger Text unter https://creativecommons.org/licenses/by-sa/4.0/.

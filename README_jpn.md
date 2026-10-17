@@ -28,7 +28,7 @@ Compute Module 5 上の HYDRA-UMC 自身の 5"/7" DSI タッチスクリーン�
 
 ---
 
-**正直な現状確認 - 今日実際に動くもの:** ネットワーク層(`lib/network/hydra_api_client.dart`、`hydra_websocket.dart`、`discovery.dart`、`auth_prefs.dart`)と状態層(`lib/state/robot_view_model.dart`、`hydra_error.dart`)は本物でテスト済みである(`test/*.dart` 全体で 41 件のテストが成功しており、モックではなく本物のローカルサーバーに対する本物の WebSocket 接続/再接続/認証拒否の往復テストも含む)。`flutter analyze` も問題を報告していない。カタログの 6 画面はすべて本物の配線されたUIであり、プレースホルダーではない。実際にまだ構築されていないもの: **3D View** 画面は本物の 3D レンダラーではなく、小さなネイティブの等角 X/Y/Z インジケーターにすぎない - STUDIO の本物の Three.js シーンは埋め込まれていない(Linux 版の `webview_flutter` 実装が存在しないため)。本物だが対象ハードウェアでは未検証のもの: `flutter build linux --release` は実行され、実際に起動することが確認されたバイナリを生成しているが、これは Ubuntu 24.04 WSL2(x86_64)上でのみであり、CM5 の実際の aarch64 Raspberry Pi OS 上では一度も実行されていない。また `kiosk/hydra-umc-dsi.service` の自動起動ユニットも、実際の Linux マシン上で一度も実行されたことがない。これまでに何が実際に出荷されたかは、下記の "Known Follow-ups" と `CHANGELOG.md` を参照。
+**正直な現状確認 - 今日実際に動くもの:** ネットワーク層(`lib/network/hydra_api_client.dart`、`hydra_websocket.dart`、`discovery.dart`、`auth_prefs.dart`)と状態層(`lib/state/robot_view_model.dart`、`hydra_error.dart`)は本物でテスト済みである(`test/*.dart` 全体で 44 件のテストが成功しており、モックではなく本物のローカルサーバーに対する本物の WebSocket 接続/再接続/認証拒否の往復テストも含む)。`flutter analyze` も問題を報告していない。カタログの 6 画面はすべて本物の配線されたUIであり、プレースホルダーではない。実際にまだ構築されていないもの: **3D View** 画面は本物の 3D レンダラーではなく、小さなネイティブの等角 X/Y/Z インジケーターにすぎない - STUDIO の本物の Three.js シーンは埋め込まれていない(Linux 版の `webview_flutter` 実装が存在しないため)。本物だが対象ハードウェアでは未検証のもの: `flutter build linux --release` は実行され、実際に起動することが確認されたバイナリを生成しているが、これは Ubuntu 24.04 WSL2(x86_64)上でのみであり、CM5 の実際の aarch64 Raspberry Pi OS 上では一度も実行されていない。また `kiosk/hydra-umc-dsi.service` の自動起動ユニットも、実際の Linux マシン上で一度も実行されたことがない。これまでに何が実際に出荷されたかは、下記の "Known Follow-ups" と `CHANGELOG.md` を参照。
 
 ## 🏗️ 実装済みの内容
 
@@ -44,7 +44,7 @@ Compute Module 5 上の HYDRA-UMC 自身の 5"/7" DSI タッチスクリーン�
 - **システム指標**（`lib/ui/metrics_screen.dart`）—— iOS/Android のようにダッシュボードに折りたたまれるのではなく、専用のタブを持ち、`GET /api/system/metrics` からの CPU/メモリ/温度/稼働時間タイルと、`GET /api/hydra-info` からのホスト名/コントローラー数/ロボット数/アプリバージョンを表示します。
 - **設定**（`lib/ui/settings_screen.dart`）—— 接続情報、サーバー識別情報、サインアウト、そして本アプリ自身のバージョン（下記の[バージョン管理](#-バージョン管理)参照）。
 - **キオスク自動起動**（`kiosk/hydra-umc-dsi.service`、`kiosk/install_kiosk.sh`）—— `cage` 経由で `tty1` 上に本アプリをフルスクリーン起動する systemd ユニット、`Restart=always`。詳細は下記「実際の CM5 上での実行」を参照してください。
-- **7言語対応UI**（`lib/l10n/`、標準の `flutter gen-l10n` パイプライン）—— 英語・スペイン語・フランス語・ドイツ語・イタリア語・日本語・中国語に対応し、このエコシステムの他のクライアントと同じです。`設定 > 言語` に保存される上書き設定はデフォルトでOSのロケールに従います。`RobotViewModel.lastError` は整形済みの英語テキストではなく型付きの `HydraError` になっているため、ビジネスロジック側のエラーメッセージも画面の静的なテキストと同様に正しくローカライズされます。
+- **8言語対応UI**（`lib/l10n/`、標準の `flutter gen-l10n` パイプライン）—— 英語・スペイン語・フランス語・ドイツ語・イタリア語・日本語・中国語・ポルトガル語に対応し、このエコシステムの他のクライアントと同じです。`設定 > 言語` に保存される上書き設定はデフォルトでOSのロケールに従います。`RobotViewModel.lastError` は整形済みの英語テキストではなく型付きの `HydraError` になっているため、ビジネスロジック側のエラーメッセージも画面の静的なテキストと同様に正しくローカライズされます。
 
 **状態：雛形 + 全 6 のカタログ画面が実装され、実際の REMOTE_API.md 契約に接続済み。** `flutter analyze` はクリーン、`flutter build windows` と `flutter build linux`(WSL2 経由)はどちらも動作するバイナリを生成し、`flutter test` はパスします——何が検証済みで何がまだかの正確な内容(この WSL2 検証と実際の CM5 実機との間に残るギャップも含む)は、下記「ビルド」を参照してください。
 
@@ -126,9 +126,9 @@ HYDRA-UMC-DSI/
 │   │   └── hydra_error.dart         # RobotViewModel向けの型付きエラーサーフェス(独自のBuildContextを持たない)
 │   ├── services/
 │   │   └── backlight.dart           # 時間帯に応じた適応型バックライト
-│   ├── l10n/                        # 実際に生成されたローカライゼーション(7言語) - リポジトリルートのl10n.yamlを参照
+│   ├── l10n/                        # 実際に生成されたローカライゼーション(8言語) - リポジトリルートのl10n.yamlを参照
 │   │   ├── app_localizations.dart   # 生成されたベースクラス
-│   │   ├── app_localizations_en.dart, _es.dart, _it.dart, _fr.dart, _de.dart, _ja.dart, _zh.dart
+│   │   ├── app_localizations_en.dart, _es.dart, _it.dart, _fr.dart, _de.dart, _ja.dart, _zh.dart, _pt.dart
 │   │   └── language_prefs.dart      # 永続化された言語上書き設定(shared_preferences)
 │   └── ui/
 │       ├── login_screen.dart        # ホスト/ポート/ユーザー/パスワードフィールド + 「ローカルネットワークをスキャン」
@@ -151,7 +151,7 @@ HYDRA-UMC-DSI/
 ├── bump_manifest_version.py          # hydra-umc.project.json のバージョンをネイティブ版と同期(--sync)
 ├── test/                             # widget_test、format_uptime_test、localization_test、robot_view_model_test、robot_view_model_silent_refresh_test、auth_prefs_test、hydra_websocket_test
 ├── README.md                         # 本ファイル
-└── README_spa.md / README_ita.md / README_fra.md / README_deu.md / README_zho.md / README_jpn.md  # 翻訳
+└── README_spa.md / README_ita.md / README_fra.md / README_deu.md / README_zho.md / README_jpn.md / README_por.md  # 翻訳
 ```
 
 ## 🔗 関連プロジェクト
@@ -265,4 +265,4 @@ HYDRA-UMC-DSI/
 
 ソースコードは **GNU General Public License v3.0（GPL-3.0）**——[`LICENSE`](LICENSE) を参照してください。
 
-ドキュメント（本 README およびその自身の翻訳版——`README_spa.md`、`README_ita.md`、`README_fra.md`、`README_deu.md`、`README_zho.md`、`README_jpn.md`）は、**クリエイティブ・コモンズ 表示-継承 4.0 国際（CC BY-SA 4.0）** の下で提供されます。全文は https://creativecommons.org/licenses/by-sa/4.0/ を参照してください。
+ドキュメント（本 README およびその自身の翻訳版——`README_spa.md`、`README_ita.md`、`README_fra.md`、`README_deu.md`、`README_zho.md`、`README_jpn.md`、`README_por.md`）は、**クリエイティブ・コモンズ 表示-継承 4.0 国際（CC BY-SA 4.0）** の下で提供されます。全文は https://creativecommons.org/licenses/by-sa/4.0/ を参照してください。

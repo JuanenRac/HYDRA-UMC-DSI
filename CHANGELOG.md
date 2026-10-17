@@ -7,6 +7,11 @@ in [README.md](README.md#-versioning); earlier entries are grouped under
 the pre-policy version `0.0.0+1` the repo carried while the policy did not
 yet exist.
 
+## [0.2.1] - Portuguese interface and README, translation parity tests
+
+- **Portuguese interface:** the app is now available in Portuguese (`lib/l10n/app_pt.arb`, all 82 strings), selectable in `Settings > Language` and picked automatically when the system locale is Portuguese; the interface now covers 8 languages and a README in Portuguese (`README_por.md`) joins the other translations.
+- **Translation tests:** the localization tests now check that Portuguese resolves and that every language file defines exactly the same keys and placeholders as the English one, so a missing or misspelled placeholder fails the test instead of showing up on the panel (44 tests).
+
 ## [0.2.0] - Reconnect delivery test coverage, narrowed Dashboard rebuilds
 
 - **Reconnect test coverage:** the existing WS reconnect test proved a
