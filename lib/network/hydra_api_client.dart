@@ -11,7 +11,7 @@
 // and doesn't do server-side today.
 //   - POST /api/login               - obtain a bearer token.
 //   - GET  /api/hydra-info          - discovery/identity.
-//   - GET  /api/settings            - full current state, no auth needed.
+//   - GET  /api/settings            - full current state, needs a bearer token (either role).
 //   - POST /api/settings            - overwrite the whole state, ADMIN only.
 //   - POST /api/robot/:id/command   - atomic per-robot command, either role -
 //     the PRIMARY way this app writes (see state/robot_view_model.dart).
