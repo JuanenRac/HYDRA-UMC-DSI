@@ -48,10 +48,16 @@ class _Server {
   _Server(this.http) {
     http.listen((request) async {
       if (WebSocketTransformer.isUpgradeRequest(request)) {
-        final socket = await WebSocketTransformer.upgrade(
-          request,
-          protocolSelector: (p) => p.contains('hydra.bearer') ? 'hydra.bearer' : null,
-        );
+        final WebSocket socket;
+        try {
+          socket = await WebSocketTransformer.upgrade(
+            request,
+            protocolSelector: (p) => p.contains('hydra.bearer') ? 'hydra.bearer' : null,
+          );
+        } catch (_) {
+          // The client may drop mid-handshake (dart:io then throws inside the upgrade).
+          return;
+        }
         socket.listen((_) {});
         return;
       }

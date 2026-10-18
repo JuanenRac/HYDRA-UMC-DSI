@@ -65,10 +65,17 @@ class _FakeServer {
         wsTokensSeen.add(subprotocolToken ?? request.uri.queryParameters['token']);
         final rejectThisOne = _wsConnectionCount < _wsBehaviors.length ? _wsBehaviors[_wsConnectionCount] : false;
         _wsConnectionCount++;
-        final socket = await WebSocketTransformer.upgrade(
-          request,
-          protocolSelector: (protocols) => protocols.contains('hydra.bearer') ? 'hydra.bearer' : null,
-        );
+        final WebSocket socket;
+        try {
+          socket = await WebSocketTransformer.upgrade(
+            request,
+            protocolSelector: (protocols) => protocols.contains('hydra.bearer') ? 'hydra.bearer' : null,
+          );
+        } catch (_) {
+          // The client may drop the connection mid-handshake (dart:io then
+          // throws from inside the upgrade); a real server just ignores it.
+          return;
+        }
         if (rejectThisOne) {
           // Exactly what the real server does for a dead token: an error
           // frame first, and about 100 ms later the 1008 close - two signals
