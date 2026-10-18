@@ -31,6 +31,17 @@ Compute Module 5 上の HYDRA-UMC 自身の 5"/7" DSI タッチスクリーン�
 
 **正直な現状確認 - 今日実際に動くもの:** ネットワーク層(`lib/network/hydra_api_client.dart`、`hydra_websocket.dart`、`discovery.dart`、`auth_prefs.dart`)と状態層(`lib/state/robot_view_model.dart`、`hydra_error.dart`)は本物でテスト済みである(`test/*.dart` 全体で 72 件のテストが成功しており、モックではなく本物のローカルサーバーに対する本物の WebSocket 接続/再接続/認証拒否の往復テストも含む)。`flutter analyze` も問題を報告していない。カタログの 6 画面はすべて本物の配線されたUIであり、プレースホルダーではない。実際にまだ構築されていないもの: **3D View** 画面は本物の 3D レンダラーではなく、小さなネイティブの等角 X/Y/Z インジケーターにすぎない - STUDIO の本物の Three.js シーンは埋め込まれていない(Linux 版の `webview_flutter` 実装が存在しないため)。本物だが対象ハードウェアでは未検証のもの: `flutter build linux --release` は実行され、実際に起動することが確認されたバイナリを生成しているが、これは Ubuntu 24.04 WSL2(x86_64)上でのみであり、CM5 の実際の aarch64 Raspberry Pi OS 上では一度も実行されていない。また `kiosk/hydra-umc-dsi.service` の自動起動ユニットも、実際の Linux マシン上で一度も実行されたことがない。これまでに何が実際に出荷されたかは、下記の "Known Follow-ups" と `CHANGELOG.md` を参照。
 
+## 📋 ひと目で
+
+| | |
+|---|---|
+| バージョン | `0.2.4` |
+| 成熟度 | 確立 |
+| テスト | 72 |
+| 技術 | Flutter 3.x / Dart |
+| 対象 | HYDRA-UMC セルの Raspberry Pi CM5 |
+| 実機での確認 | まだです：このバージョンについて実機での動作記録はありません |
+
 ## 🏗️ 実装済みの内容
 
 - **ログイン**（`lib/ui/login_screen.dart`、`lib/state/robot_view_model.dart`）—— サーバー IP/ポートフィールドは妥当な LAN 既定値で事前入力済み、ユーザー名/パスワードフィールドはタッチ操作向けに調整され既定では空欄（ハードコードされた認証情報は事前入力されません——各サーバーが実運用での初回起動時にデフォルトアカウントを作成しなくなったのに合わせ、初期の `admin`/`admin` 事前入力は削除されました)、オペレーターが入力したアカウントに対する `POST /api/login`。追加の低権限「オペレーター」アカウントはブラウザ UI の Config > Users から作成可能です。セッショントークンはプラットフォームのセキュアストレージに保存されます（Linux では libsecret で、キーリングサービスが動作している必要があります。ない場合、セッションはアプリを再起動するまで有効で、その後ログインが再度求められます）。「ローカルネットワークをスキャン」ダイアログ（`lib/network/discovery.dart`）は、IP を事前に知らなくてもサーバーを見つけられます——本アプリが動作している CM5 自体が、それが接続すべきまさにそのコントローラーであることが多いため、ここでは特に有用です。

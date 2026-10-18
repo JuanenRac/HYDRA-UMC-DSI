@@ -31,6 +31,17 @@ Eine native Flutter-Touch-UI (Dart, mit echtem Linux-Desktop-Ziel) für HYDRA-UM
 
 **Ehrlichkeitscheck - was heute wirklich läuft:** die Netzwerkschicht (`lib/network/hydra_api_client.dart`, `hydra_websocket.dart`, `discovery.dart`, `auth_prefs.dart`) und die Zustandsschicht (`lib/state/robot_view_model.dart`, `hydra_error.dart`) sind real und getestet (72 bestandene Tests in `test/*.dart`, einschließlich eines echten WebSocket-Verbindungs-/Wiederverbindungs-/Auth-Ablehnungs-Roundtrips gegen einen echten lokalen Server, kein Mock), und `flutter analyze` meldet keine Probleme. Alle 6 Katalog-Bildschirme sind echte, verdrahtete UI, keine Platzhalter. Was tatsächlich nicht gebaut ist: der Bildschirm **3D View** ist ein kleiner nativer isometrischer X/Y/Z-Indikator, kein echter 3D-Renderer - er bettet nicht die echte Three.js-Szene von STUDIO ein (es gibt keine Linux-Implementierung von `webview_flutter`). Was real, aber auf der Zielhardware unverifiziert ist: `flutter build linux --release` wurde ausgeführt und erzeugt eine Binärdatei, die nachweislich startet, aber nur unter Ubuntu 24.04 WSL2 (x86_64) - niemals auf dem echten aarch64 Raspberry Pi OS des CM5 - und die Autostart-Unit `kiosk/hydra-umc-dsi.service` lief noch nie auf einer echten Linux-Maschine. Siehe "Known Follow-ups" weiter unten und `CHANGELOG.md` für das, was bisher genau ausgeliefert wurde.
 
+## 📋 Auf einen Blick
+
+| | |
+|---|---|
+| Version | `0.2.4` |
+| Reifegrad | Etabliert |
+| Tests | 72 |
+| Technik | Flutter 3.x / Dart |
+| Ziel | Der Raspberry Pi CM5 einer HYDRA-UMC-Zelle |
+| Auf echter Hardware | Noch nicht: für diese Version ist kein Lauf auf echter Hardware vermerkt |
+
 ## 🏗️ Was implementiert ist
 
 - **Login** (`lib/ui/login_screen.dart`, `lib/state/robot_view_model.dart`) - Server-IP/Port-Felder mit einem sinnvollen LAN-Standardwert vorausgefüllt, Benutzername/Passwort-Felder in Touch-Größe und standardmäßig leer (kein fest hinterlegtes Kennwort wird vorausgefüllt - das anfängliche `admin`/`admin`-Vorausfüllen wurde entfernt, sobald jeder Server dieses Standardkonto bei einem echten Produktions-Erststart nicht mehr selbst anlegte), `POST /api/login` gegen das vom Bediener eingegebene Konto; zusätzliche Konten mit geringeren Rechten "operator" können über Config > Users in der Web-Oberfläche angelegt werden. Das Sitzungstoken liegt im sicheren Speicher der Plattform (unter Linux libsecret, das einen laufenden Schlüsselbunddienst braucht: auf einem Panel ohne ihn gilt die Sitzung bis zum Neustart der App, danach wird die Anmeldung erneut verlangt). Ein "Lokales Netzwerk durchsuchen"-Dialog (`lib/network/discovery.dart`) findet Server, ohne die IP bereits zu kennen - hier doppelt nützlich, da das CM5, auf dem diese App läuft, oft genau der Controller ist, mit dem sie sich verbinden soll.

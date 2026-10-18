@@ -31,6 +31,17 @@ Uma interface tátil Flutter nativa (Dart, alvo real de desktop Linux) para o ec
 
 **Verificação de honestidade - o que realmente funciona hoje:** a camada de rede (`lib/network/hydra_api_client.dart`, `hydra_websocket.dart`, `discovery.dart`, `auth_prefs.dart`) e a camada de estado (`lib/state/robot_view_model.dart`, `hydra_error.dart`) são reais e estão testadas (72 testes a passar em `test/*.dart`, incluindo uma volta real de ligação/religação/rejeição de autenticação por WebSocket contra um servidor local genuíno, não um simulado), e o `flutter analyze` não reporta problemas. Os 6 ecrãs do catálogo são interface real e ligada, não marcadores de posição. O que genuinamente não está construído: o ecrã **Vista 3D** é um pequeno indicador isométrico X/Y/Z nativo, não um renderizador 3D real - não embebe a cena Three.js do STUDIO (não existe nenhuma implementação de `webview_flutter` para Linux). O que é real mas não está verificado no hardware de destino: o `flutter build linux --release` foi executado e produz um binário cujo arranque está confirmado, mas apenas em Ubuntu 24.04 WSL2 (x86_64) - nunca no Raspberry Pi OS aarch64 real do CM5 - e a unidade de arranque automático `kiosk/hydra-umc-dsi.service` nunca correu em nenhuma máquina Linux real. Veja "Seguimentos conhecidos" abaixo e o `CHANGELOG.md` para saber exatamente o que foi entregue até agora.
 
+## 📋 Num relance
+
+| | |
+|---|---|
+| Versão | `0.2.4` |
+| Maturidade | Estabelecido |
+| Testes | 72 |
+| Tecnologia | Flutter 3.x / Dart |
+| Destino | O Raspberry Pi CM5 de uma célula HYDRA-UMC |
+| Em hardware real | Ainda não: não há registo de execução em hardware real para esta versão |
+
 ## 🏗️ O que está implementado
 
 - **Início de sessão** (`lib/ui/login_screen.dart`, `lib/state/robot_view_model.dart`) - campos de IP/porta do servidor pré-preenchidos com um valor de LAN sensato, campos de utilizador/palavra-passe dimensionados para toque e deixados em branco por omissão (nenhuma credencial fixa vem pré-preenchida - o pré-preenchimento inicial `admin`/`admin` foi retirado quando todos os servidores passaram a recusar criar essa conta por omissão no primeiro arranque real de produção), `POST /api/login` contra a conta que o operador introduzir; podem criar-se contas de "operador" com menos privilégios em Config > Users na interface do navegador. O token de sessão fica no armazenamento seguro da plataforma (libsecret no Linux, que exige um serviço de porta-chaves em execução: num painel sem ele a sessão dura até reiniciar a aplicação e o início de sessão volta a ser pedido). Um diálogo "Procurar na rede local" (`lib/network/discovery.dart`) encontra servidores sem ser preciso conhecer já o IP - duplamente útil aqui, já que o CM5 em que esta aplicação corre é muitas vezes o próprio controlador a que se deve ligar.

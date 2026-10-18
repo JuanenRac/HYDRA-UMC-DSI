@@ -31,6 +31,17 @@
 
 **诚实核查 - 今天真正能运行的部分：** 网络层(`lib/network/hydra_api_client.dart`、`hydra_websocket.dart`、`discovery.dart`、`auth_prefs.dart`)和状态层(`lib/state/robot_view_model.dart`、`hydra_error.dart`)都是真实的并经过测试(`test/*.dart` 中 72 个测试全部通过，其中包括针对一个真实本地服务器、而非模拟对象的真实 WebSocket 连接/重连/认证拒绝往返测试),且 `flutter analyze` 没有报告任何问题。目录中的全部 6 个界面都是真实接线好的 UI，而非占位符。真正尚未构建的部分：**3D View** 界面只是一个小型的原生等距 X/Y/Z 指示器，并非真正的 3D 渲染器 - 它并未嵌入 STUDIO 的真实 Three.js 场景(因为不存在 Linux 版本的 `webview_flutter` 实现)。真实但尚未在目标硬件上验证的部分：`flutter build linux --release` 已经运行过，并生成了一个确认可以启动的二进制文件，但仅在 Ubuntu 24.04 WSL2(x86_64)环境下验证过 - 从未在 CM5 真实的 aarch64 Raspberry Pi OS 上运行过；`kiosk/hydra-umc-dsi.service` 自启动单元也从未在任何真实 Linux 机器上运行过。具体已交付的内容请见下方的 "Known Follow-ups" 和 `CHANGELOG.md`。
 
+## 📋 速览
+
+| | |
+|---|---|
+| 版本 | `0.2.4` |
+| 成熟度 | 成熟 |
+| 测试 | 72 |
+| 技术栈 | Flutter 3.x / Dart |
+| 目标 | HYDRA-UMC 工作单元的 Raspberry Pi CM5 |
+| 真实硬件 | 尚未：此版本没有在真实硬件上运行的记录 |
+
 ## 🏗️ 已实现的功能
 
 - **登录**（`lib/ui/login_screen.dart`、`lib/state/robot_view_model.dart`）—— 服务器 IP/端口字段预填了合理的局域网默认值,用户名/密码字段面向触控设计,默认留空（不预填任何硬编码凭据——一旦每台服务器在真实生产环境首次启动时不再自动创建该默认账户,最初的 `admin`/`admin` 预填就被移除了）,`POST /api/login` 针对操作员实际输入的账户;可从浏览器界面的 Config > Users 中创建额外的低权限“操作员”账户。会话令牌保存在平台的安全存储中（Linux 上为 libsecret，需要正在运行的密钥环服务；没有它的面板上，会话只持续到应用重新启动，之后会再次要求登录）。一个“扫描本地网络”对话框（`lib/network/discovery.dart`）无需预先知道 IP 即可找到服务器——这在这里尤其有用,因为本应用运行所在的 CM5,往往正是它应该连接的那个控制器本身。

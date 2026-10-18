@@ -31,6 +31,17 @@ Un'interfaccia touch nativa in Flutter (Dart, con target reale desktop Linux) pe
 
 **Controllo di onestà - cosa funziona davvero oggi:** il layer di rete (`lib/network/hydra_api_client.dart`, `hydra_websocket.dart`, `discovery.dart`, `auth_prefs.dart`) e il layer di stato (`lib/state/robot_view_model.dart`, `hydra_error.dart`) sono reali e testati (72 test superati in `test/*.dart`, incluso un vero round-trip di connessione/riconnessione/rifiuto di autenticazione WebSocket contro un vero server locale, non un mock), e `flutter analyze` non segnala alcun problema. Tutte e 6 le schermate del catalogo sono UI reale e cablata, non placeholder. Ciò che non è realmente costruito: la schermata **3D View** è un piccolo indicatore isometrico nativo X/Y/Z, non un vero motore di rendering 3D - non incorpora la scena Three.js di STUDIO (non esiste alcuna implementazione Linux di `webview_flutter`). Ciò che è reale ma non verificato sull'hardware di destinazione: `flutter build linux --release` è stato eseguito e produce un binario confermato all'avvio, ma solo sotto Ubuntu 24.04 WSL2 (x86_64) - mai sul vero aarch64 Raspberry Pi OS della CM5 - e l'unità di autoavvio `kiosk/hydra-umc-dsi.service` non è mai stata eseguita su nessuna vera macchina Linux. Vedi "Known Follow-ups" più sotto e `CHANGELOG.md` per ciò che è stato consegnato esattamente finora.
 
+## 📋 In breve
+
+| | |
+|---|---|
+| Versione | `0.2.4` |
+| Maturità | Consolidato |
+| Test | 72 |
+| Tecnologia | Flutter 3.x / Dart |
+| Destinazione | Il Raspberry Pi CM5 di una cella HYDRA-UMC |
+| Su hardware reale | Non ancora: per questa versione non risulta alcuna esecuzione su hardware reale |
+
 ## 🏗️ Cosa è implementato
 
 - **Login** (`lib/ui/login_screen.dart`, `lib/state/robot_view_model.dart`) - campi IP/porta del server precompilati con un valore LAN ragionevole, campi nome utente/password dimensionati per il tocco e vuoti per impostazione predefinita (nessuna credenziale precompilata - il precompilamento iniziale `admin`/`admin` è stato rimosso quando ogni server ha smesso di creare quell'account predefinito al primo avvio reale di produzione), `POST /api/login` verso l'account inserito dall'operatore; è possibile creare account aggiuntivi a privilegio minore "operator" da Config > Users nell'interfaccia web. Il token di sessione è conservato nell'archivio sicuro della piattaforma (libsecret su Linux, che richiede un servizio di portachiavi attivo: su un pannello che non lo ha la sessione dura fino al riavvio dell'app e il login viene richiesto di nuovo). Una finestra di dialogo "Scan local network" (`lib/network/discovery.dart`) trova i server senza dover già conoscere l'IP - doppiamente utile qui, dato che il CM5 su cui gira questa app è spesso proprio il controller a cui deve connettersi.
