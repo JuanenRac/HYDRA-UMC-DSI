@@ -7,6 +7,11 @@ in [README.md](README.md#-versioning); earlier entries are grouped under
 the pre-policy version `0.0.0+1` the repo carried while the policy did not
 yet exist.
 
+## [0.2.6]
+
+- Maturity is functional: nothing here has been verified on real hardware yet.
+- The READMEs say, in the eight languages, what is planned and what has only been tested against fakes, emulators or fixtures, and carry a short safety and security status note.
+
 ## [0.2.5] - Reconnect back-off that stays a back-off, and tolerant readers of server data
 
 - **Reconnect back-off:** the wait before a reconnect was `3 s x 2^(failed attempts - 1)` computed in 64-bit integers, which overflows at 62 consecutive failed attempts (about half an hour with a server that stays down): the wait fell to zero and the app reconnected every fraction of a second until the server came back. The doubling now stops at 10 steps, so the wait is always between 3 s and 30 s.
