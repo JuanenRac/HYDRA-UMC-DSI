@@ -31,7 +31,7 @@ if ! command -v flutter >/dev/null 2>&1; then
     echo "[ERROR] flutter was not found on PATH. Install the Flutter SDK" >&2
     echo "        (https://docs.flutter.dev/get-started/install) and add its" >&2
     echo "        bin/ directory to PATH, then re-run this script." >&2
-    read -p "Press Enter to close this window..."
+    if [ -t 0 ] && [ "${HYDRA_UMC_CI:-}" != "1" ] && [ -z "${CI:-}" ]; then read -r -p "Press Enter to close this window..." _ || true; fi
     exit 1
 fi
 

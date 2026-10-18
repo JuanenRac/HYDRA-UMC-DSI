@@ -27,13 +27,18 @@ echo ***************************************************************************
 echo.
 REM HYDRA_UMC_SCRIPT_STANDARD_BANNER_END
 setlocal
+cd /d "%~dp0"
+rem Keep the window open for people, never in automation (CI / HYDRA_UMC_CI).
+set "KEEP_OPEN=pause"
+if defined CI set "KEEP_OPEN=ver >nul"
+if "%HYDRA_UMC_CI%"=="1" set "KEEP_OPEN=ver >nul"
 
 where flutter >nul 2>nul
 if errorlevel 1 (
     echo [ERROR] flutter was not found on PATH. Install the Flutter SDK
     echo         ^(https://docs.flutter.dev/get-started/install^) and add its
     echo         bin\ directory to PATH, then re-run this script.
-    pause
+    %KEEP_OPEN%
     exit /b 1
 )
 

@@ -27,6 +27,10 @@ echo ***************************************************************************
 echo.
 REM HYDRA_UMC_SCRIPT_STANDARD_BANNER_END
 setlocal
+rem Keep the window open for people, never in automation (CI / HYDRA_UMC_CI).
+set "KEEP_OPEN=pause"
+if defined CI set "KEEP_OPEN=ver >nul"
+if "%HYDRA_UMC_CI%"=="1" set "KEEP_OPEN=ver >nul"
 where flutter >nul 2>nul
 if errorlevel 1 (
     echo [ERROR] flutter was not found on PATH. Install the Flutter SDK
@@ -53,7 +57,7 @@ if errorlevel 1 goto :fail
 REM HYDRA_UMC_SCRIPT_STANDARD_VERSION_CAPTURE_BEFORE
 for /f "usebackq delims=" %%V in (`python -c "import json; print(json.load(open(r'%~dp0hydra-umc.project.json', encoding='utf-8'))['version'])"`) do set "HYDRA_UMC_VERSION_BEFORE=%%V"
 python "%~dp0bump_manifest_version.py" --sync
-if errorlevel 1 ( echo VERSION SYNC FAILED. & pause & exit /b 1 )
+if errorlevel 1 ( echo VERSION SYNC FAILED. & %KEEP_OPEN% & exit /b 1 )
 REM HYDRA_UMC_SCRIPT_STANDARD_VERSION_CAPTURE_AFTER
 for /f "usebackq delims=" %%V in (`python -c "import json; print(json.load(open(r'%~dp0hydra-umc.project.json', encoding='utf-8'))['version'])"`) do set "HYDRA_UMC_VERSION_AFTER=%%V"
 if not defined HYDRA_UMC_VERSION_BEFORE set "HYDRA_UMC_VERSION_BEFORE=unknown"
@@ -76,13 +80,13 @@ echo (Windows build - development/verification only. For the real CM5
 echo  target, run build_linux.sh on an actual Linux machine.)
 echo.
 echo Build finished successfully.
-pause
+%KEEP_OPEN%
 endlocal
 exit /b 0
 
 :fail
 echo.
 echo Build FAILED.
-pause
+%KEEP_OPEN%
 endlocal
 exit /b 1
