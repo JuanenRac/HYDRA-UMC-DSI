@@ -29,6 +29,7 @@ import 'package:flutter/foundation.dart';
 import '../l10n/language_prefs.dart';
 import '../models/hydra_state.dart';
 import '../models/server_info.dart';
+import '../models/stop_all_result.dart';
 import '../network/auth_prefs.dart';
 import '../network/hydra_api_client.dart';
 import '../network/hydra_websocket.dart';
@@ -208,6 +209,8 @@ class RobotViewModel extends ChangeNotifier {
     }
     _debounceTimers.clear();
     _jogsInFlight.clear();
+    stopAllResult = null;
+    stopAllUnconfirmed = false;
     // The bearer token also leaves the live client, not just the stored copy.
     final client = apiClient;
     client?.authToken = null;
@@ -702,6 +705,124 @@ class RobotViewModel extends ChangeNotifier {
         lastError = HydraError(HydraErrorKind.unknownCommand, {'command': command});
         notifyListeners();
     }
+  }
+
+  // ---- Global STOP -------------------------------------------------------
+  //
+  // One tap, no confirmation, every robot: POST /api/stop-all. It does not
+  // wait for any roster refresh and a reservation held by another account
+  // never blocks it.
+
+  /// The newest answer of the global STOP, shown until the user closes it.
+  StopAllResult? stopAllResult;
+
+  /// True after a STOP that never got an answer (and until a later one does):
+  /// the robots may still be moving, so the app keeps saying so.
+  bool stopAllUnconfirmed = false;
+
+  /// Global STOPs on the wire right now.
+  int _stopAllInFlight = 0;
+  bool get stopAllInFlight => _stopAllInFlight > 0;
+
+  void dismissStopAllResult() {
+    if (stopAllResult == null) return;
+    stopAllResult = null;
+    notifyListeners();
+  }
+
+  /// Stops every robot at once. Never throws.
+  Future<void> stopAll() async {
+    _stopAllInFlight++;
+    notifyListeners();
+    try {
+      StopAllResult? result;
+      Object? failure;
+      try {
+        result = StopAllResult.fromJson(await _postStopAllWithRetry());
+      } on HydraApiException catch (e) {
+        if (e.isRateLimited || e.isNotFound) {
+          // Over the global route's rate limit, or an older server without
+          // it: stop the robots one by one instead.
+          result = await _stopEachRobot();
+        } else {
+          failure = e;
+        }
+      } catch (e) {
+        failure = e;
+      }
+
+      if (result == null) {
+        stopAllUnconfirmed = true;
+        lastError = const HydraError(HydraErrorKind.stopNotConfirmed);
+        if (failure is HydraApiException && failure.isSessionProblem) {
+          // The renewal inside _authed() already failed: the session is over.
+          _forceLogout();
+        }
+        notifyListeners();
+        return;
+      }
+
+      stopAllUnconfirmed = false;
+      stopAllResult = result;
+      for (final entry in result.robots) {
+        if (!entry.stopped) continue;
+        for (final c in state.controllers) {
+          if (entry.controllerId != null && c.id != entry.controllerId) continue;
+          c.robotById(entry.robotId)?.stop();
+        }
+      }
+      notifyListeners();
+      _refreshAfterStopAll();
+    } finally {
+      _stopAllInFlight--;
+      notifyListeners();
+    }
+  }
+
+  // A network failure (not an answer of the server) is tried once more after a
+  // short pause; an answer of any kind is final.
+  Future<Map<String, dynamic>> _postStopAllWithRetry() async {
+    try {
+      return await _authed((c) => c.postStopAll());
+    } on HydraApiException {
+      rethrow;
+    } catch (_) {
+      await Future<void>.delayed(const Duration(milliseconds: 250));
+      return await _authed((c) => c.postStopAll());
+    }
+  }
+
+  // The per-robot "stop" for every robot of every controller, all at once.
+  Future<StopAllResult> _stopEachRobot() async {
+    final targets = <(String, RobotView)>[
+      for (final c in state.controllers)
+        for (final r in c.robots) (c.id, r),
+    ];
+    final entries = await Future.wait(targets.map((t) async {
+      final (controllerId, robot) = t;
+      try {
+        await _authed((c) => c.postRobotCommand(robot.id, {'command': 'stop'}, timeout: const Duration(seconds: 2)));
+        return StopAllRobot(robotId: robot.id, controllerId: controllerId, name: robot.name, stopped: true);
+      } catch (e) {
+        return StopAllRobot(robotId: robot.id, controllerId: controllerId, name: robot.name, stopped: false, error: '$e');
+      }
+    }));
+    return StopAllResult.fromRobots(entries, viaFallback: true);
+  }
+
+  // Reads the state again after a STOP (the WebSocket deltas usually got there
+  // first); a failure is ignored, the socket keeps the picture up to date.
+  void _refreshAfterStopAll() {
+    if (apiClient == null) return;
+    unawaited(
+      _authed((c) => c.getSettings())
+          .then((settings) {
+            state = HydraState(settings);
+            _ensureSelectedRobot();
+            notifyListeners();
+          })
+          .catchError((_) {}),
+    );
   }
 
   /// True while a jog should not be sent: the previous tick is still on the

@@ -13,6 +13,7 @@
 //   - GET  /api/hydra-info          - discovery/identity.
 //   - GET  /api/settings            - full current state, needs a bearer token (either role).
 //   - POST /api/settings            - overwrite the whole state, ADMIN only.
+//   - POST /api/stop-all            - global stop of every robot
 //   - POST /api/robot/:id/command   - atomic per-robot command, either role -
 //     the PRIMARY way this app writes (see state/robot_view_model.dart).
 //   - GET  /api/system/metrics      - host CPU/memory/temp/uptime/network.
@@ -47,6 +48,12 @@ class HydraApiException implements Exception {
 
   /// The server refused the command itself (unknown command, a value it cannot take).
   bool get isRejectedCommand => statusCode == 400;
+
+  /// Over the server's rate limit (429).
+  bool get isRateLimited => statusCode == 429;
+
+  /// The server does not have the route (an older server).
+  bool get isNotFound => statusCode == 404;
 
   @override
   String toString() => message;
@@ -215,6 +222,20 @@ class HydraApiClient {
           headers: {'Content-Type': 'application/json', ..._clientHeaders, ..._authHeaders},
           body: jsonEncode(payload),
         )
+        .timeout(timeout);
+    return _expectJson(resp);
+  }
+
+  /// POST /api/stop-all: the global stop. No body, no confirmation; any
+  /// signed-in account may call it and a reservation held by another account
+  /// never blocks it. Answers `{success, stoppedCount, failedCount, persisted,
+  /// robots: [...]}`. A short [timeout] so a stuck connection is given up and
+  /// the caller can try again at once. A server that does not have the route
+  /// answers 404 and one over its rate limit answers 429 (both are
+  /// [HydraApiException]s the caller turns into the per-robot stop).
+  Future<Map<String, dynamic>> postStopAll({Duration timeout = const Duration(seconds: 2)}) async {
+    final resp = await _client
+        .post(Uri.parse('$baseUrl/api/stop-all'), headers: {..._clientHeaders, ..._authHeaders})
         .timeout(timeout);
     return _expectJson(resp);
   }

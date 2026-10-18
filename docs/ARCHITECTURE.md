@@ -75,6 +75,20 @@ is shown to the operator and the optimistic change is undone; and
 `GET /api/system/metrics` carries the bearer token, with `temp_is_real:
 false` shown as `--`.
 
+The **global STOP** is `POST /api/stop-all` (no body, any signed-in account).
+One tap on the red STOP button at the right end of the top bar - visible on
+every tab, also on the Control tab and, through the same call, in the
+screen-cleaning overlay - calls `RobotViewModel.stopAll()` at once, without
+waiting for any refresh, with the bearer token and the client header. The
+answer (`success`, `stoppedCount`, `failedCount`, `persisted`, and per robot
+`stopped`, `valvesOff`, `pumpsOff`, `reservedBy`, `error`) is shown robot by
+robot under the bar; a failed robot or an unsaved stop is a warning and a
+robot reserved by another account is marked (the server stops it anyway). A
+network error is retried once with a 2 s timeout; a 429 (rate limit) or a 404
+(older server) is answered with the per-robot `stop` for every known robot; if
+nothing answers, a persistent "STOP not confirmed" banner stays until a later
+STOP gets an answer. The state is read again afterwards.
+
 ## 4. The one screen that isn't a straight port: 3D View
 
 `ui/three_d_screen.dart` does NOT embed HYDRA-UMC STUDIO's real Three.js
@@ -117,7 +131,7 @@ own catalog entry - see `ui/metrics_screen.dart`'s own header comment.
 ```text
 lib/
 ├── main.dart
-├── models/        server_info.dart, hydra_state.dart
+├── models/        server_info.dart, hydra_state.dart, stop_all_result.dart
 ├── network/       hydra_api_client.dart, hydra_websocket.dart, discovery.dart, auth_prefs.dart
 ├── state/         robot_view_model.dart
 └── ui/            login_screen.dart, main_screen.dart, dashboard_screen.dart,

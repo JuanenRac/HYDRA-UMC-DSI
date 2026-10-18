@@ -29,7 +29,7 @@ Compute Module 5 上の HYDRA-UMC 自身の 5"/7" DSI タッチスクリーン�
 
 ---
 
-**正直な現状確認 - 今日実際に動くもの:** ネットワーク層(`lib/network/hydra_api_client.dart`、`hydra_websocket.dart`、`discovery.dart`、`auth_prefs.dart`)と状態層(`lib/state/robot_view_model.dart`、`hydra_error.dart`)は本物でテスト済みである(`test/*.dart` 全体で 44 件のテストが成功しており、モックではなく本物のローカルサーバーに対する本物の WebSocket 接続/再接続/認証拒否の往復テストも含む)。`flutter analyze` も問題を報告していない。カタログの 6 画面はすべて本物の配線されたUIであり、プレースホルダーではない。実際にまだ構築されていないもの: **3D View** 画面は本物の 3D レンダラーではなく、小さなネイティブの等角 X/Y/Z インジケーターにすぎない - STUDIO の本物の Three.js シーンは埋め込まれていない(Linux 版の `webview_flutter` 実装が存在しないため)。本物だが対象ハードウェアでは未検証のもの: `flutter build linux --release` は実行され、実際に起動することが確認されたバイナリを生成しているが、これは Ubuntu 24.04 WSL2(x86_64)上でのみであり、CM5 の実際の aarch64 Raspberry Pi OS 上では一度も実行されていない。また `kiosk/hydra-umc-dsi.service` の自動起動ユニットも、実際の Linux マシン上で一度も実行されたことがない。これまでに何が実際に出荷されたかは、下記の "Known Follow-ups" と `CHANGELOG.md` を参照。
+**正直な現状確認 - 今日実際に動くもの:** ネットワーク層(`lib/network/hydra_api_client.dart`、`hydra_websocket.dart`、`discovery.dart`、`auth_prefs.dart`)と状態層(`lib/state/robot_view_model.dart`、`hydra_error.dart`)は本物でテスト済みである(`test/*.dart` 全体で 72 件のテストが成功しており、モックではなく本物のローカルサーバーに対する本物の WebSocket 接続/再接続/認証拒否の往復テストも含む)。`flutter analyze` も問題を報告していない。カタログの 6 画面はすべて本物の配線されたUIであり、プレースホルダーではない。実際にまだ構築されていないもの: **3D View** 画面は本物の 3D レンダラーではなく、小さなネイティブの等角 X/Y/Z インジケーターにすぎない - STUDIO の本物の Three.js シーンは埋め込まれていない(Linux 版の `webview_flutter` 実装が存在しないため)。本物だが対象ハードウェアでは未検証のもの: `flutter build linux --release` は実行され、実際に起動することが確認されたバイナリを生成しているが、これは Ubuntu 24.04 WSL2(x86_64)上でのみであり、CM5 の実際の aarch64 Raspberry Pi OS 上では一度も実行されていない。また `kiosk/hydra-umc-dsi.service` の自動起動ユニットも、実際の Linux マシン上で一度も実行されたことがない。これまでに何が実際に出荷されたかは、下記の "Known Follow-ups" と `CHANGELOG.md` を参照。
 
 ## 🏗️ 実装済みの内容
 
@@ -39,7 +39,7 @@ Compute Module 5 上の HYDRA-UMC 自身の 5"/7" DSI タッチスクリーン�
 - **リアルタイム WebSocket 同期**（`lib/network/hydra_websocket.dart`）—— 常に `?token=` を付加し、`"settings"` と `"delta"` の両方のブロードキャストタイプを処理し、切断時には自動的に再接続します。
 - **水平タッチナビゲーション**（`lib/ui/main_screen.dart`）—— 固定 1280px 幅にわたる、6 つの大きなアイコン+ラベルタブ（ダッシュボード/制御/カメラ/3D ビュー/指標/設定）からなる常設のトップバー。スマートフォン式のボトムナビゲーションバーというより、精神的には KlipperScreen に近いものです——プロジェクトオーナーが求めたカタログに一致させつつ、縦長のスマートフォンレイアウトではなく、横長のタッチパネル向けに再編成されています。
 - **ダッシュボード**（`lib/ui/dashboard_screen.dart`）—— ロボットごとのカード、`Provider` によるリアルタイムの反応、LED の慣例（緑の点滅=アクティブ、赤の点灯=非アクティブ）、統合ロボット表示、モジュールチップ（CAM/XY/ATC/PNP/CNC/LSR/BED/VAC/RCK）——本エコシステム内の他のすべてのクライアントと同じビジュアル言語です。
-- **手動制御**（`lib/ui/control_screen.dart`、`lib/ui/widgets/joystick_pad.dart`）—— 単一のスクロール列ではなく 1280x720 のフレームに合わせたサイズの左右配置レイアウト（左にジョグパッド、右にテレメトリ/速度/IO）、緊急停止/停止に対する実際の長押し保護（すばやいタップでは何も起こらず、触感+視覚的なヒントのみで、本当に長押しした場合にのみ指令が送信されます）、速度/加速度スライダー、バルブ/ポンプのトグル。
+- **手動制御**（`lib/ui/control_screen.dart`、`lib/ui/widgets/joystick_pad.dart`）—— 単一のスクロール列ではなく 1280x720 のフレームに合わせたサイズの左右配置レイアウト（左にジョグパッド、右にテレメトリ/速度/IO）、グローバル **STOP**（`lib/ui/widgets/stop_all.dart`）が各タブの上部バー、制御タブ、画面清掃オーバーレイに常時表示され、1 回のタップのみで（長押しも確認もなし）全ロボットを停止し（`POST /api/stop-all`）、結果をロボットごとに表示し（ロボットが失敗した場合や停止が保存されなかった場合は警告、他のアカウントが予約中のロボットには印）、ネットワークエラー時は 1 回再試行し、429 や古いサーバーではロボットごとの停止に切り替え、後の STOP が応答を得るまで「STOP 未確認」の表示を残します（丸いロボット単位の停止ボタンは長押し保護を維持）、速度/加速度スライダー、バルブ/ポンプのトグル。
 - **カメラ**（`lib/ui/camera_screen.dart`、`lib/ui/widgets/mjpeg_view.dart`）—— HYDRA-UMC-IOS-CONTROL と同じ、手作りで依存関係のない MJPEG ストリームパーサー（WebView なし、プラットフォーム固有コードなし——Linux デスクトップ上でそのまま動作します）、明確な「カメラ無効」状態、そしてサーバーから直接ロボットのビジョンシステムをオン/オフする切り替えスイッチ。
 - **3D ビュー**（`lib/ui/three_d_screen.dart`）—— iOS/Android アプリとは異なり、STUDIO の実際の Three.js シーンを埋め込む WebView では**ありません**——`webview_flutter` には Linux デスクトップ実装がまったく存在せず、フルブラウザエンジンはこの低消費電力の組み込みパネルが必要とする以上に重いランタイム負荷になります。代わりに：小さなネイティブの等角 X/Y/Z 位置インジケーター（`CustomPainter`、3D エンジンなし）と、本ボード自身の HDMI 接続モニター上にある実際の 3D シーンを指し示す画面上の注記。完全な理由は `docs/ARCHITECTURE.md` 第 4 節を参照してください。
 - **システム指標**（`lib/ui/metrics_screen.dart`）—— iOS/Android のようにダッシュボードに折りたたまれるのではなく、専用のタブを持ち、`GET /api/system/metrics` からの CPU/メモリ/温度/稼働時間タイルと、`GET /api/hydra-info` からのホスト名/コントローラー数/ロボット数/アプリバージョンを表示します。
@@ -116,7 +116,8 @@ HYDRA-UMC-DSI/
 │   ├── app_version.dart             # 生成物——tool/bump_version.dart によって再生成される、手動編集禁止
 │   ├── models/
 │   │   ├── server_info.dart         # ディスカバリー/接続エントリ——他の 3 つのクライアントの ServerInfo をミラーリング
-│   │   └── hydra_state.dart         # RobotView/ControllerView/HydraState——生の settings.json ツリーに対する薄い可変ビュー
+│   │   ├── hydra_state.dart         # RobotView/ControllerView/HydraState——生の settings.json ツリーに対する薄い可変ビュー
+│   │   └── stop_all_result.dart    # グローバル STOP の応答（ロボットごと）
 │   ├── network/
 │   │   ├── hydra_api_client.dart    # REST：ログイン、設定、原子的ロボット指令、システム指標——X-Hydra-Client: dsi
 │   │   ├── hydra_websocket.dart     # /ws リアルタイム同期クライアント
@@ -142,6 +143,7 @@ HYDRA-UMC-DSI/
 │       ├── settings_screen.dart     # 接続情報 + サインアウト + 自身のアプリバージョン
 │       └── widgets/
 │           ├── joystick_pad.dart     # ジョグ方向パッド、タッチ向けに拡大
+│           ├── stop_all.dart            # グローバル STOP ボタンと、その結果／「未確認」バナー
 │           ├── digital_readout.dart, status_led.dart
 │           └── mjpeg_view.dart       # 手作りの MJPEG ストリームパーサー
 ├── linux/                            # GTK デスクトップランナー——実際のターゲット、固定 1280x720 ウィンドウ

@@ -29,7 +29,7 @@
 
 ---
 
-**诚实核查 - 今天真正能运行的部分：** 网络层(`lib/network/hydra_api_client.dart`、`hydra_websocket.dart`、`discovery.dart`、`auth_prefs.dart`)和状态层(`lib/state/robot_view_model.dart`、`hydra_error.dart`)都是真实的并经过测试(`test/*.dart` 中 44 个测试全部通过，其中包括针对一个真实本地服务器、而非模拟对象的真实 WebSocket 连接/重连/认证拒绝往返测试),且 `flutter analyze` 没有报告任何问题。目录中的全部 6 个界面都是真实接线好的 UI，而非占位符。真正尚未构建的部分：**3D View** 界面只是一个小型的原生等距 X/Y/Z 指示器，并非真正的 3D 渲染器 - 它并未嵌入 STUDIO 的真实 Three.js 场景(因为不存在 Linux 版本的 `webview_flutter` 实现)。真实但尚未在目标硬件上验证的部分：`flutter build linux --release` 已经运行过，并生成了一个确认可以启动的二进制文件，但仅在 Ubuntu 24.04 WSL2(x86_64)环境下验证过 - 从未在 CM5 真实的 aarch64 Raspberry Pi OS 上运行过；`kiosk/hydra-umc-dsi.service` 自启动单元也从未在任何真实 Linux 机器上运行过。具体已交付的内容请见下方的 "Known Follow-ups" 和 `CHANGELOG.md`。
+**诚实核查 - 今天真正能运行的部分：** 网络层(`lib/network/hydra_api_client.dart`、`hydra_websocket.dart`、`discovery.dart`、`auth_prefs.dart`)和状态层(`lib/state/robot_view_model.dart`、`hydra_error.dart`)都是真实的并经过测试(`test/*.dart` 中 72 个测试全部通过，其中包括针对一个真实本地服务器、而非模拟对象的真实 WebSocket 连接/重连/认证拒绝往返测试),且 `flutter analyze` 没有报告任何问题。目录中的全部 6 个界面都是真实接线好的 UI，而非占位符。真正尚未构建的部分：**3D View** 界面只是一个小型的原生等距 X/Y/Z 指示器，并非真正的 3D 渲染器 - 它并未嵌入 STUDIO 的真实 Three.js 场景(因为不存在 Linux 版本的 `webview_flutter` 实现)。真实但尚未在目标硬件上验证的部分：`flutter build linux --release` 已经运行过，并生成了一个确认可以启动的二进制文件，但仅在 Ubuntu 24.04 WSL2(x86_64)环境下验证过 - 从未在 CM5 真实的 aarch64 Raspberry Pi OS 上运行过；`kiosk/hydra-umc-dsi.service` 自启动单元也从未在任何真实 Linux 机器上运行过。具体已交付的内容请见下方的 "Known Follow-ups" 和 `CHANGELOG.md`。
 
 ## 🏗️ 已实现的功能
 
@@ -39,7 +39,7 @@
 - **实时 WebSocket 同步**（`lib/network/hydra_websocket.dart`）—— 始终附带 `?token=`,同时处理 `"settings"` 和 `"delta"` 两种广播类型,断线后自动重连。
 - **水平触控导航**（`lib/ui/main_screen.dart`）—— 在固定的 1280px 宽度上,一条常驻的顶部栏包含 6 个大图标+标签选项卡（仪表盘/控制/摄像头/3D 视图/指标/设置）,精神上更接近 KlipperScreen,而非手机式的底部导航栏——匹配项目所有者所要求的目录,并针对宽幅触控面板而非纵向手机布局进行了重新组织。
 - **仪表盘**（`lib/ui/dashboard_screen.dart`）—— 每机器人卡片,通过 `Provider` 实时响应,LED 惯例（绿色脉冲=活动,红色常亮=非活动）,合并机器人显示,以及模块芯片（CAM/XY/ATC/PNP/CNC/LSR/BED/VAC/RCK）——与本生态系统中其他每一个客户端相同的视觉语言。
-- **手动控制**（`lib/ui/control_screen.dart`、`lib/ui/widgets/joystick_pad.dart`）—— 并排布局（点动面板在左,遥测/速度/IO 在右）,针对 1280x720 画面而设计,而非单列滚动布局,紧急停止/停止具备真实的长按保护（快速轻触不会产生任何效果,只有触感反馈+视觉提示,只有真正的长按才会发送指令）,速度/加速度滑块,阀门/泵开关。
+- **手动控制**（`lib/ui/control_screen.dart`、`lib/ui/widgets/joystick_pad.dart`）—— 并排布局（点动面板在左,遥测/速度/IO 在右）,针对 1280x720 画面而设计,而非单列滚动布局,全局 **STOP**（`lib/ui/widgets/stop_all.dart`）固定显示在每个标签页的顶部栏、控制标签页和屏幕清洁覆盖层中：只需轻触一次，无需长按也无需确认，即可停止所有机器人（`POST /api/stop-all`），按机器人逐个显示结果（有机器人失败或停止未保存时给出警告，被其他账户预约的机器人会被标出），网络错误时重试一次，遇到 429 或较旧的服务器时改用逐个机器人停止，并保留“STOP 未确认”横幅，直到之后的某次 STOP 得到应答（圆形的单机器人停止按钮保留长按保护）,速度/加速度滑块,阀门/泵开关。
 - **摄像头**（`lib/ui/camera_screen.dart`、`lib/ui/widgets/mjpeg_view.dart`）—— 与 HYDRA-UMC-IOS-CONTROL 相同的手写、无依赖 MJPEG 流解析器（没有 WebView,没有平台特定代码——在 Linux 桌面上原样即可运行）,一个明确的“摄像头已禁用”状态,以及一个可直接从服务器打开/关闭机器人视觉系统的开关。
 - **3D 视图**（`lib/ui/three_d_screen.dart`）—— **并非**像 iOS/Android 应用那样嵌入 STUDIO 真实 Three.js 场景的 WebView——`webview_flutter` 在 Linux 桌面上根本没有实现,而完整的浏览器引擎对这块低功耗嵌入式面板而言是过重的运行时负担。取而代之的是:一个小型的原生等距 X/Y/Z 位置指示器（`CustomPainter`,不涉及 3D 引擎）,并附有一条屏幕提示,指向本主板自身通过 HDMI 连接的显示器上的真实 3D 场景。完整推理见 `docs/ARCHITECTURE.md` 第 4 节。
 - **系统指标**（`lib/ui/metrics_screen.dart`）—— 拥有自己专属的选项卡（不像 iOS/Android 那样折叠进仪表盘中）,包含来自 `GET /api/system/metrics` 的 CPU/内存/温度/运行时间图块,以及来自 `GET /api/hydra-info` 的主机名/控制器数量/机器人数量/应用版本。
@@ -116,7 +116,8 @@ HYDRA-UMC-DSI/
 │   ├── app_version.dart             # 生成文件——由 tool/bump_version.dart 重新生成，请勿手动编辑
 │   ├── models/
 │   │   ├── server_info.dart         # 发现/连接条目——与其他 3 个客户端中的 ServerInfo 镜像一致
-│   │   └── hydra_state.dart         # RobotView/ControllerView/HydraState——原始 settings.json 树的薄型可变视图
+│   │   ├── hydra_state.dart         # RobotView/ControllerView/HydraState——原始 settings.json 树的薄型可变视图
+│   │   └── stop_all_result.dart    # 全局 STOP 的应答（按机器人）
 │   ├── network/
 │   │   ├── hydra_api_client.dart    # REST：登录、设置、原子化机器人指令、系统指标——X-Hydra-Client: dsi
 │   │   ├── hydra_websocket.dart     # /ws 实时同步客户端
@@ -142,6 +143,7 @@ HYDRA-UMC-DSI/
 │       ├── settings_screen.dart     # 连接信息 + 退出登录 + 自身应用版本
 │       └── widgets/
 │           ├── joystick_pad.dart     # 点动方向键，为触控放大
+│           ├── stop_all.dart            # 全局 STOP 按钮及其结果/“未确认”横幅
 │           ├── digital_readout.dart, status_led.dart
 │           └── mjpeg_view.dart       # 手写的 MJPEG 流解析器
 ├── linux/                            # GTK 桌面运行器——真正的目标平台，固定 1280x720 窗口

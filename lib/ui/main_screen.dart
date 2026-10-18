@@ -27,6 +27,7 @@ import 'dashboard_screen.dart';
 import 'metrics_screen.dart';
 import 'settings_screen.dart';
 import 'three_d_screen.dart';
+import 'widgets/stop_all.dart';
 
 // Screen-cleaning mode duration: a 30-second input lock is a
 // real, practical need for a touchscreen mounted on/near industrial
@@ -175,6 +176,7 @@ class _MainScreenState extends State<MainScreen> {
                   onCleanTap: _startScreenClean,
                   cleanTooltip: l10n.cleanScreenTooltip(_screenCleanDuration.inSeconds),
                 ),
+                const StopAllBanner(),
                 Expanded(
                   child: IndexedStack(index: _index, children: entries.map((e) => e.screen).toList()),
                 ),
@@ -223,17 +225,20 @@ class _ScreenCleanOverlay extends StatelessWidget {
           // Layer 2: the actual dismiss control, stacked on top (not a
           // descendant of layer 1) so its own long-press still reaches it.
           // The cleaning mode must never leave the robot without a way to stop
-          // it: one tap on this button stops it, on top of the absorbing layer.
+          // it: one tap on this button is the same global STOP as the one in the top bar,
+          // on top of the absorbing layer.
           Positioned(
             right: 24,
             bottom: 24,
             child: FilledButton.icon(
               style: FilledButton.styleFrom(backgroundColor: const Color(0xFFB91C1C), minimumSize: const Size(140, 64)),
-              onPressed: () => context.read<RobotViewModel>().sendCommand('stop'),
+              onPressed: () => context.read<RobotViewModel>().stopAll(),
               icon: const Icon(Icons.stop),
               label: Text(l10n.cleanModeStop, style: const TextStyle(fontWeight: FontWeight.bold)),
             ),
           ),
+          // What the STOP did (or that it was not confirmed) must be seen here too.
+          const Positioned(top: 0, left: 0, right: 0, child: StopAllBanner()),
           Positioned.fill(
             child: Center(
               child: GestureDetector(
@@ -342,6 +347,10 @@ class _TopNavBar extends StatelessWidget {
             tooltip: cleanTooltip,
             onPressed: onCleanTap,
           ),
+          const VerticalDivider(width: 1),
+          // The global STOP: one tap, every robot, on every tab.
+          const StopAllButton(),
+          const SizedBox(width: 8),
         ],
       ),
     );

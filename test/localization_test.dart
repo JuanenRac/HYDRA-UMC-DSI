@@ -32,7 +32,8 @@ void main() {
     await tester.pump();
 
     expect(l10n.loginServerIp, 'IP del servidor');
-    expect(l10n.controlEstopHold, 'E-STOP (mantener)');
+    expect(l10n.stopAllLabel, 'STOP');
+    expect(l10n.stopAllSummary(2, 1), 'STOP: 2 parados, 1 con fallo');
     expect(l10n.metricsHostname, 'Nombre de host');
     expect(l10n.navMetrics, 'Métricas');
   });
