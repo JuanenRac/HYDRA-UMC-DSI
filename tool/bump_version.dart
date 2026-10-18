@@ -1,7 +1,7 @@
 // =============================================================================
 // HYDRA-UMC DSI (Flutter) - tool/bump_version.dart
 // Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
-// GPL-3.0 - see LICENSE
+// GPL-3.0-or-later - see LICENSE
 //
 // Ecosystem-wide version policy: the version bumps automatically on every
 // real build, no manual editing of pubspec.yaml. Run by build.sh/build.bat/

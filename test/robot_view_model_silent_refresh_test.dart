@@ -1,7 +1,7 @@
 // =============================================================================
 // HYDRA-UMC DSI (Flutter) - test/robot_view_model_silent_refresh_test.dart
 // Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
-// GPL-3.0 - see LICENSE
+// GPL-3.0-or-later - see LICENSE
 //
 // real end-to-end coverage for RobotViewModel's own
 // _attemptTokenRefresh() - a real local dart:io HttpServer serves both the

@@ -1,7 +1,7 @@
 // =============================================================================
 // HYDRA-UMC DSI (Flutter) - models/hydra_state.dart
 // Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
-// GPL-3.0 - see LICENSE
+// GPL-3.0-or-later - see LICENSE
 //
 // Thin, mutation-friendly views over the raw settings.json tree - copied
 // verbatim from HYDRA-UMC-IOS-CONTROL's own models/hydra_state.dart (same

@@ -1,7 +1,7 @@
 // =============================================================================
 // HYDRA-UMC DSI (Flutter) - state/robot_view_model.dart
 // Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
-// GPL-3.0 - see LICENSE
+// GPL-3.0-or-later - see LICENSE
 //
 // Single ChangeNotifier every screen listens to via Provider - ported from
 // HYDRA-UMC-IOS-CONTROL's own state/robot_view_model.dart (same Dart/

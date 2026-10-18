@@ -1,7 +1,7 @@
 // =============================================================================
 // HYDRA-UMC DSI (Flutter) - ui/metrics_screen.dart
 // Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
-// GPL-3.0 - see LICENSE
+// GPL-3.0-or-later - see LICENSE
 //
 // New screen, not a straight port - HYDRA-UMC-ANDROID-CONTROL and
 // HYDRA-UMC-IOS-CONTROL both fold system metrics into a corner of their

@@ -1,7 +1,7 @@
 // =============================================================================
 // HYDRA-UMC DSI (Flutter) - ui/three_d_screen.dart
 // Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
-// GPL-3.0 - see LICENSE
+// GPL-3.0-or-later - see LICENSE
 //
 // Deliberately NOT a port of HYDRA-UMC-IOS-CONTROL's/HYDRA-UMC-ANDROID-CONTROL's
 // own 3D screen - both of those embed HYDRA-UMC-STUDIO's real Three.js scene

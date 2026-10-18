@@ -1,7 +1,7 @@
 // =============================================================================
 // HYDRA-UMC DSI (Flutter) - test/robot_view_model_stop_all_test.dart
 // Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
-// GPL-3.0 - see LICENSE
+// GPL-3.0-or-later - see LICENSE
 //
 // The global STOP (POST /api/stop-all) against a real local dart:io
 // HttpServer: the request itself (bearer, client header, no body), the

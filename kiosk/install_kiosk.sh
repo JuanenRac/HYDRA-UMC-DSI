@@ -2,7 +2,7 @@
 # =============================================================================
 # HYDRA-UMC DSI (Flutter) - kiosk/install_kiosk.sh
 # Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
-# GPL-3.0 - see LICENSE
+# GPL-3.0-or-later - see LICENSE
 #
 # Installs and enables hydra-umc-dsi.service (this directory) on a real
 # Linux machine - the CM5 itself. Run ON that machine, as root, AFTER

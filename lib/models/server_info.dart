@@ -1,7 +1,7 @@
 // =============================================================================
 // HYDRA-UMC DSI (Flutter) - models/server_info.dart
 // Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
-// GPL-3.0 - see LICENSE
+// GPL-3.0-or-later - see LICENSE
 //
 // One entry in the discovery/connection list - see HYDRA-UMC-STUDIO's own
 // docs/REMOTE_API.md section 1 (GET /api/hydra-info) for the wire shape

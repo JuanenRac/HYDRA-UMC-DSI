@@ -1,7 +1,7 @@
 // =============================================================================
 // HYDRA-UMC DSI (Flutter) - ui/login_screen.dart
 // Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
-// GPL-3.0 - see LICENSE
+// GPL-3.0-or-later - see LICENSE
 //
 // Adapted from HYDRA-UMC-IOS-CONTROL's own ui/login_screen.dart for a fixed
 // 1280x720 touch panel: same fields and "Scan local network" flow, laid out

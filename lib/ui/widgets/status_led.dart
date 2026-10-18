@@ -1,7 +1,7 @@
 // =============================================================================
 // HYDRA-UMC DSI (Flutter) - ui/widgets/status_led.dart
 // Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
-// GPL-3.0 - see LICENSE
+// GPL-3.0-or-later - see LICENSE
 //
 // Green pulsing = active, red solid = inactive - same convention
 // HYDRA-UMC-STUDIO's own Dashboard Overview and every control app in this

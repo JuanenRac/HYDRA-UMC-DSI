@@ -1,7 +1,7 @@
 // =============================================================================
 // HYDRA-UMC DSI (Flutter) - ui/main_screen.dart
 // Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
-// GPL-3.0 - see LICENSE
+// GPL-3.0-or-later - see LICENSE
 //
 // Horizontal touch menu across the top of the fixed 1280x720 frame -
 // KlipperScreen-in-spirit navigation (a persistent row of large icon+label

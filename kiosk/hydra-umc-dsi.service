@@ -1,7 +1,7 @@
 # =============================================================================
 # HYDRA-UMC DSI (Flutter) - kiosk/hydra-umc-dsi.service
 # Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
-# GPL-3.0 - see LICENSE
+# GPL-3.0-or-later - see LICENSE
 #
 # systemd unit that launches this app fullscreen, without any window
 # manager chrome, on the CM5's own DSI touchscreen at boot - the piece

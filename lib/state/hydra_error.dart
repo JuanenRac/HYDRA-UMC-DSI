@@ -1,7 +1,7 @@
 // =============================================================================
 // HYDRA-UMC DSI (Flutter) - state/hydra_error.dart
 // Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
-// GPL-3.0 - see LICENSE
+// GPL-3.0-or-later - see LICENSE
 //
 // Ported from HYDRA-UMC-IOS-CONTROL's own state/hydra_error.dart:
 // RobotViewModel (a plain ChangeNotifier, no BuildContext of its own) needs

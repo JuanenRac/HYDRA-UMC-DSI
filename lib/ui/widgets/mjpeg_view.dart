@@ -1,7 +1,7 @@
 // =============================================================================
 // HYDRA-UMC DSI (Flutter) - ui/widgets/mjpeg_view.dart
 // Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
-// GPL-3.0 - see LICENSE
+// GPL-3.0-or-later - see LICENSE
 //
 // Live MJPEG picture from HYDRA-UMC-SERVER's GET /api/camera/:id/stream (a
 // multipart/x-mixed-replace stream of JPEG frames). The frames are found by

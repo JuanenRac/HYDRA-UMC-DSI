@@ -93,7 +93,7 @@ BEGIN
             VALUE "FileDescription", "hydra_umc_dsi" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
             VALUE "InternalName", "hydra_umc_dsi" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2026 JuanenRac (Electro Hobby 3D). GPL-3.0." "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2026 JuanenRac (Electro Hobby 3D). GPL-3.0-or-later." "\0"
             VALUE "OriginalFilename", "hydra_umc_dsi.exe" "\0"
             VALUE "ProductName", "hydra_umc_dsi" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"

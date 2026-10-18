@@ -16,7 +16,7 @@
 
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Licence-GPL%203.0-blue.svg" alt="GPL 3.0">
+  <img src="https://img.shields.io/badge/Licence-GPL%203.0--or--later-blue.svg" alt="GPL 3.0 or later">
   <img src="https://img.shields.io/badge/Framework-Flutter%203.x-02569B.svg" alt="Flutter">
   <img src="https://img.shields.io/badge/Langage-Dart-0175C2.svg" alt="Dart">
   <img src="https://img.shields.io/badge/Plateforme-Linux%20%7C%20CM5-E34F26.svg" alt="Platform">
@@ -280,6 +280,6 @@ Ce projet fait partie de l'écosystème robotique HYDRA-UMC du même auteur (Jua
 
 ## 📜 LICENCE
 
-GNU General Public License v3.0 (GPL-3.0) pour le code source - voir [`LICENSE`](LICENSE).
+GNU General Public License v3.0 or later (GPL-3.0-or-later) pour le code source - voir [`LICENSE`](LICENSE).
 
 La documentation (ce README et ses traductions - `README_spa.md`, `README_ita.md`, `README_fra.md`, `README_deu.md`, `README_zho.md`, `README_jpn.md`, `README_por.md`) est disponible sous **Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)**. Texte complet sur https://creativecommons.org/licenses/by-sa/4.0/.

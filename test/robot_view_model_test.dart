@@ -1,7 +1,7 @@
 // =============================================================================
 // HYDRA-UMC DSI (Flutter) - test/robot_view_model_test.dart
 // Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
-// GPL-3.0 - see LICENSE
+// GPL-3.0-or-later - see LICENSE
 //
 // Unit coverage for state/robot_view_model.dart's own _sendAtomicCommand():
 // the optimistic-mutate-then-rollback-on-failure flow and combinedWith

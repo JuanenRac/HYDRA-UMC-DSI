@@ -1,7 +1,7 @@
 // =============================================================================
 // HYDRA-UMC DSI (Flutter) - ui/camera_screen.dart
 // Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
-// GPL-3.0 - see LICENSE
+// GPL-3.0-or-later - see LICENSE
 //
 // Ported from HYDRA-UMC-IOS-CONTROL's own ui/camera_screen.dart - the
 // hand-rolled MjpegView (widgets/mjpeg_view.dart) has no platform

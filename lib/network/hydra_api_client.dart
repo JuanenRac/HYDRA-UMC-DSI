@@ -1,7 +1,7 @@
 // =============================================================================
 // HYDRA-UMC DSI (Flutter) - network/hydra_api_client.dart
 // Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
-// GPL-3.0 - see LICENSE
+// GPL-3.0-or-later - see LICENSE
 //
 // Talks the exact contract in HYDRA-UMC-SERVER/docs/REMOTE_API.md - ported
 // from HYDRA-UMC-IOS-CONTROL's own network/hydra_api_client.dart (same
