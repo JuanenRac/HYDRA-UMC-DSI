@@ -8,6 +8,10 @@
 // not available (rate limit, older server).
 // =============================================================================
 
+/// A count as the server sent it, or null when it is not a finite number
+/// (a JSON `1e999` decodes as infinity, which cannot become an int).
+int? _wholeOrNull(dynamic v) => v is num && v.isFinite ? v.toInt() : null;
+
 class StopAllRobot {
   final dynamic robotId;
   final String? controllerId;
@@ -33,7 +37,7 @@ class StopAllRobot {
   });
 
   factory StopAllRobot.fromJson(Map<String, dynamic> json) {
-    int count(dynamic v) => v is num ? v.toInt() : 0;
+    int count(dynamic v) => v is num && v.isFinite ? v.toInt() : 0;
     return StopAllRobot(
       robotId: json['robotId'],
       controllerId: json['controllerId'] is String ? json['controllerId'] as String : null,
@@ -77,8 +81,8 @@ class StopAllResult {
         if (r is Map<String, dynamic>) list.add(StopAllRobot.fromJson(r));
       }
     }
-    final stopped = json['stoppedCount'] is num ? (json['stoppedCount'] as num).toInt() : list.where((r) => r.stopped).length;
-    final failed = json['failedCount'] is num ? (json['failedCount'] as num).toInt() : list.where((r) => !r.stopped).length;
+    final stopped = _wholeOrNull(json['stoppedCount']) ?? list.where((r) => r.stopped).length;
+    final failed = _wholeOrNull(json['failedCount']) ?? list.where((r) => !r.stopped).length;
     return StopAllResult(
       success: json['success'] == true,
       stoppedCount: stopped,

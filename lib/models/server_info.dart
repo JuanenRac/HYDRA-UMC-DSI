@@ -63,10 +63,10 @@ class ServerInfo {
     return ServerInfo(
       host: host,
       port: port,
-      product: (payload['product'] ?? '') as String,
+      product: _asString(payload['product']),
       remoteApiVersion: _asInt(payload['remoteApiVersion']),
-      appVersion: (payload['appVersion'] ?? '') as String,
-      hostname: (payload['hostname'] ?? '') as String,
+      appVersion: _asString(payload['appVersion']),
+      hostname: _asString(payload['hostname']),
       controllerCount: _asInt(payload['controllerCount']),
       robotCount: _asInt(payload['robotCount']),
       uptimeSeconds: _asInt(payload['uptimeSeconds']),
@@ -76,7 +76,9 @@ class ServerInfo {
 
   // A device that answers on this port with something else must not break the
   // scan with a cast: a number reads as itself, anything else as 0.
-  static int _asInt(dynamic v) => v is num ? v.toInt() : 0;
+  static int _asInt(dynamic v) => v is num && v.isFinite ? v.toInt() : 0;
+
+  static String _asString(dynamic v) => v is String ? v : '';
 
   ServerInfo copyWith({String? nickname, String? username, String? password, bool? useTls}) {
     return ServerInfo(

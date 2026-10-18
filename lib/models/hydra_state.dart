@@ -20,12 +20,12 @@ class RobotView {
   RobotView(this.raw);
 
   dynamic get id => raw['id'];
-  String get name => (raw['name'] ?? 'Robot $id') as String;
-  bool get online => (raw['online'] ?? false) as bool;
-  String get model => (raw['model'] ?? 'Generic (6-DOF)') as String;
-  String get role => (raw['role'] ?? 'Idle') as String;
-  String get tool => (raw['tool'] ?? 'None') as String;
-  bool get hasXYTable => (raw['hasXYTable'] ?? false) as bool;
+  String get name => raw['name'] is String ? raw['name'] as String : 'Robot $id';
+  bool get online => raw['online'] == true;
+  String get model => raw['model'] is String ? raw['model'] as String : 'Generic (6-DOF)';
+  String get role => raw['role'] is String ? raw['role'] as String : 'Idle';
+  String get tool => raw['tool'] is String ? raw['tool'] as String : 'None';
+  bool get hasXYTable => raw['hasXYTable'] == true;
 
   String get manufacturer {
     final m = model;
@@ -41,7 +41,10 @@ class RobotView {
     return 'Generic';
   }
 
-  bool _moduleEnabled(String key) => (raw[key]?['enabled'] ?? false) as bool;
+  bool _moduleEnabled(String key) {
+    final module = raw[key];
+    return module is Map && module['enabled'] == true;
+  }
   bool get hasPnP => _moduleEnabled('juanenPnP') || _moduleEnabled('lumenPnP');
   bool get hasCNC => _moduleEnabled('juanenCNC');
   bool get hasLaser => _moduleEnabled('juanenLaser');
@@ -50,7 +53,10 @@ class RobotView {
   // Real signal is visionEnabled or the paired camera's own connected flag -
   // NOT mere presence of a "camera"/"cameraView" key. Matches the same fix
   // in HYDRA-UMC-STUDIO's own Dashboard Overview and both Android/iOS.
-  bool get hasCamera => (raw['visionEnabled'] ?? false) as bool || ((raw['camera']?['connected']) ?? false) as bool;
+  bool get hasCamera {
+    final camera = raw['camera'];
+    return raw['visionEnabled'] == true || (camera is Map && camera['connected'] == true);
+  }
   bool get hasAtc => raw.containsKey('atc');
   bool get hasRack => _moduleEnabled('rackSystem');
 
@@ -81,7 +87,10 @@ class RobotView {
   }
 
   Map<String, dynamic> get pos => (raw['pos'] ??= <String, dynamic>{}) as Map<String, dynamic>;
-  double posAxis(String axis) => ((pos[axis] ?? 0.0) as num).toDouble();
+  double posAxis(String axis) {
+    final v = pos[axis];
+    return v is num ? v.toDouble() : 0.0;
+  }
   void setPosAxis(String axis, double value) => pos[axis] = value;
 
   Map<String, dynamic> get xyTable => (raw['xyTable'] ??= <String, dynamic>{}) as Map<String, dynamic>;
@@ -94,10 +103,16 @@ class RobotView {
   }
 
   Map<String, dynamic> get playbackState => (raw['playbackState'] ??= <String, dynamic>{}) as Map<String, dynamic>;
-  bool get isPlaying => (playbackState['isPlaying'] ?? playbackState['playing'] ?? false) as bool;
-  bool get isPaused => (playbackState['isPaused'] ?? playbackState['paused'] ?? false) as bool;
-  double get speed => ((playbackState['speed'] ?? 100.0) as num).toDouble();
-  double get acceleration => ((playbackState['acceleration'] ?? 100.0) as num).toDouble();
+  bool get isPlaying => (playbackState['isPlaying'] ?? playbackState['playing']) == true;
+  bool get isPaused => (playbackState['isPaused'] ?? playbackState['paused']) == true;
+  double get speed {
+    final v = playbackState['speed'];
+    return v is num ? v.toDouble() : 100.0;
+  }
+  double get acceleration {
+    final v = playbackState['acceleration'];
+    return v is num ? v.toDouble() : 100.0;
+  }
 
   void setPlaying(bool playing) {
     final pb = playbackState;
@@ -147,9 +162,9 @@ class RobotView {
   void setSpeed(double value) => playbackState['speed'] = value;
   void setAcceleration(double value) => playbackState['acceleration'] = value;
 
-  Map<String, dynamic>? get controllerBoard => raw['controllerBoard'] as Map<String, dynamic>?;
-  Map<String, dynamic>? get urtcHead => raw['urtcHead'] as Map<String, dynamic>?;
-  Map<String, dynamic>? get urtcExpansion => raw['urtcExpansion'] as Map<String, dynamic>?;
+  Map<String, dynamic>? get controllerBoard => raw['controllerBoard'] is Map<String, dynamic> ? raw['controllerBoard'] as Map<String, dynamic> : null;
+  Map<String, dynamic>? get urtcHead => raw['urtcHead'] is Map<String, dynamic> ? raw['urtcHead'] as Map<String, dynamic> : null;
+  Map<String, dynamic>? get urtcExpansion => raw['urtcExpansion'] is Map<String, dynamic> ? raw['urtcExpansion'] as Map<String, dynamic> : null;
 
   @override
   String toString() => 'RobotView(id=$id, name=$name, online=$online)';
@@ -160,13 +175,13 @@ class ControllerView {
   final Map<String, dynamic> raw;
   ControllerView(this.raw);
 
-  String get id => (raw['id'] ?? '') as String;
-  String get name => (raw['name'] ?? id) as String;
-  String get ip => (raw['ip'] ?? '') as String;
+  String get id => '${raw['id'] ?? ''}';
+  String get name => raw['name'] is String ? raw['name'] as String : id;
+  String get ip => raw['ip'] is String ? raw['ip'] as String : '';
 
   List<RobotView> get robots {
     final arr = raw['robots'];
-    if (arr is List) return arr.map((r) => RobotView(r as Map<String, dynamic>)).toList();
+    if (arr is List) return arr.whereType<Map<String, dynamic>>().map(RobotView.new).toList();
     return const [];
   }
 
@@ -179,7 +194,7 @@ class ControllerView {
 
   List<Map<String, dynamic>> get cameras {
     final arr = raw['cameras'];
-    if (arr is List) return arr.cast<Map<String, dynamic>>();
+    if (arr is List) return arr.whereType<Map<String, dynamic>>().toList();
     return const [];
   }
 }
@@ -192,11 +207,11 @@ class HydraState {
 
   List<ControllerView> get controllers {
     final arr = raw['controllers'];
-    if (arr is List) return arr.map((c) => ControllerView(c as Map<String, dynamic>)).toList();
+    if (arr is List) return arr.whereType<Map<String, dynamic>>().map(ControllerView.new).toList();
     return const [];
   }
 
-  String get activeControllerId => (raw['activeControllerId'] ?? '') as String;
+  String get activeControllerId => '${raw['activeControllerId'] ?? ''}';
 
   ControllerView? get activeController {
     final cid = activeControllerId;

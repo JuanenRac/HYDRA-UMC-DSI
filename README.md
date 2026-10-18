@@ -29,13 +29,13 @@ A native Flutter touch UI (Dart, real Linux desktop target) for HYDRA-UMC's own 
 
 ---
 
-**Honesty check - what actually runs today:** the networking layer (`lib/network/hydra_api_client.dart`, `hydra_websocket.dart`, `discovery.dart`, `auth_prefs.dart`) and the state layer (`lib/state/robot_view_model.dart`, `hydra_error.dart`) are real and tested (72 tests passing across `test/*.dart`, including a real WebSocket connect/reconnect/auth-rejection round trip against a genuine local server, not a mock), and `flutter analyze` reports no issues. All 6 catalog screens are real, wired UI, not placeholders. What is genuinely not built: the **3D View** screen is a small native isometric X/Y/Z indicator, not a real 3D renderer - it does not embed STUDIO's Three.js scene (no Linux `webview_flutter` implementation exists). What is real but unverified on target hardware: `flutter build linux --release` has been run and produces a binary confirmed to launch, but only under Ubuntu 24.04 WSL2 (x86_64) - never on the CM5's real aarch64 Raspberry Pi OS - and the `kiosk/hydra-umc-dsi.service` autostart unit has never run on any real Linux machine at all. See "Known Follow-ups" below and `CHANGELOG.md` for exactly what has shipped so far.
+**Honesty check - what actually runs today:** the networking layer (`lib/network/hydra_api_client.dart`, `hydra_websocket.dart`, `discovery.dart`, `auth_prefs.dart`) and the state layer (`lib/state/robot_view_model.dart`, `hydra_error.dart`) are real and tested (98 tests passing across `test/*.dart`, including a real WebSocket connect/reconnect/auth-rejection round trip against a genuine local server, not a mock), and `flutter analyze` reports no issues. All 6 catalog screens are real, wired UI, not placeholders. What is genuinely not built: the **3D View** screen is a small native isometric X/Y/Z indicator, not a real 3D renderer - it does not embed STUDIO's Three.js scene (no Linux `webview_flutter` implementation exists). What is real but unverified on target hardware: `flutter build linux --release` has been run and produces a binary confirmed to launch, but only under Ubuntu 24.04 WSL2 (x86_64) - never on the CM5's real aarch64 Raspberry Pi OS - and the `kiosk/hydra-umc-dsi.service` autostart unit has never run on any real Linux machine at all. See "Known Follow-ups" below and `CHANGELOG.md` for exactly what has shipped so far.
 
 ## 📋 At a glance
 
 | | |
 |---|---|
-| Version | `0.2.4` |
+| Version | `0.2.5` |
 | Maturity | Established |
 | Tests | 72 |
 | Stack | Flutter 3.x / Dart |
@@ -175,7 +175,7 @@ HYDRA-UMC-DSI/
 ├── tools/
 │   └── ci_validate.py               # Manifest/CHANGELOG/docs validation used by CI
 ├── bump_manifest_version.py          # Syncs hydra-umc.project.json's version to the native one (--sync)
-├── test/                             # widget_test, format_uptime_test, localization_test, robot_view_model_test, robot_view_model_silent_refresh_test, auth_prefs_test, hydra_websocket_test
+├── test/                             # widget_test, format_uptime_test, localization_test, robot_view_model_test, robot_view_model_silent_refresh_test, auth_prefs_test, hydra_websocket_test, hostile_answers_test, hydra_error_test
 ├── README.md                         # this file
 └── README_spa.md / README_ita.md / README_fra.md / README_deu.md / README_zho.md / README_jpn.md / README_por.md  # translations
 ```

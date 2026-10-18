@@ -43,6 +43,18 @@ enum WsStatus { connecting, connected, disconnected }
 const Duration reconnectDelay = Duration(seconds: 3);
 const Duration maxReconnectDelay = Duration(seconds: 30);
 
+/// How long to wait before reconnect attempt number [failedAttempts] + 1: the
+/// base delay, doubled after every attempt that failed to open, up to
+/// [maxReconnectDelay].
+Duration reconnectBackoff(int failedAttempts) {
+  // 2^n overflows a 64-bit integer for n >= 62 and the wait collapsed to zero
+  // after about half an hour of failed attempts, so the doubling stops well
+  // before the ceiling would be hit anyway.
+  final doublings = min(max(0, failedAttempts - 1), 10);
+  final backoff = reconnectDelay * (1 << doublings);
+  return backoff > maxReconnectDelay ? maxReconnectDelay : backoff;
+}
+
 /// The client pings this often, so a link that died without a close (Wi-Fi
 /// dropped, no FIN) is noticed instead of waiting for the OS to give up.
 const Duration pingInterval = Duration(seconds: 20);
@@ -263,8 +275,7 @@ class HydraWebSocket {
   void _scheduleReconnect({required bool wasOpen}) {
     if (_closingByUser) return;
     if (!wasOpen) _failedAttempts++;
-    final backoff = reconnectDelay * pow(2, max(0, _failedAttempts - 1)).toInt();
-    final capped = backoff > maxReconnectDelay ? maxReconnectDelay : backoff;
+    final capped = reconnectBackoff(_failedAttempts);
     // A little jitter, so many phones do not reconnect in the same instant
     // after the server restarts.
     final jitter = Duration(milliseconds: _random.nextInt(500));

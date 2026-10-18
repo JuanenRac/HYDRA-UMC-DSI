@@ -7,6 +7,13 @@ in [README.md](README.md#-versioning); earlier entries are grouped under
 the pre-policy version `0.0.0+1` the repo carried while the policy did not
 yet exist.
 
+## [0.2.5] - Reconnect back-off that stays a back-off, and tolerant readers of server data
+
+- **Reconnect back-off:** the wait before a reconnect was `3 s x 2^(failed attempts - 1)` computed in 64-bit integers, which overflows at 62 consecutive failed attempts (about half an hour with a server that stays down): the wait fell to zero and the app reconnected every fraction of a second until the server came back. The doubling now stops at 10 steps, so the wait is always between 3 s and 30 s.
+- **Settings tree:** a robot, controller or camera whose fields have the wrong type (a number for a name, a text for a flag, an entry that is not an object) no longer throws a cast error from the model getters and takes the screen down; each field reads as its default and entries that are not objects are skipped.
+- **HTTP answers:** a `200` whose body is JSON but not an object (a list, `null`, a number) is a `HydraApiException` instead of a cast error, a discovery answer whose `product`, `appVersion` or `hostname` is not text no longer breaks the scan, and a STOP answer with a count that is not a finite number (JSON `1e999`) keeps its robots instead of failing.
+- Tests: 26 new (98 in all, line coverage of the app code up from 26 % to 35 %): tolerant readers, HTTP answers, STOP answer, back-off, frames of the wrong shape on the WebSocket, and the error texts in the 8 languages. The sign-out test no longer depends on how fast the first WebSocket close arrives.
+
 ## [0.2.4]
 
 - Build version synchronized with `hydra-umc.project.json` and the repository-native version source.

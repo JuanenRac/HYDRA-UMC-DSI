@@ -29,13 +29,13 @@
 
 ---
 
-**诚实核查 - 今天真正能运行的部分：** 网络层(`lib/network/hydra_api_client.dart`、`hydra_websocket.dart`、`discovery.dart`、`auth_prefs.dart`)和状态层(`lib/state/robot_view_model.dart`、`hydra_error.dart`)都是真实的并经过测试(`test/*.dart` 中 72 个测试全部通过，其中包括针对一个真实本地服务器、而非模拟对象的真实 WebSocket 连接/重连/认证拒绝往返测试),且 `flutter analyze` 没有报告任何问题。目录中的全部 6 个界面都是真实接线好的 UI，而非占位符。真正尚未构建的部分：**3D View** 界面只是一个小型的原生等距 X/Y/Z 指示器，并非真正的 3D 渲染器 - 它并未嵌入 STUDIO 的真实 Three.js 场景(因为不存在 Linux 版本的 `webview_flutter` 实现)。真实但尚未在目标硬件上验证的部分：`flutter build linux --release` 已经运行过，并生成了一个确认可以启动的二进制文件，但仅在 Ubuntu 24.04 WSL2(x86_64)环境下验证过 - 从未在 CM5 真实的 aarch64 Raspberry Pi OS 上运行过；`kiosk/hydra-umc-dsi.service` 自启动单元也从未在任何真实 Linux 机器上运行过。具体已交付的内容请见下方的 "Known Follow-ups" 和 `CHANGELOG.md`。
+**诚实核查 - 今天真正能运行的部分：** 网络层(`lib/network/hydra_api_client.dart`、`hydra_websocket.dart`、`discovery.dart`、`auth_prefs.dart`)和状态层(`lib/state/robot_view_model.dart`、`hydra_error.dart`)都是真实的并经过测试(`test/*.dart` 中 98 个测试全部通过，其中包括针对一个真实本地服务器、而非模拟对象的真实 WebSocket 连接/重连/认证拒绝往返测试),且 `flutter analyze` 没有报告任何问题。目录中的全部 6 个界面都是真实接线好的 UI，而非占位符。真正尚未构建的部分：**3D View** 界面只是一个小型的原生等距 X/Y/Z 指示器，并非真正的 3D 渲染器 - 它并未嵌入 STUDIO 的真实 Three.js 场景(因为不存在 Linux 版本的 `webview_flutter` 实现)。真实但尚未在目标硬件上验证的部分：`flutter build linux --release` 已经运行过，并生成了一个确认可以启动的二进制文件，但仅在 Ubuntu 24.04 WSL2(x86_64)环境下验证过 - 从未在 CM5 真实的 aarch64 Raspberry Pi OS 上运行过；`kiosk/hydra-umc-dsi.service` 自启动单元也从未在任何真实 Linux 机器上运行过。具体已交付的内容请见下方的 "Known Follow-ups" 和 `CHANGELOG.md`。
 
 ## 📋 速览
 
 | | |
 |---|---|
-| 版本 | `0.2.4` |
+| 版本 | `0.2.5` |
 | 成熟度 | 成熟 |
 | 测试 | 72 |
 | 技术栈 | Flutter 3.x / Dart |
@@ -163,7 +163,7 @@ HYDRA-UMC-DSI/
 ├── tools/
 │   └── ci_validate.py               # CI 使用的清单/CHANGELOG/文档校验
 ├── bump_manifest_version.py          # 将 hydra-umc.project.json 的版本与原生版本同步(--sync)
-├── test/                             # widget_test、format_uptime_test、localization_test、robot_view_model_test、robot_view_model_silent_refresh_test、auth_prefs_test、hydra_websocket_test
+├── test/                             # widget_test、format_uptime_test、localization_test、robot_view_model_test、robot_view_model_silent_refresh_test、auth_prefs_test、hydra_websocket_test、hostile_answers_test、hydra_error_test
 ├── README.md                         # 本文件
 └── README_spa.md / README_ita.md / README_fra.md / README_deu.md / README_zho.md / README_jpn.md / README_por.md  # 翻译
 ```

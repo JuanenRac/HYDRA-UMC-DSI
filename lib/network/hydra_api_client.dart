@@ -271,11 +271,16 @@ class HydraApiClient {
         serverMessage: serverMessage,
       );
     }
+    final Object? decoded;
     try {
-      return jsonDecode(resp.body) as Map<String, dynamic>;
+      decoded = jsonDecode(resp.body);
     } on FormatException catch (e) {
       throw HydraApiException('Response is not valid JSON: ${e.message}');
     }
+    if (decoded is! Map<String, dynamic>) {
+      throw HydraApiException('Response is not a JSON object');
+    }
+    return decoded;
   }
 
   void close() => _client.close();

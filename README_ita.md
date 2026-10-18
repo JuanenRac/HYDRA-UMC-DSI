@@ -29,13 +29,13 @@ Un'interfaccia touch nativa in Flutter (Dart, con target reale desktop Linux) pe
 
 ---
 
-**Controllo di onestà - cosa funziona davvero oggi:** il layer di rete (`lib/network/hydra_api_client.dart`, `hydra_websocket.dart`, `discovery.dart`, `auth_prefs.dart`) e il layer di stato (`lib/state/robot_view_model.dart`, `hydra_error.dart`) sono reali e testati (72 test superati in `test/*.dart`, incluso un vero round-trip di connessione/riconnessione/rifiuto di autenticazione WebSocket contro un vero server locale, non un mock), e `flutter analyze` non segnala alcun problema. Tutte e 6 le schermate del catalogo sono UI reale e cablata, non placeholder. Ciò che non è realmente costruito: la schermata **3D View** è un piccolo indicatore isometrico nativo X/Y/Z, non un vero motore di rendering 3D - non incorpora la scena Three.js di STUDIO (non esiste alcuna implementazione Linux di `webview_flutter`). Ciò che è reale ma non verificato sull'hardware di destinazione: `flutter build linux --release` è stato eseguito e produce un binario confermato all'avvio, ma solo sotto Ubuntu 24.04 WSL2 (x86_64) - mai sul vero aarch64 Raspberry Pi OS della CM5 - e l'unità di autoavvio `kiosk/hydra-umc-dsi.service` non è mai stata eseguita su nessuna vera macchina Linux. Vedi "Known Follow-ups" più sotto e `CHANGELOG.md` per ciò che è stato consegnato esattamente finora.
+**Controllo di onestà - cosa funziona davvero oggi:** il layer di rete (`lib/network/hydra_api_client.dart`, `hydra_websocket.dart`, `discovery.dart`, `auth_prefs.dart`) e il layer di stato (`lib/state/robot_view_model.dart`, `hydra_error.dart`) sono reali e testati (98 test superati in `test/*.dart`, incluso un vero round-trip di connessione/riconnessione/rifiuto di autenticazione WebSocket contro un vero server locale, non un mock), e `flutter analyze` non segnala alcun problema. Tutte e 6 le schermate del catalogo sono UI reale e cablata, non placeholder. Ciò che non è realmente costruito: la schermata **3D View** è un piccolo indicatore isometrico nativo X/Y/Z, non un vero motore di rendering 3D - non incorpora la scena Three.js di STUDIO (non esiste alcuna implementazione Linux di `webview_flutter`). Ciò che è reale ma non verificato sull'hardware di destinazione: `flutter build linux --release` è stato eseguito e produce un binario confermato all'avvio, ma solo sotto Ubuntu 24.04 WSL2 (x86_64) - mai sul vero aarch64 Raspberry Pi OS della CM5 - e l'unità di autoavvio `kiosk/hydra-umc-dsi.service` non è mai stata eseguita su nessuna vera macchina Linux. Vedi "Known Follow-ups" più sotto e `CHANGELOG.md` per ciò che è stato consegnato esattamente finora.
 
 ## 📋 In breve
 
 | | |
 |---|---|
-| Versione | `0.2.4` |
+| Versione | `0.2.5` |
 | Maturità | Consolidato |
 | Test | 72 |
 | Tecnologia | Flutter 3.x / Dart |
@@ -176,7 +176,7 @@ HYDRA-UMC-DSI/
 ├── tools/
 │   └── ci_validate.py               # Validazione manifest/CHANGELOG/docs usata dalla CI
 ├── bump_manifest_version.py          # Sincronizza la versione di hydra-umc.project.json con quella nativa (--sync)
-├── test/                             # widget_test, format_uptime_test, localization_test, robot_view_model_test, robot_view_model_silent_refresh_test, auth_prefs_test, hydra_websocket_test
+├── test/                             # widget_test, format_uptime_test, localization_test, robot_view_model_test, robot_view_model_silent_refresh_test, auth_prefs_test, hydra_websocket_test, hostile_answers_test, hydra_error_test
 ├── README.md                         # documento originale (inglese)
 └── README_spa.md / README_ita.md / README_fra.md / README_deu.md / README_zho.md / README_jpn.md / README_por.md  # traduzioni
 ```
