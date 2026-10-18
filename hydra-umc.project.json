@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "ecosystem": "HYDRA-UMC",
   "name": "HYDRA-UMC-DSI",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "role": "ui",
   "stack": "flutter",
   "technologies": [
@@ -13,7 +13,7 @@
   "maturity": "established",
   "family": "Core Backend & Clients",
   "parent": "HYDRA-UMC-SERVER",
-  "build": "flutter pub get && flutter build apk.",
+  "build": "flutter pub get && flutter build linux",
   "notes": "Native touch UI for the onboard 7\" DSI touchscreen, same client role as the mobile apps but embedded on the CM5 itself. v0.1.5: a failed secure-storage delete during logout, or a partial saveToken() write (token saved, username save failed), could leave a real, orphaned token that a later loadToken() would resurrect - fixed with a plain, non-secret hydra_logged_out marker checked before secure storage is ever consulted, plus a best-effort revert of a partial write. Same fix ported to HYDRA-UMC-IOS-CONTROL.",
   "native_version": {
     "file": "pubspec.yaml",

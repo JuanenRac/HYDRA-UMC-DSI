@@ -86,10 +86,13 @@ class _MainScreenState extends State<MainScreen> {
     setState(() => _cleanSecondsLeft = null);
   }
 
-  static List<_NavEntry> _entries(AppLocalizations l10n) => [
+  // The camera knows whether its tab is the one shown: all tabs stay alive
+  // side by side (IndexedStack), and a picture stream nobody is looking at is
+  // wasted CPU and memory on a panel that also runs the server.
+  List<_NavEntry> _entries(AppLocalizations l10n) => [
         _NavEntry(Icons.dashboard, l10n.navDashboard, const DashboardScreen()),
         _NavEntry(Icons.gamepad, l10n.navControl, const ControlScreen()),
-        _NavEntry(Icons.videocam, l10n.navCamera, const CameraScreen()),
+        _NavEntry(Icons.videocam, l10n.navCamera, CameraScreen(active: _index == 2)),
         _NavEntry(Icons.view_in_ar, l10n.nav3d, const ThreeDScreen()),
         _NavEntry(Icons.monitor_heart, l10n.navMetrics, const MetricsScreen()),
         _NavEntry(Icons.settings, l10n.navSettings, const SettingsScreen()),
@@ -134,6 +137,9 @@ class _MainScreenState extends State<MainScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(err.localize(AppLocalizations.of(context)!)), backgroundColor: const Color(0xFFB91C1C)),
       );
+      // Shown: forget it, so the same error happening again is shown again.
+      _vm?.acknowledgeError();
+      _lastShownError = null;
     }
   }
 
@@ -216,6 +222,18 @@ class _ScreenCleanOverlay extends StatelessWidget {
           ),
           // Layer 2: the actual dismiss control, stacked on top (not a
           // descendant of layer 1) so its own long-press still reaches it.
+          // The cleaning mode must never leave the robot without a way to stop
+          // it: one tap on this button stops it, on top of the absorbing layer.
+          Positioned(
+            right: 24,
+            bottom: 24,
+            child: FilledButton.icon(
+              style: FilledButton.styleFrom(backgroundColor: const Color(0xFFB91C1C), minimumSize: const Size(140, 64)),
+              onPressed: () => context.read<RobotViewModel>().sendCommand('stop'),
+              icon: const Icon(Icons.stop),
+              label: Text(l10n.cleanModeStop, style: const TextStyle(fontWeight: FontWeight.bold)),
+            ),
+          ),
           Positioned.fill(
             child: Center(
               child: GestureDetector(

@@ -63,7 +63,8 @@ class BacklightControl {
   /// use 0-255, some 0-31, some much finer). Returns true only on a real
   /// successful write; every failure path (no device, unreadable
   /// max_brightness, unwritable brightness - e.g. running without the
-  /// permissions install_kiosk.sh's own udev rule grants) returns false
+  /// permission to write under /sys/class/backlight, which the user running the
+  /// app needs to be given) returns false
   /// rather than throwing, since a backlight write failing should never
   /// be able to crash the whole kiosk app over a cosmetic feature.
   Future<bool> setBrightnessPercent(int percent) async {

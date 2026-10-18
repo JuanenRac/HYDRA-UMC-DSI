@@ -3,45 +3,74 @@
 // Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 // GPL-3.0 - see LICENSE
 //
-// /ws live-sync connection - copied verbatim from HYDRA-UMC-IOS-CONTROL's
-// own network/hydra_websocket.dart (same Dart/Flutter stack, no port
-// needed). On connect, the server immediately sends one
+// /ws live-sync connection. On connect, the server immediately sends one
 // {"type":"settings","payload":{...}} message with the current full
 // state, then pushes the same shape to every connected client (sender
-// included) whenever the state changes. A WS closed with code 1008
-// (invalid/expired token, see wsClosePolicyViolation below) is treated as
-// "sign in again", not retried - see HYDRA-UMC-ANDROID-CONTROL's own
-// HydraWebSocket.kt for the reference handling this mirrors.
+// included) whenever the state changes, from either a POST /api/settings,
+// a POST /api/robot/:id/command (broadcast as "delta" - SAME payload
+// shape, only the label differs), or a client sending the "settings"
+// envelope back over its own socket.
+//
+// The server's /ws upgrade requires a token. The normal way to give it one
+// is the "hydra.bearer" subprotocol (Sec-WebSocket-Protocol: hydra.bearer,
+// <token>), which keeps the token out of the address that proxies and logs
+// record. A server from before that subprotocol only reads ?token= in the
+// query string: when the first upgrade is refused, the connection is opened
+// once more with the token in the address (and that choice is remembered
+// until it fails too).
+//
+// When the token is bad the server first sends one {"error":"Access denied
+// ..."} frame and, about 100 ms later, closes with code 1008. Both reach the
+// caller as errors, but they describe ONE event: wsAuthRejected is reported
+// only for the close, and the frame is passed on as a plain serverMessage so
+// the caller can treat the pair as a single authentication failure.
 // =============================================================================
 
 import 'dart:async';
 import 'dart:convert';
+import 'dart:math';
 
+import 'package:web_socket_channel/io.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import '../state/hydra_error.dart';
 
 enum WsStatus { connecting, connected, disconnected }
 
+/// First wait before a reconnect attempt; it doubles after every attempt that
+/// fails to open (up to [maxReconnectDelay]) and starts again from here as
+/// soon as one opens.
 const Duration reconnectDelay = Duration(seconds: 3);
+const Duration maxReconnectDelay = Duration(seconds: 30);
+
+/// The client pings this often, so a link that died without a close (Wi-Fi
+/// dropped, no FIN) is noticed instead of waiting for the OS to give up.
+const Duration pingInterval = Duration(seconds: 20);
 
 /// RFC 6455 close code the server sends for a missing/invalid/expired
 /// auth token (server.ts's own /ws upgrade check) - same constant name
 /// as HYDRA-UMC-ANDROID-CONTROL's own HydraWebSocket.kt.
 const int wsClosePolicyViolation = 1008;
 
+/// The subprotocol name the server reads a token from.
+const String wsTokenSubprotocol = 'hydra.bearer';
+
+final RegExp _subprotocolToken = RegExp(r"^[A-Za-z0-9!#$%&'*+\-.^_`|~]+$");
+
 class HydraWebSocket {
   final String host;
   final int port;
+  /// See buildConnectionUri's own doc comment - set from the same
+  /// HydraApiClient.usesTls that already probed this server.
+  final bool useTls;
   String? token;
   final void Function(WsStatus status) onStatus;
   final void Function(Map<String, dynamic> payload) onSettings;
   final void Function(HydraError error) onError;
   /// A real targeted delta (server.ts's own broadcastRobotDelta(), sent
   /// only once this connection declares schema 2 via ?remoteApiVersion=2
-  /// below - see DISEÑO_SYNC_DELTAS.txt section 2/3). Optional: a caller
-  /// that doesn't pass this still gets every delta folded into onSettings
-  /// as a full-tree replace, same as before this existed.
+  /// below). Optional: a caller that doesn't pass this still gets every
+  /// delta folded into onSettings as a full-tree replace.
   final void Function(Map<String, dynamic> delta)? onDelta;
 
   WebSocketChannel? _channel;
@@ -49,10 +78,19 @@ class HydraWebSocket {
   bool _closingByUser = false;
   Timer? _reconnectTimer;
   String? _lastPayloadJson;
+  // Identifies the connection attempt in progress: callbacks of an older
+  // attempt (superseded by a reconnect or a disconnect) are ignored.
+  int _generation = 0;
+  // Consecutive attempts that never opened - drives the reconnect back-off.
+  int _failedAttempts = 0;
+  // True after an older server refused the subprotocol upgrade.
+  bool _tokenInQuery = false;
+  final Random _random = Random();
 
   HydraWebSocket({
     required this.host,
     required this.port,
+    this.useTls = false,
     this.token,
     required this.onStatus,
     required this.onSettings,
@@ -65,71 +103,118 @@ class HydraWebSocket {
     unawaited(_openSocket());
   }
 
+  /// Builds the endpoint with Uri rather than string interpolation. Tokens
+  /// are opaque bearer credentials and may contain reserved URL characters;
+  /// queryParameters guarantees they remain one token value instead of
+  /// accidentally changing the request query.
+  ///
+  /// [tokenInQuery] false leaves the token out of the address (it then
+  /// travels as the "hydra.bearer" subprotocol); true is the form older
+  /// servers understand.
+  static Uri buildConnectionUri({
+    required String host,
+    required int port,
+    String? token,
+    // True to open wss:// instead of ws:// - set this from the same
+    // HydraApiClient.usesTls that already probed this server (see that
+    // class's own getHydraInfo()), never guessed independently: a plain
+    // WebSocket has no HTTP response of its own to detect TLS-only from.
+    bool useTls = false,
+    bool tokenInQuery = true,
+  }) => Uri(
+    scheme: useTls ? 'wss' : 'ws',
+    host: host,
+    port: port,
+    path: '/ws',
+    queryParameters: token == null
+        ? null
+        : {if (tokenInQuery) 'token': token, 'remoteApiVersion': '2'},
+  );
+
   Future<void> _openSocket() async {
     onStatus(WsStatus.connecting);
-    final base = 'ws://$host:$port/ws';
+    final generation = ++_generation;
+    final bearer = token;
+    final useSubprotocol =
+        bearer != null && !_tokenInQuery && _subprotocolToken.hasMatch(bearer);
     // remoteApiVersion=2 declares this connection understands a real
-    // targeted delta - reused from GET /api/hydra-info's own field name
-    // (see DISEÑO_SYNC_DELTAS.txt section 3/8q3). A server that doesn't
-    // recognize it just keeps sending the full tree under "delta" like
-    // before, so this is safe regardless of server version.
-    final url = token != null ? '$base?token=$token&remoteApiVersion=2' : base;
+    // targeted delta; a server that doesn't recognize it just keeps sending
+    // the full tree under "delta" like before.
+    final url = buildConnectionUri(
+      host: host,
+      port: port,
+      token: token,
+      useTls: useTls,
+      tokenInQuery: !useSubprotocol,
+    );
+    var opened = false;
     try {
-      final channel = WebSocketChannel.connect(Uri.parse(url));
+      final channel = IOWebSocketChannel.connect(
+        url,
+        protocols: useSubprotocol ? [wsTokenSubprotocol, bearer] : null,
+        pingInterval: pingInterval,
+      );
       _channel = channel;
       _sub = channel.stream.listen(
-        (raw) => _handleMessage(raw as String),
+        (raw) {
+          if (generation != _generation) return;
+          // A binary frame is not part of this protocol: ignore it rather
+          // than let the cast throw inside the listener.
+          if (raw is String) _handleMessage(raw);
+        },
         onDone: () {
+          if (generation != _generation) return;
           onStatus(WsStatus.disconnected);
-          // Real bug fixed 2026-09-08: despite this file's own header
-          // comment already claiming a 1008 close is "treated as sign in
-          // again", this always reconnected here, unconditionally - the
-          // claim was aspirational, not implemented. server.ts closes the
-          // /ws upgrade with exactly this code for a missing/invalid/
-          // expired token and never sends a message frame first (the
-          // connection is rejected before any data can flow), so
-          // _handleMessage()'s own {"error": "..."} check can never catch
-          // this case - retrying the same rejected token every
-          // reconnectDelay forever just spun in "connecting" ->
-          // "disconnected" with no visible error and no path back to the
-          // login screen. Same fix as HYDRA-UMC-IOS-CONTROL's own copy of
-          // this file.
           if (channel.closeCode == wsClosePolicyViolation) {
+            // The token is expired or invalid. Retrying the exact same token
+            // forever only spins against a server that will never accept it;
+            // report it once and stop. The caller renews the session and
+            // opens a new connection.
             _closingByUser = true;
-            onError(const HydraError(HydraErrorKind.wsAuthRejected));
             _channel = null;
+            onError(const HydraError(HydraErrorKind.wsAuthRejected));
             return;
           }
           _channel = null;
-          _scheduleReconnect();
+          _scheduleReconnect(wasOpen: opened);
         },
         onError: (Object e) {
+          if (generation != _generation) return;
+          // A refused handshake is handled by the catch below (it also gets
+          // here as a stream error); a connection that opened and then broke
+          // is reported here.
+          if (!opened) return;
           onStatus(WsStatus.disconnected);
           onError(HydraError(HydraErrorKind.wsConnectionLost, {'error': '$e'}));
           _channel = null;
-          _scheduleReconnect();
+          _scheduleReconnect(wasOpen: true);
         },
         cancelOnError: true,
       );
-      // WebSocketChannel.connect() returns immediately and connects lazily -
-      // reporting "connected" right here (as this file used to, unlike
-      // HYDRA-UMC-IOS-CONTROL's own fixed copy) means a bad host/port/
-      // refused connection still showed a green "CONNECTED" status until
-      // the onDone/onError callbacks above eventually fired. channel.ready
-      // is the real handshake signal (completes once the connection is
-      // actually open, throws if it never completes) - wait for it before
-      // reporting connected, matching IOS-CONTROL's own fix (external audit
-      // #059/#254) that this file's header comment claims to already mirror
-      // but didn't. A failure here still flows through the same
-      // onError/_scheduleReconnect path as a message-time failure.
+      // channel.ready completes once the HTTP upgrade succeeded. Without
+      // waiting for it, "connected" was reported for a socket the server
+      // rejected before the handshake finished.
       await channel.ready;
-      if (_closingByUser || _channel != channel) return;
+      if (_closingByUser || generation != _generation) return;
+      opened = true;
+      _failedAttempts = 0;
       onStatus(WsStatus.connected);
     } catch (e) {
+      if (generation != _generation || _closingByUser) return;
+      if (useSubprotocol && !opened) {
+        // Probably a server from before the subprotocol: try the token in the
+        // address once, right away, without reporting an error.
+        _tokenInQuery = true;
+        _sub?.cancel();
+        _channel = null;
+        unawaited(_openSocket());
+        return;
+      }
+      _tokenInQuery = false; // the next round starts with the subprotocol again
       onStatus(WsStatus.disconnected);
       onError(HydraError(HydraErrorKind.wsConnectFailed, {'error': '$e'}));
       _channel = null;
-      _scheduleReconnect();
+      _scheduleReconnect(wasOpen: false);
     }
   }
 
@@ -152,24 +237,19 @@ class HydraWebSocket {
         handler(msg);
         return;
       }
-      // No onDelta wired up - falls through to the payload check below,
-      // which safely no-ops (a schema-2 delta has no `payload` key) rather
-      // than crash or apply a corrupted full-tree replace.
     }
     if (type != 'settings' && type != 'delta') return;
     final payload = msg['payload'];
     if (payload is! Map<String, dynamic>) return;
-    final payloadJson = jsonEncode(payload);
-    if (payloadJson == _lastPayloadJson) return; // our own echoed-back write
-    _lastPayloadJson = payloadJson;
+    // Every full snapshot is applied: this app never writes over the socket,
+    // so there is no echo of its own to filter out, and filtering "identical"
+    // snapshots made a state changed by deltas in between look current when
+    // another client put the previous full state back.
     onSettings(payload);
   }
 
-  /// Sends [payload] as a "settings" envelope over the socket - not
-  /// currently called anywhere in this app, same as HYDRA-UMC-IOS-CONTROL
-  /// (state/robot_view_model.dart writes exclusively through the atomic
-  /// REST endpoint). Kept as a capability of this class since the server's
-  /// own wire protocol does accept a client-sent "settings" envelope.
+  /// Sends a "settings" envelope over the open socket. Returns false if no
+  /// socket is open.
   bool send(Map<String, dynamic> payload) {
     final payloadJson = jsonEncode(payload);
     if (payloadJson == _lastPayloadJson) return true;
@@ -180,16 +260,23 @@ class HydraWebSocket {
     return true;
   }
 
-  void _scheduleReconnect() {
+  void _scheduleReconnect({required bool wasOpen}) {
     if (_closingByUser) return;
+    if (!wasOpen) _failedAttempts++;
+    final backoff = reconnectDelay * pow(2, max(0, _failedAttempts - 1)).toInt();
+    final capped = backoff > maxReconnectDelay ? maxReconnectDelay : backoff;
+    // A little jitter, so many phones do not reconnect in the same instant
+    // after the server restarts.
+    final jitter = Duration(milliseconds: _random.nextInt(500));
     _reconnectTimer?.cancel();
-    _reconnectTimer = Timer(reconnectDelay, () {
+    _reconnectTimer = Timer(capped + jitter, () {
       if (!_closingByUser) unawaited(_openSocket());
     });
   }
 
   void disconnect() {
     _closingByUser = true;
+    _generation++;
     _reconnectTimer?.cancel();
     _sub?.cancel();
     _channel?.sink.close();

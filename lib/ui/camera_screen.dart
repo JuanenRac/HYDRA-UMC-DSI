@@ -18,7 +18,10 @@ import '../state/robot_view_model.dart';
 import 'widgets/mjpeg_view.dart';
 
 class CameraScreen extends StatefulWidget {
-  const CameraScreen({super.key});
+  /// False while another tab is shown: the picture is then not downloaded or
+  /// decoded at all (the tabs are kept alive side by side).
+  final bool active;
+  const CameraScreen({super.key, this.active = true});
 
   @override
   State<CameraScreen> createState() => _CameraScreenState();
@@ -29,6 +32,7 @@ class _CameraScreenState extends State<CameraScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (!widget.active) return const SizedBox.shrink();
     final vm = context.watch<RobotViewModel>();
     final l10n = AppLocalizations.of(context)!;
     final robots = vm.robots;
@@ -73,7 +77,10 @@ class _CameraScreenState extends State<CameraScreen> {
               width: double.infinity,
               decoration: BoxDecoration(color: Colors.black, borderRadius: BorderRadius.circular(12)),
               child: robot.hasCamera && server != null
-                  ? MjpegView(url: '${server.baseUrl}/api/camera/${robot.id}/stream')
+                  ? MjpegView(
+                      url: '${vm.serverBaseUrl ?? server.baseUrl}/api/camera/${vm.cameraIdFor(robot)}/stream',
+                      headers: vm.apiClient?.mediaHeaders,
+                    )
                   : Center(
                       child: Column(
                         mainAxisSize: MainAxisSize.min,

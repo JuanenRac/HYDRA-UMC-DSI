@@ -29,6 +29,11 @@ class ServerInfo {
   final String username;
   final String password;
 
+  /// True once the server was seen answering only over HTTPS (it was started
+  /// with TLS_CERT_PATH/TLS_KEY_PATH): every address built from this is
+  /// https/wss.
+  final bool useTls;
+
   const ServerInfo({
     required this.host,
     this.port = 3000,
@@ -42,32 +47,38 @@ class ServerInfo {
     this.nickname = '',
     this.username = '',
     this.password = '',
+    this.useTls = false,
   });
 
-  String get baseUrl => 'http://$host:$port';
+  String get baseUrl => '${useTls ? 'https' : 'http'}://$host:$port';
 
   String wsUrl(String? token) {
-    final base = 'ws://$host:$port/ws';
+    final base = '${useTls ? 'wss' : 'ws'}://$host:$port/ws';
     return token != null ? '$base?token=$token' : base;
   }
 
   String get displayName => nickname.isNotEmpty ? nickname : (hostname.isNotEmpty ? hostname : host);
 
-  factory ServerInfo.fromHydraInfo(String host, int port, Map<String, dynamic> payload) {
+  factory ServerInfo.fromHydraInfo(String host, int port, Map<String, dynamic> payload, {bool useTls = false}) {
     return ServerInfo(
       host: host,
       port: port,
       product: (payload['product'] ?? '') as String,
-      remoteApiVersion: (payload['remoteApiVersion'] ?? 0) as int,
+      remoteApiVersion: _asInt(payload['remoteApiVersion']),
       appVersion: (payload['appVersion'] ?? '') as String,
       hostname: (payload['hostname'] ?? '') as String,
-      controllerCount: (payload['controllerCount'] ?? 0) as int,
-      robotCount: (payload['robotCount'] ?? 0) as int,
-      uptimeSeconds: (payload['uptimeSeconds'] ?? 0) as int,
+      controllerCount: _asInt(payload['controllerCount']),
+      robotCount: _asInt(payload['robotCount']),
+      uptimeSeconds: _asInt(payload['uptimeSeconds']),
+      useTls: useTls,
     );
   }
 
-  ServerInfo copyWith({String? nickname, String? username, String? password}) {
+  // A device that answers on this port with something else must not break the
+  // scan with a cast: a number reads as itself, anything else as 0.
+  static int _asInt(dynamic v) => v is num ? v.toInt() : 0;
+
+  ServerInfo copyWith({String? nickname, String? username, String? password, bool? useTls}) {
     return ServerInfo(
       host: host,
       port: port,
@@ -81,6 +92,7 @@ class ServerInfo {
       nickname: nickname ?? this.nickname,
       username: username ?? this.username,
       password: password ?? this.password,
+      useTls: useTls ?? this.useTls,
     );
   }
 

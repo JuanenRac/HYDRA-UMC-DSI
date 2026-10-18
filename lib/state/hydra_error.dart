@@ -36,6 +36,15 @@ enum HydraErrorKind {
   // resolved server-side, in whatever language the shared backend emits
   // it in, so it is shown as-is rather than run through a template.
   serverMessage,
+  // The server refused a command, and why: a robot reserved by another
+  // account (409), a command it does not know or a value it cannot take (400),
+  // a role without the permission (403), a 200 that carried warnings (nothing
+  // applied), and a STOP that never got an answer.
+  robotReserved,
+  permissionDenied,
+  commandRejected,
+  commandNotApplied,
+  stopNotConfirmed,
 }
 
 class HydraError {
@@ -67,6 +76,16 @@ class HydraError {
         return l10n.errWsAuthRejected;
       case HydraErrorKind.serverMessage:
         return params['message'] ?? '';
+      case HydraErrorKind.robotReserved:
+        return l10n.errRobotReserved(params['owner'] ?? '');
+      case HydraErrorKind.permissionDenied:
+        return l10n.errPermissionDenied;
+      case HydraErrorKind.commandRejected:
+        return l10n.errCommandRejected(params['command'] ?? '', params['reason'] ?? '');
+      case HydraErrorKind.commandNotApplied:
+        return l10n.errCommandNotApplied(params['command'] ?? '', params['reason'] ?? '');
+      case HydraErrorKind.stopNotConfirmed:
+        return l10n.errStopNotConfirmed;
     }
   }
 }

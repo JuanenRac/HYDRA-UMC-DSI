@@ -145,16 +145,21 @@ Stream<ServerInfo> scanSubnets({String? lastHost}) async* {
       Future<void> worker() async {
         while (index < hosts.length) {
           final host = hosts[index++];
-          final apiClient = HydraApiClient(host, defaultPort, client: client);
-          final info = await apiClient.getHydraInfo();
-          if (info != null && !controller.isClosed) {
-            controller.add(ServerInfo.fromHydraInfo(host, defaultPort, info));
+          try {
+            final apiClient = HydraApiClient(host, defaultPort, client: client);
+            final info = await apiClient.getHydraInfo();
+            if (info != null && !controller.isClosed) {
+              controller.add(ServerInfo.fromHydraInfo(host, defaultPort, info, useTls: apiClient.usesTls));
+            }
+          } catch (_) {
+            // One host that answers with something unexpected must not abort
+            // the sweep (or leave the "searching" spinner running forever).
           }
         }
       }
 
       final workers = List.generate(_scanConcurrency, (_) => worker());
-      unawaited(Future.wait(workers).then((_) => controller.close()));
+      unawaited(Future.wait(workers).whenComplete(controller.close));
       yield* controller.stream;
     }
   } finally {

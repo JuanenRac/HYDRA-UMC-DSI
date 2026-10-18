@@ -10,6 +10,8 @@
 // viewed from the browser, a phone, a tablet, or this touchscreen.
 // =============================================================================
 
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -57,7 +59,12 @@ class _RobotsGridSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final robots = context.select<RobotViewModel, List<RobotView>>((vm) => vm.robots);
+    // `vm.robots` builds a NEW list on every call, so selecting it compared
+    // lists by identity and the grid rebuilt on every notification (the metrics
+    // tick included). The selected value is a signature of the robots' data
+    // instead: equal text, no rebuild.
+    context.select<RobotViewModel, String>((vm) => jsonEncode(vm.robots.map((r) => r.raw).toList()));
+    final robots = context.read<RobotViewModel>().robots;
     final l10n = AppLocalizations.of(context)!;
 
     if (robots.isEmpty) {
@@ -97,7 +104,7 @@ class _MetricsBar extends StatelessWidget {
           const SizedBox(width: 20),
           _stat(Icons.storage, '${metrics.memoryUsage}%'),
           const SizedBox(width: 20),
-          _stat(Icons.thermostat, '${metrics.temp.toStringAsFixed(0)}°C'),
+          _stat(Icons.thermostat, metrics.tempIsReal ? '${metrics.temp.toStringAsFixed(0)}°C' : '--'),
           const Spacer(),
           Text(
             AppLocalizations.of(context)!.dashboardUptime(formatUptime(metrics.uptime)),

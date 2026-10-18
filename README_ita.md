@@ -10,7 +10,8 @@
   🇮🇹 <b>Italiano</b> |
   <a href="README_deu.md">🇩🇪 Deutsch</a> |
   <a href="README_zho.md">🇨🇳 简体中文</a> |
-  <a href="README_jpn.md">🇯🇵 日本語</a>
+  <a href="README_jpn.md">🇯🇵 日本語</a> |
+  <a href="README_por.md">🇵🇹 Português</a>
 </p>
 
 
@@ -32,9 +33,9 @@ Un'interfaccia touch nativa in Flutter (Dart, con target reale desktop Linux) pe
 
 ## 🏗️ Cosa è implementato
 
-- **Login** (`lib/ui/login_screen.dart`, `lib/state/robot_view_model.dart`) - campi IP/porta del server precompilati con un valore LAN ragionevole, campi nome utente/password dimensionati per il tocco e vuoti per impostazione predefinita (nessuna credenziale precompilata - il precompilamento iniziale `admin`/`admin` è stato rimosso quando ogni server ha smesso di creare quell'account predefinito al primo avvio reale di produzione), `POST /api/login` verso l'account inserito dall'operatore; è possibile creare account aggiuntivi a privilegio minore "operator" da Config > Users nell'interfaccia web. Token di sessione persistito tra gli avvii tramite `shared_preferences` - importante su un pannello kiosk che deve restare autenticato anche dopo un ciclo di spegnimento/accensione del CM5 stesso, non solo dopo la riapertura dell'app. Una finestra di dialogo "Scan local network" (`lib/network/discovery.dart`) trova i server senza dover già conoscere l'IP - doppiamente utile qui, dato che il CM5 su cui gira questa app è spesso proprio il controller a cui deve connettersi.
+- **Login** (`lib/ui/login_screen.dart`, `lib/state/robot_view_model.dart`) - campi IP/porta del server precompilati con un valore LAN ragionevole, campi nome utente/password dimensionati per il tocco e vuoti per impostazione predefinita (nessuna credenziale precompilata - il precompilamento iniziale `admin`/`admin` è stato rimosso quando ogni server ha smesso di creare quell'account predefinito al primo avvio reale di produzione), `POST /api/login` verso l'account inserito dall'operatore; è possibile creare account aggiuntivi a privilegio minore "operator" da Config > Users nell'interfaccia web. Il token di sessione è conservato nell'archivio sicuro della piattaforma (libsecret su Linux, che richiede un servizio di portachiavi attivo: su un pannello che non lo ha la sessione dura fino al riavvio dell'app e il login viene richiesto di nuovo). Una finestra di dialogo "Scan local network" (`lib/network/discovery.dart`) trova i server senza dover già conoscere l'IP - doppiamente utile qui, dato che il CM5 su cui gira questa app è spesso proprio il controller a cui deve connettersi.
 - **Discovery di rete** (`lib/network/discovery.dart`) - due percorsi in parallelo dalla stessa finestra "Scan local network": mDNS/Bonjour reale (`discoverMdns()`, interrogando il servizio `_hydra._tcp` pubblicato da `server.ts` tramite il pacchetto `multicast_dns`) e una scansione concorrente a forza bruta di `GET /api/hydra-info` sulle sottoreti locali reali di questo dispositivo (`scanSubnets()`), deduplicata per host:porta - portato da HYDRA-UMC-IOS-CONTROL, il primo client dell'ecosistema ad aggiungere mDNS reale.
-- **Sincronizzazione atomica dei comandi** (`lib/state/robot_view_model.dart`, il proprio `_sendAtomicCommand()`) - ogni scrittura (enable/disable/play/pause/stop/jog/valve/pump/speed/vision) usa il reale endpoint `POST /api/robot/:id/command`, con la corretta propagazione ai robot combinati (`combinedWith`) e un rollback allo stato precedente se la richiesta fallisce - particolarmente importante per un pendant di jog/E-STOP posizionato a pochi metri dai robot reali.
+- **Sincronizzazione atomica dei comandi** (`lib/state/robot_view_model.dart`, il proprio `_sendAtomicCommand()`) - ogni scrittura (play/pause/stop/jog/valve/pump/speed/vision) usa il reale endpoint `POST /api/robot/:id/command`, con la corretta propagazione ai robot combinati (`combinedWith`) e un rollback allo stato precedente se la richiesta fallisce - particolarmente importante per un pendant di jog/E-STOP posizionato a pochi metri dai robot reali.
 - **Sincronizzazione live via WebSocket** (`lib/network/hydra_websocket.dart`) - allega sempre `?token=`, gestisce sia i tipi di broadcast `"settings"` che `"delta"`, si riconnette automaticamente in caso di caduta.
 - **Navigazione touch orizzontale** (`lib/ui/main_screen.dart`) - una barra superiore persistente con 6 grandi schede icona+etichetta (Dashboard/Control/Camera/Vista 3D/Metriche/Impostazioni) lungo tutta la larghezza fissa di 1280px, nello spirito di KlipperScreen invece di una barra di navigazione inferiore in stile telefono - seguendo il catalogo richiesto dal proprietario del progetto, riorganizzato per un pannello touch largo invece di un layout verticale da telefono.
 - **Dashboard** (`lib/ui/dashboard_screen.dart`) - schede per robot, reattive in tempo reale tramite `Provider`, convenzione dei LED (verde lampeggiante = attivo, rosso fisso = inattivo), visualizzazione dei robot combinati e chip dei moduli (CAM/XY/ATC/PNP/CNC/LSR/BED/VAC/RCK) - lo stesso linguaggio visivo di tutti gli altri client di questo ecosistema.
@@ -133,7 +134,7 @@ HYDRA-UMC-DSI/
 │   │   ├── hydra_api_client.dart    # REST: login, settings, comando atomico robot, metriche di sistema - X-Hydra-Client: dsi
 │   │   ├── hydra_websocket.dart     # Client di sincronizzazione live /ws
 │   │   ├── discovery.dart           # Scansione concorrente delle sottoreti locali reali di questo dispositivo
-│   │   └── auth_prefs.dart          # Connessione e token persistiti (shared_preferences)
+│   │   └── auth_prefs.dart          # Connessione e token persistiti (secure storage + shared_preferences)
 │   ├── state/
 │   │   ├── robot_view_model.dart    # Unico ChangeNotifier ascoltato da ogni schermata
 │   │   └── hydra_error.dart         # Superficie di errore tipizzata per RobotViewModel (senza un proprio BuildContext)

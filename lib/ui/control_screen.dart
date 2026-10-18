@@ -76,12 +76,12 @@ class _ControlScreenState extends State<ControlScreen> {
                       _jogStepSelector(l10n),
                       const SizedBox(height: 12),
                       JoystickPad(
-                        enabled: robot.online,
+                        // Not while a trajectory is running: the server's
+                        // playback and a jog would both write the same setpoint.
+                        enabled: robot.online && !(robot.isPlaying && !robot.isPaused),
                         onJog: (dx, dy, dz) {
                           HapticFeedback.selectionClick();
-                          if (dx != 0) vm.jog(_jogTarget, 'x', dx * _jogStep);
-                          if (dy != 0) vm.jog(_jogTarget, 'y', dy * _jogStep);
-                          if (dz != 0) vm.jog('robot', 'z', dz * _jogStep);
+                          vm.jogXYZ(_jogTarget, dx, dy, dz, _jogStep);
                         },
                       ),
                     ],
@@ -119,9 +119,9 @@ class _ControlScreenState extends State<ControlScreen> {
       DigitalReadout(label: 'X', value: robot.posAxis('x')),
       DigitalReadout(label: 'Y', value: robot.posAxis('y')),
       DigitalReadout(label: 'Z', value: robot.posAxis('z')),
-      DigitalReadout(label: 'J1', value: (robot.joints['j1'] ?? 0.0) as double, color: Colors.amber),
-      DigitalReadout(label: 'J2', value: (robot.joints['j2'] ?? 0.0) as double, color: Colors.amber),
-      DigitalReadout(label: 'J3', value: (robot.joints['j3'] ?? 0.0) as double, color: Colors.amber),
+      DigitalReadout(label: 'J1', value: robot.joint('j1'), color: Colors.amber),
+      DigitalReadout(label: 'J2', value: robot.joint('j2'), color: Colors.amber),
+      DigitalReadout(label: 'J3', value: robot.joint('j3'), color: Colors.amber),
     ];
   }
 

@@ -60,16 +60,20 @@ not repeated here to avoid drift) with exactly one difference: this app's
 own `network/hydra_api_client.dart` sends `X-Hydra-Client: dsi` instead of
 `ios`/`android`/`suite`.
 
-**Known gap, not fixed by this app's own code:** `REMOTE_API.md` section 1
-documents only `suite`, `android`, and `ios` as recognized values for that
-header - a value it doesn't recognize is "never gated," meaning this app's
-own discovery requests pass through unconditionally today (functionally
-identical to sending no header at all). HYDRA-UMC-STUDIO's own
-`SystemSettings.remoteAccess` type and its Config > Remote Access tab
-would need a 4th toggle added server-side before the project owner could
-disable this app's own remote access independently of the other three -
-that's a change to a different repository's server code, out of scope for
-this one. Tracked in the root README's own "Known Follow-ups" section.
+HYDRA-UMC-SERVER's `serverPolicy.ts` recognizes `suite`, `android`, `ios`,
+`watch` and `dsi`, so the owner can switch this app's remote access off on
+its own (Config > Remote Access); `REMOTE_API.md` section 1 still lists only
+the first three, which is a documentation lag on the server side, not a
+behaviour of this app.
+
+The details the other clients share also hold here: `GET /api/settings`
+needs a bearer token (either role); the token reaches `/ws` as the
+`hydra.bearer` subprotocol (a server from before that gets `?token=`
+automatically); a server answering 400 (a command it does not have), 409 (a
+robot reserved by another account) or 200 with `warnings` (nothing applied)
+is shown to the operator and the optimistic change is undone; and
+`GET /api/system/metrics` carries the bearer token, with `temp_is_real:
+false` shown as `--`.
 
 ## 4. The one screen that isn't a straight port: 3D View
 

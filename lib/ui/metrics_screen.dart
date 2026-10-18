@@ -56,8 +56,10 @@ class MetricsScreen extends StatelessWidget {
               _MetricTile(
                 icon: Icons.thermostat,
                 label: l10n.metricsTemperature,
-                value: '${metrics.temp.toStringAsFixed(1)}°C',
-                color: _tempColor(metrics.temp),
+                // A host without a temperature sensor reports a made-up value
+                // (temp_is_real: false): shown as "--", never coloured as an alarm.
+                value: metrics.tempIsReal ? '${metrics.temp.toStringAsFixed(1)}°C' : '--',
+                color: metrics.tempIsReal ? _tempColor(metrics.temp) : Colors.grey,
               ),
               _MetricTile(icon: Icons.timer, label: l10n.metricsUptime, value: _formatUptime(metrics.uptime), color: const Color(0xFF00E5FF)),
             ],

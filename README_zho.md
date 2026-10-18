@@ -10,7 +10,8 @@
   <a href="README_ita.md">🇮🇹 Italiano</a> |
   <a href="README_deu.md">🇩🇪 Deutsch</a> |
   🇨🇳 <b>简体中文</b> |
-  <a href="README_jpn.md">🇯🇵 日本語</a>
+  <a href="README_jpn.md">🇯🇵 日本語</a> |
+  <a href="README_por.md">🇵🇹 Português</a>
 </p>
 
 
@@ -32,9 +33,9 @@
 
 ## 🏗️ 已实现的功能
 
-- **登录**（`lib/ui/login_screen.dart`、`lib/state/robot_view_model.dart`）—— 服务器 IP/端口字段预填了合理的局域网默认值,用户名/密码字段面向触控设计,默认留空（不预填任何硬编码凭据——一旦每台服务器在真实生产环境首次启动时不再自动创建该默认账户,最初的 `admin`/`admin` 预填就被移除了）,`POST /api/login` 针对操作员实际输入的账户;可从浏览器界面的 Config > Users 中创建额外的低权限“操作员”账户。会话令牌通过 `shared_preferences` 在多次启动之间持久化——这对于一个应当在 CM5 断电重启后依然保持登录状态、而不仅仅是应用重新启动后保持登录的看板面板来说非常重要。一个“扫描本地网络”对话框（`lib/network/discovery.dart`）无需预先知道 IP 即可找到服务器——这在这里尤其有用,因为本应用运行所在的 CM5,往往正是它应该连接的那个控制器本身。
+- **登录**（`lib/ui/login_screen.dart`、`lib/state/robot_view_model.dart`）—— 服务器 IP/端口字段预填了合理的局域网默认值,用户名/密码字段面向触控设计,默认留空（不预填任何硬编码凭据——一旦每台服务器在真实生产环境首次启动时不再自动创建该默认账户,最初的 `admin`/`admin` 预填就被移除了）,`POST /api/login` 针对操作员实际输入的账户;可从浏览器界面的 Config > Users 中创建额外的低权限“操作员”账户。会话令牌保存在平台的安全存储中（Linux 上为 libsecret，需要正在运行的密钥环服务；没有它的面板上，会话只持续到应用重新启动，之后会再次要求登录）。一个“扫描本地网络”对话框（`lib/network/discovery.dart`）无需预先知道 IP 即可找到服务器——这在这里尤其有用,因为本应用运行所在的 CM5,往往正是它应该连接的那个控制器本身。
 - **网络发现**（`lib/network/discovery.dart`）—— 两条路径从同一个“扫描本地网络”对话框并行运行:真实的 mDNS/Bonjour（`discoverMdns()`，通过 `multicast_dns` 包查询 `server.ts` 自身发布的 `_hydra._tcp`）,以及针对本设备自身真实本地子网的并发暴力扫描 `GET /api/hydra-info`（`scanSubnets()`）,按 host:port 去重——从 HYDRA-UMC-IOS-CONTROL 移植而来,后者是本生态系统中第一个加入真实 mDNS 发现的客户端。
-- **原子化指令同步**（`lib/state/robot_view_model.dart` 自身的 `_sendAtomicCommand()`）—— 每一次写入（启用/禁用/播放/暂停/停止/点动/阀门/泵/速度/视觉）都使用真实的 `POST /api/robot/:id/command` 端点,具备正确的合并机器人（`combinedWith`）传播机制,并在请求失败时回滚到变更前的快照——这对于距离真实机器人仅几英尺远的点动手柄/紧急停止尤为重要。
+- **原子化指令同步**（`lib/state/robot_view_model.dart` 自身的 `_sendAtomicCommand()`）—— 每一次写入（播放/暂停/停止/点动/阀门/泵/速度/视觉）都使用真实的 `POST /api/robot/:id/command` 端点,具备正确的合并机器人（`combinedWith`）传播机制,并在请求失败时回滚到变更前的快照——这对于距离真实机器人仅几英尺远的点动手柄/紧急停止尤为重要。
 - **实时 WebSocket 同步**（`lib/network/hydra_websocket.dart`）—— 始终附带 `?token=`,同时处理 `"settings"` 和 `"delta"` 两种广播类型,断线后自动重连。
 - **水平触控导航**（`lib/ui/main_screen.dart`）—— 在固定的 1280px 宽度上,一条常驻的顶部栏包含 6 个大图标+标签选项卡（仪表盘/控制/摄像头/3D 视图/指标/设置）,精神上更接近 KlipperScreen,而非手机式的底部导航栏——匹配项目所有者所要求的目录,并针对宽幅触控面板而非纵向手机布局进行了重新组织。
 - **仪表盘**（`lib/ui/dashboard_screen.dart`）—— 每机器人卡片,通过 `Provider` 实时响应,LED 惯例（绿色脉冲=活动,红色常亮=非活动）,合并机器人显示,以及模块芯片（CAM/XY/ATC/PNP/CNC/LSR/BED/VAC/RCK）——与本生态系统中其他每一个客户端相同的视觉语言。
@@ -120,7 +121,7 @@ HYDRA-UMC-DSI/
 │   │   ├── hydra_api_client.dart    # REST：登录、设置、原子化机器人指令、系统指标——X-Hydra-Client: dsi
 │   │   ├── hydra_websocket.dart     # /ws 实时同步客户端
 │   │   ├── discovery.dart           # 本设备自身真实本地子网的并发扫描
-│   │   └── auth_prefs.dart          # 持久化的连接信息 + 令牌（shared_preferences）
+│   │   └── auth_prefs.dart          # 持久化的连接信息 + 令牌（secure storage + shared_preferences）
 │   ├── state/
 │   │   ├── robot_view_model.dart    # 每个界面都监听的单一 ChangeNotifier
 │   │   └── hydra_error.dart         # 面向 RobotViewModel 的类型化错误接口（自身无 BuildContext）

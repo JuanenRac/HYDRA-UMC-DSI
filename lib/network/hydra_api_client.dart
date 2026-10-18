@@ -25,44 +25,82 @@ import 'package:http/http.dart' as http;
 
 class HydraApiException implements Exception {
   final String message;
-  HydraApiException(this.message);
+  /// HTTP status of the server's answer; null when there was no answer.
+  final int? statusCode;
+  /// The stable `code` field of the server's JSON error body
+  /// (TOKEN_EXPIRED, TOKEN_INVALID, SESSION_REVOKED, ...), when it sent one.
+  final String? code;
+  /// The server's own `error` text, when it sent one.
+  final String? serverMessage;
+  HydraApiException(this.message, {this.statusCode, this.code, this.serverMessage});
+
+  /// A 401, or a 403 that says the token expired or is invalid: a refresh or
+  /// a new login can cure it. (A plain 403 is a missing role permission.)
+  bool get isSessionProblem =>
+      statusCode == 401 || (statusCode == 403 && (code == 'TOKEN_EXPIRED' || code == 'TOKEN_INVALID'));
+
+  /// A 403 about the account's role, not about the session.
+  bool get isPermissionDenied => statusCode == 403 && !isSessionProblem;
+
+  /// The robot is reserved by another account (the server's 409).
+  bool get isReservedByAnother => statusCode == 409;
+
+  /// The server refused the command itself (unknown command, a value it cannot take).
+  bool get isRejectedCommand => statusCode == 400;
+
   @override
   String toString() => message;
 }
 
 class HydraApiClient {
-  final String baseUrl;
+  // Starts as plain HTTP (or HTTPS when [useTls] says the server was already
+  // seen on it) - getHydraInfo()/login() switch it to HTTPS the first time a
+  // plain-HTTP probe gets no answer at all and an HTTPS one does (the server's
+  // optional TLS_CERT_PATH/TLS_KEY_PATH switches it to HTTPS/WSS-only, with no
+  // HTTP fallback of its own). It never goes back to http by itself.
+  String baseUrl;
+  bool get usesTls => baseUrl.startsWith('https://');
   String? authToken;
   final http.Client _client;
 
-  HydraApiClient(String host, int port, {http.Client? client})
-      : baseUrl = 'http://$host:$port',
+  /// [useTls] starts the client on https:// - for a server that was already
+  /// seen answering TLS. It never goes back to plain http by itself: a server
+  /// that once spoke TLS and now answers over http is not trusted with a
+  /// password or a token in the clear.
+  HydraApiClient(String host, int port, {http.Client? client, bool useTls = false})
+      : baseUrl = '${useTls ? 'https' : 'http'}://$host:$port',
         _client = client ?? http.Client();
 
   Map<String, String> get _authHeaders =>
       authToken != null ? {'Authorization': 'Bearer $authToken'} : const {};
 
+  /// Headers for requests made outside this class (the live camera stream):
+  /// the client identity and the bearer token. A server started with
+  /// HYDRA_UMC_CAMERA_AUTH=required refuses the picture without a signed-in
+  /// client; the token goes in a header, never in the address.
+  Map<String, String> get mediaHeaders => {..._clientHeaders, ..._authHeaders};
+
   /// Self-identifies this client to server.ts's own per-client remote-access
-  /// toggles (Config > Remote Access). REMOTE_API.md section 1 documents
-  /// only "suite", "android", "ios" as recognized values as of this writing -
-  /// "dsi" is a genuinely new client the server doesn't know how to gate yet.
-  /// Per that same section: "A request with no X-Hydra-Client header, or an
-  /// unrecognized value, is never gated here" - so this app's discovery
-  /// requests simply pass through ungated (same as today's behavior with no
-  /// header at all) until HYDRA-UMC-STUDIO's own SystemSettings.remoteAccess
-  /// type and Config > Remote Access UI grow a 4th "dsi" toggle. This is
-  /// out of scope for this app's
-  /// own repo since it requires a change on the server side.
+  /// toggles (Config > Remote Access): HYDRA-UMC-SERVER's serverPolicy.ts
+  /// recognizes "suite", "android", "ios", "watch" and "dsi", so this app's
+  /// access can be switched off on its own. A request with no header, or an
+  /// unrecognized value, is never gated.
   static const Map<String, String> _clientHeaders = {'X-Hydra-Client': 'dsi'};
 
   Future<Map<String, dynamic>> login(String username, String password) async {
+    // A direct "add server, log in" flow never gets a chance to learn the
+    // scheme first: resolve it here, before spending the login on a scheme a
+    // TLS-only server will not answer.
+    await _resolveScheme();
     final resp = await _client
         .post(
           Uri.parse('$baseUrl/api/login'),
           headers: {'Content-Type': 'application/json', ..._clientHeaders},
           body: jsonEncode({'username': username, 'password': password}),
         )
-        .timeout(const Duration(seconds: 5));
+        // Longer than the other calls: login is the first request against a
+        // host, so it also pays for DNS and connection set-up.
+        .timeout(const Duration(seconds: 15));
     return _expectJson(resp);
   }
 
@@ -106,9 +144,35 @@ class HydraApiClient {
   }
 
   Future<Map<String, dynamic>?> getHydraInfo() async {
+    final direct = await _probeHydraInfo(baseUrl);
+    if (direct != null) return direct;
+    // Only plain http that gets no answer is retried over https, and the
+    // answer is remembered in baseUrl for every later call.
+    if (baseUrl.startsWith('http://')) {
+      final httpsUrl = baseUrl.replaceFirst('http://', 'https://');
+      final viaHttps = await _probeHydraInfo(httpsUrl);
+      if (viaHttps != null) {
+        baseUrl = httpsUrl;
+        return viaHttps;
+      }
+    }
+    return null;
+  }
+
+  // Same scheme resolution getHydraInfo() does, for login() and getSettings():
+  // a harmless GET /api/hydra-info (it needs no credentials), only to learn the
+  // scheme this host answers on.
+  Future<void> _resolveScheme() async {
+    if (baseUrl.startsWith('https://')) return;
+    if (await _probeHydraInfo(baseUrl) != null) return;
+    final httpsUrl = baseUrl.replaceFirst('http://', 'https://');
+    if (await _probeHydraInfo(httpsUrl) != null) baseUrl = httpsUrl;
+  }
+
+  Future<Map<String, dynamic>?> _probeHydraInfo(String base) async {
     try {
       final resp = await _client
-          .get(Uri.parse('$baseUrl/api/hydra-info'), headers: _clientHeaders)
+          .get(Uri.parse('$base/api/hydra-info'), headers: _clientHeaders)
           .timeout(const Duration(seconds: 3));
       if (resp.statusCode != 200) return null;
       final json = jsonDecode(resp.body) as Map<String, dynamic>;
@@ -120,6 +184,7 @@ class HydraApiClient {
   }
 
   Future<Map<String, dynamic>> getSettings() async {
+    await _resolveScheme(); // a restored session never ran login(), so the scheme is learned here
     final resp = await _client
         .get(Uri.parse('$baseUrl/api/settings'), headers: {..._clientHeaders, ..._authHeaders})
         .timeout(const Duration(seconds: 5));
@@ -137,27 +202,53 @@ class HydraApiClient {
     _expectJson(resp);
   }
 
-  Future<Map<String, dynamic>> postRobotCommand(dynamic robotId, Map<String, dynamic> payload) async {
+  /// [timeout] is 5 s for an ordinary command; a STOP uses a shorter one so a
+  /// stuck connection is given up and retried quickly.
+  Future<Map<String, dynamic>> postRobotCommand(
+    dynamic robotId,
+    Map<String, dynamic> payload, {
+    Duration timeout = const Duration(seconds: 5),
+  }) async {
     final resp = await _client
         .post(
           Uri.parse('$baseUrl/api/robot/$robotId/command'),
           headers: {'Content-Type': 'application/json', ..._clientHeaders, ..._authHeaders},
           body: jsonEncode(payload),
         )
-        .timeout(const Duration(seconds: 5));
+        .timeout(timeout);
     return _expectJson(resp);
   }
 
   Future<Map<String, dynamic>> getSystemMetrics() async {
     final resp = await _client
-        .get(Uri.parse('$baseUrl/api/system/metrics'), headers: _clientHeaders)
+        .get(Uri.parse('$baseUrl/api/system/metrics'), headers: {..._clientHeaders, ..._authHeaders})
         .timeout(const Duration(seconds: 5));
     return _expectJson(resp);
   }
 
   Map<String, dynamic> _expectJson(http.Response resp) {
     if (resp.statusCode < 200 || resp.statusCode >= 300) {
-      throw HydraApiException('HTTP ${resp.statusCode} from ${resp.request?.url.path}');
+      // The server's error body carries a reason (`error`) and, for the auth
+      // middleware, a stable `code`: keep both so the caller can tell an
+      // expired session from a missing permission, an unknown command (400)
+      // or a robot reserved by someone else (409).
+      String? code;
+      String? serverMessage;
+      try {
+        final body = jsonDecode(resp.body);
+        if (body is Map) {
+          if (body['code'] is String) code = body['code'] as String;
+          if (body['error'] is String) serverMessage = body['error'] as String;
+        }
+      } catch (_) {
+        // Not JSON (a proxy's HTML page, say): the status alone has to do.
+      }
+      throw HydraApiException(
+        'HTTP ${resp.statusCode} from ${resp.request?.url.path}',
+        statusCode: resp.statusCode,
+        code: code,
+        serverMessage: serverMessage,
+      );
     }
     try {
       return jsonDecode(resp.body) as Map<String, dynamic>;

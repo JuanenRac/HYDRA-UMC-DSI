@@ -135,7 +135,17 @@ class AuthPrefs {
   // predating refresh-token support) leaves the previously-stored refresh
   // token, if any, untouched rather than deleting it, since a missing
   // argument here says nothing about whether one should still exist.
-  Future<void> saveToken(String token, String username, {String? refreshToken}) async {
+  //
+  // `replaceRefreshToken` is for a real login: it makes an absent
+  // refreshToken DELETE the stored one instead of leaving it, so a refresh
+  // token left behind by a previous account (a logout whose delete failed)
+  // can never become valid again for the account that signs in next.
+  Future<void> saveToken(
+    String token,
+    String username, {
+    String? refreshToken,
+    bool replaceRefreshToken = false,
+  }) async {
     var tokenWritten = false;
     var usernameWritten = false;
     try {
@@ -145,6 +155,8 @@ class AuthPrefs {
       usernameWritten = true;
       if (refreshToken != null) {
         await _secure.write(_keyRefreshToken, refreshToken);
+      } else if (replaceRefreshToken) {
+        await _secure.delete(_keyRefreshToken);
       }
       // Secure storage is now the source of truth - clear any stale
       // plaintext copy left by a earlier session, and any in-memory-
@@ -192,6 +204,20 @@ class AuthPrefs {
       _inMemoryUsername = username;
       _inMemoryRefreshToken = refreshToken;
     }
+  }
+
+  static const _keyUseTls = 'hydra_use_tls';
+
+  /// The scheme the saved server was last seen answering. Once it spoke TLS
+  /// the panel starts on https and never probes it over plain http again.
+  Future<void> saveUseTls(bool useTls) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_keyUseTls, useTls);
+  }
+
+  Future<bool> loadUseTls() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_keyUseTls) ?? false;
   }
 
   Future<String?> loadToken() async {

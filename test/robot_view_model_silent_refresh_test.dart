@@ -45,6 +45,7 @@ class _FakeServer {
   final List<bool> _wsBehaviors;
   int _wsConnectionCount = 0;
   final List<String?> wsTokensSeen = [];
+  int refreshCalls = 0;
   String currentLoginToken = 'initial-token';
   String currentRefreshToken = 'initial-refresh-token';
   String refreshedToken = 'renewed-token';
@@ -53,12 +54,27 @@ class _FakeServer {
   _FakeServer(this.server, this._wsBehaviors) {
     server.listen((request) async {
       if (WebSocketTransformer.isUpgradeRequest(request)) {
-        final query = request.uri.queryParameters;
-        wsTokensSeen.add(query['token']);
+        // The token arrives as the "hydra.bearer" subprotocol (the form the
+        // real server prefers); ?token= is what an older client would send.
+        final offered = (request.headers.value('sec-websocket-protocol') ?? '')
+            .split(',')
+            .map((p) => p.trim())
+            .where((p) => p.isNotEmpty)
+            .toList();
+        final subprotocolToken = offered.length >= 2 && offered.first == 'hydra.bearer' ? offered[1] : null;
+        wsTokensSeen.add(subprotocolToken ?? request.uri.queryParameters['token']);
         final rejectThisOne = _wsConnectionCount < _wsBehaviors.length ? _wsBehaviors[_wsConnectionCount] : false;
         _wsConnectionCount++;
-        final socket = await WebSocketTransformer.upgrade(request);
+        final socket = await WebSocketTransformer.upgrade(
+          request,
+          protocolSelector: (protocols) => protocols.contains('hydra.bearer') ? 'hydra.bearer' : null,
+        );
         if (rejectThisOne) {
+          // Exactly what the real server does for a dead token: an error
+          // frame first, and about 100 ms later the 1008 close - two signals
+          // for ONE event, which must start ONE renewal.
+          socket.add(jsonEncode({'error': 'Access denied: Invalid token'}));
+          await Future<void>.delayed(const Duration(milliseconds: 100));
           await socket.close(1008, 'Access denied: Invalid token');
         }
         return;
@@ -82,6 +98,7 @@ class _FakeServer {
           request.response.write(jsonEncode({'controllers': []}));
           break;
         case 'POST /api/refresh':
+          refreshCalls++;
           if (json['refreshToken'] != currentRefreshToken) {
             request.response.statusCode = HttpStatus.unauthorized;
             request.response.write(jsonEncode({'error': 'Invalid or expired refresh token'}));
@@ -143,6 +160,9 @@ void main() {
     expect(fakeServer.wsTokensSeen[0], 'initial-token');
     expect(fakeServer.wsTokensSeen[1], 'renewed-token', reason: 'the second real WS connection must carry the freshly refreshed token');
     expect(vm.isLoggedIn, isTrue, reason: 'a recoverable 1008 must never surface as a visible logout');
+    // The error frame and the 1008 close that follows it are one event: one
+    // renewal, not two (the refresh token is single-use).
+    expect(fakeServer.refreshCalls, 1, reason: 'the frame and the close must start a single renewal');
   });
 
   test('a WS 1008 close with an unrecognized refresh token still forces a real logout', () async {

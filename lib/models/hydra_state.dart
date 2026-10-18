@@ -56,7 +56,7 @@ class RobotView {
 
   List<int> get combinedWith {
     final arr = raw['combinedWith'];
-    if (arr is List) return arr.map((e) => e as int).toList();
+    if (arr is List) return arr.whereType<num>().map((e) => e.toInt()).toList();
     return const [];
   }
 
@@ -71,16 +71,26 @@ class RobotView {
   Map<String, dynamic> get joints => (raw['joints'] ??= <String, dynamic>{}) as Map<String, dynamic>;
   void setJoint(String joint, double value) => joints[joint] = value;
 
+  /// A joint angle as a double. The server writes numbers with
+  /// Number(x.toFixed(3)), so a whole value (j1 = 0 at the home pose) arrives
+  /// as a JSON integer and decodes as an int: `as double` would throw and take
+  /// the whole Control screen with it. Anything that is not a number reads 0.
+  double joint(String name) {
+    final v = joints[name];
+    return v is num ? v.toDouble() : 0.0;
+  }
+
   Map<String, dynamic> get pos => (raw['pos'] ??= <String, dynamic>{}) as Map<String, dynamic>;
   double posAxis(String axis) => ((pos[axis] ?? 0.0) as num).toDouble();
   void setPosAxis(String axis, double value) => pos[axis] = value;
 
   Map<String, dynamic> get xyTable => (raw['xyTable'] ??= <String, dynamic>{}) as Map<String, dynamic>;
   Map<String, dynamic> get xyTablePos => (xyTable['pos'] ??= <String, dynamic>{}) as Map<String, dynamic>;
+  // Only xyTable.pos: for a relative jog the server updates that and leaves
+  // robot.pos.tx/ty alone (it mirrors them only for an absolute move), so
+  // writing them here made the local copy differ from the server's for good.
   void setXyTableAxis(String axis, double value) {
     xyTablePos[axis] = value;
-    if (axis == 'x') pos['tx'] = value;
-    if (axis == 'y') pos['ty'] = value;
   }
 
   Map<String, dynamic> get playbackState => (raw['playbackState'] ??= <String, dynamic>{}) as Map<String, dynamic>;
@@ -108,12 +118,15 @@ class RobotView {
     }
   }
 
-  void togglePaused() {
-    final newVal = !isPaused;
+  void togglePaused() => setPaused(!isPaused);
+
+  /// Sets the pause state to an explicit value (what is sent to the server as
+  /// params.paused), so every robot of a combined group ends up identical.
+  void setPaused(bool paused) {
     final pb = playbackState;
-    pb['isPaused'] = newVal;
-    pb['paused'] = newVal;
-    pb['requestPause'] = newVal;
+    pb['isPaused'] = paused;
+    pb['paused'] = paused;
+    pb['requestPause'] = paused;
     pb['isPlaying'] = true;
     pb['playing'] = true;
     pb['isFinished'] = false;

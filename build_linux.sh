@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 set -euo pipefail
 # HYDRA_UMC_SCRIPT_STANDARD_HEADER_BEGIN
 # *****************************************************************************
@@ -39,22 +40,9 @@ hydra_umc_pause_on_exit() {
 trap 'hydra_umc_pause_on_exit' EXIT
 
 
-# Always pause before this window closes - whether the build below succeeds
-# or fails - so a double-click launch doesn't flash a closed console before
-# any output can be read. Runs on every exit path (normal or `exit`) because
-# it's a trap, not something duplicated at each individual exit point.
-_pause_on_exit() {
-    local status=$?
-    echo
-    if [ "$status" -eq 0 ]; then
-        echo "Build finished successfully."
-    else
-        echo "Build FAILED (exit code $status)."
-    fi
-    read -n 1 -s -r -p "Press any key to close this window..." || true
-    echo
-}
-trap _pause_on_exit EXIT
+# (The pause before the window closes is the single EXIT trap above, which
+# asks only in an interactive terminal; a second trap used to replace it and
+# wait for a key even in CI and in pipes.)
 
 if ! command -v flutter >/dev/null 2>&1; then
     echo "[ERROR] flutter was not found on PATH. Install the Flutter SDK" >&2
