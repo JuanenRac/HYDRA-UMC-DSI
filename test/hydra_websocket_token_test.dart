@@ -7,8 +7,10 @@
 // dart:io server:
 //   - as the "hydra.bearer" subprotocol, never in the address;
 //   - a server from before that subprotocol (it only reads ?token=) refuses
-//     the first upgrade, and the client opens the socket again at once with
-//     the token in the address, without reporting an error;
+//     the upgrade: the failure is reported and the token is never put in the
+//     address, however often the client retries;
+//   - a token a subprotocol cannot carry is reported as rejected and no
+//     connection is attempted;
 //   - a binary frame is ignored instead of throwing inside the listener.
 // =============================================================================
 
@@ -75,8 +77,8 @@ void main() {
     ws.disconnect();
   });
 
-  test('a server that refuses the subprotocol upgrade gets the token in the address, without an error', () async {
-    final (server, seen, sockets) = await _server(acceptSubprotocol: false);
+  test('a server that refuses the subprotocol upgrade is never given the token in the address', () async {
+    final (server, seen, _) = await _server(acceptSubprotocol: false);
     addTearDown(() => server.close(force: true));
     final errors = <HydraError>[];
     final statuses = <WsStatus>[];
@@ -88,17 +90,44 @@ void main() {
       onSettings: (_) {},
       onError: errors.add,
     );
-    final connected = sockets.stream.first;
     ws.connect();
-    await connected.timeout(const Duration(seconds: 5));
-    await Future<void>.delayed(const Duration(milliseconds: 200));
-
-    expect(seen.length, 2, reason: 'one refused upgrade, then the retry');
-    expect(seen.first.protocolHeader, contains('hydra.bearer'));
-    expect(seen.last.path, contains('token=tok.en-2'));
-    expect(errors, isEmpty, reason: 'the fallback is not an error');
-    expect(statuses, contains(WsStatus.connected));
+    await Future<void>.delayed(const Duration(milliseconds: 800));
     ws.disconnect();
+
+    expect(seen, isNotEmpty);
+    for (final upgrade in seen) {
+      expect(upgrade.path, isNot(contains('token')), reason: 'the address never carries the token');
+      expect(upgrade.protocolHeader, contains('hydra.bearer'));
+    }
+    expect(errors.map((e) => e.kind), contains(HydraErrorKind.wsConnectFailed));
+    expect(statuses, isNot(contains(WsStatus.connected)));
+  });
+
+  test('a token a subprotocol cannot carry is reported as rejected and nothing is attempted', () async {
+    final (server, seen, _) = await _server(acceptSubprotocol: true);
+    addTearDown(() => server.close(force: true));
+    final errors = <HydraError>[];
+    final ws = HydraWebSocket(
+      host: '127.0.0.1',
+      port: server.port,
+      token: 'not a valid token, with spaces',
+      onStatus: (_) {},
+      onSettings: (_) {},
+      onError: errors.add,
+    );
+    ws.connect();
+    await Future<void>.delayed(const Duration(milliseconds: 300));
+    ws.disconnect();
+
+    expect(seen, isEmpty);
+    expect(errors.map((e) => e.kind), [HydraErrorKind.wsAuthRejected]);
+  });
+
+  test('the connection address never holds the token', () {
+    final uri = HydraWebSocket.buildConnectionUri(host: '10.0.0.5', port: 3000, token: 'a.b-c');
+    expect(uri.toString(), 'ws://10.0.0.5:3000/ws?remoteApiVersion=2');
+    expect(HydraWebSocket.buildConnectionUri(host: 'h', port: 1, token: 'x', useTls: true).scheme, 'wss');
+    expect(HydraWebSocket.buildConnectionUri(host: 'h', port: 1).toString(), 'ws://h:1/ws');
   });
 
   test('every full snapshot is delivered, even one identical to the previous full snapshot', () async {

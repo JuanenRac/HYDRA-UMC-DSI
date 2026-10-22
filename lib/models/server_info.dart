@@ -52,11 +52,6 @@ class ServerInfo {
 
   String get baseUrl => '${useTls ? 'https' : 'http'}://$host:$port';
 
-  String wsUrl(String? token) {
-    final base = '${useTls ? 'wss' : 'ws'}://$host:$port/ws';
-    return token != null ? '$base?token=$token' : base;
-  }
-
   String get displayName => nickname.isNotEmpty ? nickname : (hostname.isNotEmpty ? hostname : host);
 
   factory ServerInfo.fromHydraInfo(String host, int port, Map<String, dynamic> payload, {bool useTls = false}) {

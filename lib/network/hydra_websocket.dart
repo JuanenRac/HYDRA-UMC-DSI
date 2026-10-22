@@ -11,13 +11,12 @@
 // shape, only the label differs), or a client sending the "settings"
 // envelope back over its own socket.
 //
-// The server's /ws upgrade requires a token. The normal way to give it one
-// is the "hydra.bearer" subprotocol (Sec-WebSocket-Protocol: hydra.bearer,
-// <token>), which keeps the token out of the address that proxies and logs
-// record. A server from before that subprotocol only reads ?token= in the
-// query string: when the first upgrade is refused, the connection is opened
-// once more with the token in the address (and that choice is remembered
-// until it fails too).
+// The server's /ws upgrade requires a token, which travels as the
+// "hydra.bearer" subprotocol (Sec-WebSocket-Protocol: hydra.bearer, <token>)
+// so that it stays out of the address that proxies and logs record. The
+// server refuses /ws?token= by default, so there is no second form: a server
+// that does not answer the subprotocol is a failed connection, reported as
+// such, and the token never goes into the address.
 //
 // When the token is bad the server first sends one {"error":"Access denied
 // ..."} frame and, about 100 ms later, closes with code 1008. Both reach the
@@ -95,8 +94,6 @@ class HydraWebSocket {
   int _generation = 0;
   // Consecutive attempts that never opened - drives the reconnect back-off.
   int _failedAttempts = 0;
-  // True after an older server refused the subprotocol upgrade.
-  bool _tokenInQuery = false;
   final Random _random = Random();
 
   HydraWebSocket({
@@ -120,9 +117,8 @@ class HydraWebSocket {
   /// queryParameters guarantees they remain one token value instead of
   /// accidentally changing the request query.
   ///
-  /// [tokenInQuery] false leaves the token out of the address (it then
-  /// travels as the "hydra.bearer" subprotocol); true is the form older
-  /// servers understand.
+  /// The token is never part of the address: it travels as the
+  /// "hydra.bearer" subprotocol.
   static Uri buildConnectionUri({
     required String host,
     required int port,
@@ -132,23 +128,25 @@ class HydraWebSocket {
     // class's own getHydraInfo()), never guessed independently: a plain
     // WebSocket has no HTTP response of its own to detect TLS-only from.
     bool useTls = false,
-    bool tokenInQuery = true,
   }) => Uri(
     scheme: useTls ? 'wss' : 'ws',
     host: host,
     port: port,
     path: '/ws',
-    queryParameters: token == null
-        ? null
-        : {if (tokenInQuery) 'token': token, 'remoteApiVersion': '2'},
+    queryParameters: token == null ? null : {'remoteApiVersion': '2'},
   );
 
   Future<void> _openSocket() async {
     onStatus(WsStatus.connecting);
     final generation = ++_generation;
     final bearer = token;
-    final useSubprotocol =
-        bearer != null && !_tokenInQuery && _subprotocolToken.hasMatch(bearer);
+    if (bearer != null && !_subprotocolToken.hasMatch(bearer)) {
+      // A token with characters a subprotocol cannot carry is not a token this
+      // server issued; it must not be pasted into the address instead.
+      onStatus(WsStatus.disconnected);
+      onError(const HydraError(HydraErrorKind.wsAuthRejected));
+      return;
+    }
     // remoteApiVersion=2 declares this connection understands a real
     // targeted delta; a server that doesn't recognize it just keeps sending
     // the full tree under "delta" like before.
@@ -157,13 +155,12 @@ class HydraWebSocket {
       port: port,
       token: token,
       useTls: useTls,
-      tokenInQuery: !useSubprotocol,
     );
     var opened = false;
     try {
       final channel = IOWebSocketChannel.connect(
         url,
-        protocols: useSubprotocol ? [wsTokenSubprotocol, bearer] : null,
+        protocols: bearer != null ? [wsTokenSubprotocol, bearer] : null,
         pingInterval: pingInterval,
       );
       _channel = channel;
@@ -213,16 +210,6 @@ class HydraWebSocket {
       onStatus(WsStatus.connected);
     } catch (e) {
       if (generation != _generation || _closingByUser) return;
-      if (useSubprotocol && !opened) {
-        // Probably a server from before the subprotocol: try the token in the
-        // address once, right away, without reporting an error.
-        _tokenInQuery = true;
-        _sub?.cancel();
-        _channel = null;
-        unawaited(_openSocket());
-        return;
-      }
-      _tokenInQuery = false; // the next round starts with the subprotocol again
       onStatus(WsStatus.disconnected);
       onError(HydraError(HydraErrorKind.wsConnectFailed, {'error': '$e'}));
       _channel = null;

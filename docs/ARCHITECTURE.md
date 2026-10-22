@@ -68,8 +68,8 @@ behaviour of this app.
 
 The details the other clients share also hold here: `GET /api/settings`
 needs a bearer token (either role); the token reaches `/ws` as the
-`hydra.bearer` subprotocol (a server from before that gets `?token=`
-automatically); a server answering 400 (a command it does not have), 409 (a
+`hydra.bearer` subprotocol (never in the address; a server that does not
+answer it is a failed connection); a server answering 400 (a command it does not have), 409 (a
 robot reserved by another account) or 200 with `warnings` (nothing applied)
 is shown to the operator and the optimistic change is undone; and
 `GET /api/system/metrics` carries the bearer token, with `temp_is_real:

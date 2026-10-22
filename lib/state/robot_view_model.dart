@@ -92,7 +92,7 @@ class RobotViewModel extends ChangeNotifier {
   // newer state, silently erasing real progress the operator already
   // made. Ported from HYDRA-UMC-IOS-CONTROL's own robot_view_model.dart -
   // this file's rollback existed without this guard until now, a real gap
-  // vs. that reference (see DISEÑO_SYNC_DELTAS.txt section 1/5c).
+  // vs. that reference (see the delta-sync design).
   final Map<dynamic, int> _commandGeneration = {};
 
   // Jog commands on the wire, per robot. A held button repeats every 150 ms;
@@ -426,7 +426,7 @@ class RobotViewModel extends ChangeNotifier {
   /// multi-controller swarm. Validates the robot exists locally BEFORE
   /// touching anything: if it doesn't, the delta is discarded and a full
   /// reload is forced instead of ever creating a "ghost" robot from a
-  /// partial patch - DISEÑO_SYNC_DELTAS.txt section 5b mitigation (b),
+  /// partial patch - the delta-sync design mitigation (b),
   /// non-optional.
   void _applyRobotDelta(Map<String, dynamic> msg) {
     final controllerId = msg['controllerId'];
