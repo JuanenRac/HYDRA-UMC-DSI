@@ -74,7 +74,7 @@ Erfordert das [Flutter SDK](https://docs.flutter.dev/get-started/install) (Stabl
 ./run_dev.sh         # Git Bash / WSL, oder run_dev.bat für cmd/PowerShell - Desktop-Simulationsmodus (flutter run), ohne Hardware nötig
 ```
 
-Alle 3 Build-Skripte (`build.sh`/`build.bat`/`build_linux.sh`) erhöhen zuerst die Version der App - siehe [Versionierung](#-versionierung) weiter unten. `run_dev.sh`/`run_dev.bat` tun dies nicht - ein `flutter run` im Entwicklungszyklus zählt nicht als "echter Build" im Sinne dieser Richtlinie.
+Alle 3 Build-Skripte (`build.sh`/`build.bat`/`build_linux.sh`) ändern die Version der App nicht - siehe [Versionierung](#-versionierung) weiter unten. `run_dev.sh`/`run_dev.bat` tun dies nicht - ein `flutter run` im Entwicklungszyklus zählt nicht als "echter Build" im Sinne dieser Richtlinie.
 
 ### Manueller Build
 
@@ -92,20 +92,14 @@ flutter run -d windows           # oder -d linux auf einer echten Linux-Maschine
 
 ## 🔢 Versionierung
 
-Dieses Repository folgt einer ökosystemweiten Richtlinie (gemeinsam mit
-[HYDRA-UMC-IOS-CONTROL](https://github.com/JuanenRac/HYDRA-UMC-IOS-CONTROL),
-dort parallel umgesetzt): Die Version wird bei **jedem echten Build**
-automatisch erhöht, ohne manuelle Bearbeitung der `version:`-Zeile in
-`pubspec.yaml`. `build.sh`/`build.bat`/`build_linux.sh` führen
-`tool/bump_version.dart` aus, bevor `flutter build` aufgerufen wird, und
-wenden dabei an:
+Dieses Repository folgt einer Richtlinie für das gesamte Ökosystem: Bauen ändert die Version nie. Der explizite `bump`-Befehl (`python tools/hydra_project_tool.py bump`) führt `tool/bump_version.dart` aus und wendet dabei an:
 
-- **Patch, Kilometerzähler-Stil (Basis 10):** +1 bei jedem Build; würde
+- **Patch, Kilometerzähler-Stil (Basis 10):** +1 bei jedem Bump; würde
   er 9 überschreiten, wird er auf 0 zurückgesetzt und die Minor-Version
   stattdessen um +1 erhöht - Beispiel: `0.0.9` -> `0.1.0`. Die
   Major-Version wird davon nie automatisch berührt.
 - **Build-Nummer** (der Teil nach dem `+`): ein einfacher monotoner
-  Zähler, +1 bei jedem Build, ohne Übertrag.
+  Zähler, +1 bei jedem Bump, ohne Übertrag.
 
 Dasselbe Skript regeneriert `lib/app_version.dart` (generiert, nicht von
 Hand bearbeitet - eine einfache `const`-Datei, keine neue

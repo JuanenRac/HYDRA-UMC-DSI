@@ -69,12 +69,12 @@ Nécessite le [SDK Flutter](https://docs.flutter.dev/get-started/install) (canal
 ### Scripts de compilation
 
 ```bash
-./build.sh          # Git Bash / WSL, ou build.bat pour cmd/PowerShell - flutter pub get + incrément de version + flutter build windows (vérification sur machine de développement)
-./build_linux.sh    # Doit s'exécuter SUR une vraie machine Linux (ou le CM5 lui-même) - flutter pub get + incrément de version + flutter build linux (la vraie cible de déploiement)
+./build.sh          # Git Bash / WSL, ou build.bat pour cmd/PowerShell - flutter pub get + flutter build windows (vérification sur machine de développement)
+./build_linux.sh    # Doit s'exécuter SUR une vraie machine Linux (ou le CM5 lui-même) - flutter pub get + flutter build linux (la vraie cible de déploiement)
 ./run_dev.sh         # Git Bash / WSL, ou run_dev.bat pour cmd/PowerShell - mode simulation bureau (flutter run), sans besoin du matériel
 ```
 
-Les 3 scripts de compilation (`build.sh`/`build.bat`/`build_linux.sh`) incrémentent d'abord la version de l'application - voir [Versionnement](#-versionnement) ci-dessous. `run_dev.sh`/`run_dev.bat` ne le font pas - un `flutter run` de boucle de développement n'est pas une « vraie compilation » au sens de cette politique.
+Les 3 scripts de compilation (`build.sh`/`build.bat`/`build_linux.sh`) ne changent pas la version de l'application - voir [Versionnement](#-versionnement) ci-dessous. `run_dev.sh`/`run_dev.bat` ne le font pas - un `flutter run` de boucle de développement n'est pas une « vraie compilation » au sens de cette politique.
 
 ### Compilation manuelle
 
@@ -92,13 +92,7 @@ flutter run -d windows           # ou -d linux sur une vraie machine Linux, pour
 
 ## 🔢 Versionnement
 
-Ce dépôt suit une politique à l'échelle de l'écosystème (partagée avec
-[HYDRA-UMC-IOS-CONTROL](https://github.com/JuanenRac/HYDRA-UMC-IOS-CONTROL),
-implémentée là-bas en parallèle) : la version s'incrémente
-automatiquement à **chaque compilation réelle**, sans édition manuelle de
-la ligne `version:` de `pubspec.yaml`. `build.sh`/`build.bat`/
-`build_linux.sh` exécutent `tool/bump_version.dart` avant d'appeler
-`flutter build`, en appliquant :
+Ce dépôt suit une politique à l'échelle de l'écosystème : compiler ne change jamais la version. La commande `bump` explicite (`python tools/hydra_project_tool.py bump`) exécute `tool/bump_version.dart`, qui applique :
 
 - **Patch, façon compteur kilométrique (base 10) :** +1 à chaque
   compilation ; si cela dépasserait 9, il revient à 0 et le minor
@@ -130,13 +124,13 @@ Des lacunes réelles et vérifiées que le code de cette application a encore - 
 ```text
 HYDRA-UMC-DSI/
 ├── build.bat, build.sh              # flutter pub get + incrément de version + flutter build windows (vérification sur machine de développement)
-├── build_linux.sh                   # flutter pub get + incrément de version + flutter build linux (la vraie cible CM5 - à exécuter sur Linux réel)
+├── build_linux.sh                   # flutter pub get + flutter build linux (la vraie cible CM5 - à exécuter sur Linux réel)
 ├── CHANGELOG.md                      # historique des versions (voir Versionnement ci-dessus)
 ├── kiosk/
 │   ├── hydra-umc-dsi.service        # unité systemd - démarrage automatique plein écran via cage
 │   └── install_kiosk.sh             # installe et active l'unité ci-dessus (à exécuter sur le CM5 réel)
 ├── tool/
-│   └── bump_version.dart            # Script d'incrément de version exécuté par build.bat/build.sh/build_linux.sh avant chaque compilation (voir Versionnement ci-dessus)
+│   └── bump_version.dart            # Incrément de version type compteur kilométrique (exécuté seulement par la commande `bump` explicite)
 ├── run_dev.bat, run_dev.sh          # flutter run - mode simulation bureau
 ├── lib/
 │   ├── main.dart                    # Point d'entrée de l'app, ChangeNotifierProvider + porte de connexion, thème sombre fixe

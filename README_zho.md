@@ -69,12 +69,12 @@
 ### 构建脚本
 
 ```bash
-./build.sh          # Git Bash / WSL，或使用 build.bat 用于 cmd/PowerShell —— flutter pub get + 版本递增 + flutter build windows（开发机验证）
-./build_linux.sh    # 必须在真实的 Linux 机器上运行（或 CM5 本身）—— flutter pub get + 版本递增 + flutter build linux（真正的部署目标）
+./build.sh          # Git Bash / WSL，或使用 build.bat 用于 cmd/PowerShell —— flutter pub get + flutter build windows（开发机验证）
+./build_linux.sh    # 必须在真实的 Linux 机器上运行（或 CM5 本身）—— flutter pub get + flutter build linux（真正的部署目标）
 ./run_dev.sh         # Git Bash / WSL，或使用 run_dev.bat 用于 cmd/PowerShell —— 桌面模拟模式（flutter run），无需硬件
 ```
 
-全部 3 个构建脚本（`build.sh`/`build.bat`/`build_linux.sh`）都会先递增应用的版本号——见下文[版本管理](#-版本管理)。`run_dev.sh`/`run_dev.bat` 不会——在该策略下,开发循环中的 `flutter run` 不算“真正的构建”。
+全部 3 个构建脚本（`build.sh`/`build.bat`/`build_linux.sh`）都不会更改应用的版本号——见下文[版本管理](#-版本管理)。`run_dev.sh`/`run_dev.bat` 不会——在该策略下,开发循环中的 `flutter run` 不算“真正的构建”。
 
 ### 手动构建
 
@@ -92,10 +92,10 @@ flutter run -d windows           # 或在真实 Linux 机器上使用 -d linux�
 
 ## 🔢 版本管理
 
-本仓库遵循一项全生态系统统一的策略（与 [HYDRA-UMC-IOS-CONTROL](https://github.com/JuanenRac/HYDRA-UMC-IOS-CONTROL) 共享,并在那里并行实现）:版本号在**每次真正的构建**时自动递增,无需手动编辑 `pubspec.yaml` 的 `version:` 行。`build.sh`/`build.bat`/`build_linux.sh` 会在调用 `flutter build` 之前运行 `tool/bump_version.dart`,应用以下规则:
+本仓库遵循生态系统统一的策略：构建绝不会更改版本号。显式的 `bump` 命令（`python tools/hydra_project_tool.py bump`）会运行 `tool/bump_version.dart`，并应用：
 
-- **Patch,里程表方式（十进制）：** 每次构建 +1;一旦超过 9 就重置为 0,并将 minor 加 1——例如 `0.0.9` -> `0.1.0`。Major 从不被自动修改。
-- **构建号**（`+` 之后的部分）：一个纯粹的单调计数器,每次构建 +1,不进位。
+- **Patch,里程表方式（十进制）：** 每次 bump +1;一旦超过 9 就重置为 0,并将 minor 加 1——例如 `0.0.9` -> `0.1.0`。Major 从不被自动修改。
+- **构建号**（`+` 之后的部分）：一个纯粹的单调计数器,每次 bump +1,不进位。
 
 同一个脚本会重新生成 `lib/app_version.dart`（这是生成的文件,不是手工编辑的——一个普通的 `const` 文件,而非像 `package_info_plus` 那样引入新的运行时依赖）,应用在运行时读取它,以在 **Settings** 界面显示自身版本。完整版本历史见 [CHANGELOG.md](CHANGELOG.md)。
 
@@ -116,14 +116,14 @@ flutter run -d windows           # 或在真实 Linux 机器上使用 -d linux�
 ```text
 HYDRA-UMC-DSI/
 ├── build.bat, build.sh              # flutter pub get + 版本递增 + flutter build windows（开发机验证）
-├── build_linux.sh                   # flutter pub get + 版本递增 + flutter build linux（真正的 CM5 目标——在真实 Linux 上运行）
+├── build_linux.sh                   # flutter pub get + flutter build linux（真正的 CM5 目标——在真实 Linux 上运行）
 ├── run_dev.bat, run_dev.sh          # flutter run —— 桌面模拟模式
 ├── CHANGELOG.md                      # 版本历史（见上文版本管理）
 ├── kiosk/
 │   ├── hydra-umc-dsi.service        # systemd 单元——通过 cage 全屏自启动
 │   └── install_kiosk.sh             # 安装并启用上述单元（在真实 CM5 上运行）
 ├── tool/
-│   └── bump_version.dart            # build.bat/build.sh/build_linux.sh 在每次构建前运行的版本递增脚本（见上文版本管理）
+│   └── bump_version.dart            # 里程表式版本递增（仅由显式 `bump` 命令运行）
 ├── lib/
 │   ├── main.dart                    # 应用入口点，ChangeNotifierProvider + 登录门禁，固定深色主题
 │   ├── app_version.dart             # 生成文件——由 tool/bump_version.dart 重新生成，请勿手动编辑

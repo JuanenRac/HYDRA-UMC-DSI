@@ -69,12 +69,12 @@ Requer o [SDK do Flutter](https://docs.flutter.dev/get-started/install) (canal s
 ### Scripts de compilação
 
 ```bash
-./build.sh          # Git Bash / WSL, ou build.bat para cmd/PowerShell - flutter pub get + subida de versão + flutter build windows (verificação na máquina de desenvolvimento)
-./build_linux.sh    # Tem de correr NUM Linux real (ou no próprio CM5) - flutter pub get + subida de versão + flutter build linux (o alvo de implementação real)
+./build.sh          # Git Bash / WSL, ou build.bat para cmd/PowerShell - flutter pub get + flutter build windows (verificação na máquina de desenvolvimento)
+./build_linux.sh    # Tem de correr NUM Linux real (ou no próprio CM5) - flutter pub get + flutter build linux (o alvo de implementação real)
 ./run_dev.sh         # Git Bash / WSL, ou run_dev.bat para cmd/PowerShell - modo de simulação de desktop (flutter run), sem hardware
 ```
 
-Os 3 scripts de compilação (`build.sh`/`build.bat`/`build_linux.sh`) sobem primeiro a versão da aplicação - veja [Versionamento](#-versionamento) abaixo. `run_dev.sh`/`run_dev.bat` não o fazem - um `flutter run` do ciclo de desenvolvimento não é uma "compilação real" segundo essa política.
+Os 3 scripts de compilação (`build.sh`/`build.bat`/`build_linux.sh`) não alteram a versão da aplicação - veja [Versionamento](#-versionamento) abaixo. `run_dev.sh`/`run_dev.bat` não o fazem - um `flutter run` do ciclo de desenvolvimento não é uma "compilação real" segundo essa política.
 
 ### Compilação manual
 
@@ -92,18 +92,13 @@ flutter run -d windows           # ou -d linux num Linux real, para um ciclo de 
 
 ## 🔢 Versionamento
 
-Este repositório segue uma política válida em todo o ecossistema (partilhada com o
-[HYDRA-UMC-IOS-CONTROL](https://github.com/JuanenRac/HYDRA-UMC-IOS-CONTROL),
-implementada lá em paralelo): a versão sobe automaticamente em
-**cada compilação real**, sem edição manual da linha `version:` do
-`pubspec.yaml`. O `build.sh`/`build.bat`/`build_linux.sh` executam `tool/bump_version.dart`
-antes de invocar o `flutter build`, aplicando:
+Este repositório segue uma política de todo o ecossistema: compilar nunca altera a versão. O comando `bump` explícito (`python tools/hydra_project_tool.py bump`) executa o `tool/bump_version.dart`, que aplica:
 
-- **Patch, ao estilo conta-quilómetros (base 10):** +1 em cada compilação; quando
+- **Patch, ao estilo conta-quilómetros (base 10):** +1 em cada bump; quando
   passaria de 9 volta a 0 e o minor sobe +1 em vez disso - por exemplo `0.0.9` ->
   `0.1.0`. O major nunca é tocado automaticamente.
 - **Número de compilação** (a parte depois de `+`): um contador monótono simples,
-  +1 em cada compilação, sem transporte.
+  +1 em cada bump, sem transporte.
 
 O mesmo script regenera `lib/app_version.dart` (gerado, não
 editado à mão - um ficheiro `const` simples, não uma nova dependência de execução como
@@ -128,14 +123,14 @@ Lacunas reais e verificadas que o código desta aplicação ainda tem - não TOD
 ```text
 HYDRA-UMC-DSI/
 ├── build.bat, build.sh              # flutter pub get + subida de versão + flutter build windows (verificação na máquina de desenvolvimento)
-├── build_linux.sh                   # flutter pub get + subida de versão + flutter build linux (o alvo CM5 real - executar num Linux real)
+├── build_linux.sh                   # flutter pub get + flutter build linux (o alvo CM5 real - executar num Linux real)
 ├── run_dev.bat, run_dev.sh          # flutter run - modo de simulação de desktop
 ├── CHANGELOG.md                      # histórico de versões (veja Versionamento acima)
 ├── kiosk/
 │   ├── hydra-umc-dsi.service        # unidade systemd - arranque automático em ecrã inteiro através do cage
 │   └── install_kiosk.sh             # instala e ativa a unidade acima (executar no CM5 real)
 ├── tool/
-│   └── bump_version.dart            # Script de subida de versão que o build.bat/build.sh/build_linux.sh executam antes de cada compilação (veja Versionamento acima)
+│   └── bump_version.dart            # Subida de versão ao estilo conta-quilómetros (executada só pelo comando `bump` explícito)
 ├── lib/
 │   ├── main.dart                    # Ponto de entrada da aplicação, ChangeNotifierProvider + porta de início de sessão, tema escuro fixo
 │   ├── app_version.dart             # GERADO - regenerado por tool/bump_version.dart, não editar à mão

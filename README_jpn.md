@@ -69,12 +69,12 @@ Compute Module 5 上の HYDRA-UMC 自身の 5"/7" DSI タッチスクリーン�
 ### ビルドスクリプト
 
 ```bash
-./build.sh          # Git Bash / WSL、または cmd/PowerShell 用の build.bat —— flutter pub get + バージョン加算 + flutter build windows（開発機での検証）
-./build_linux.sh    # 実際の Linux マシン（または CM5 自体）上で実行する必要があります —— flutter pub get + バージョン加算 + flutter build linux（実際のデプロイ先）
+./build.sh          # Git Bash / WSL、または cmd/PowerShell 用の build.bat —— flutter pub get + flutter build windows（開発機での検証）
+./build_linux.sh    # 実際の Linux マシン（または CM5 自体）上で実行する必要があります —— flutter pub get + flutter build linux（実際のデプロイ先）
 ./run_dev.sh         # Git Bash / WSL、または cmd/PowerShell 用の run_dev.bat —— デスクトップシミュレーションモード（flutter run）、ハードウェア不要
 ```
 
-3 つのビルドスクリプト（`build.sh`/`build.bat`/`build_linux.sh`）はすべて、最初にアプリのバージョンを加算します——下記の[バージョン管理](#-バージョン管理)参照。`run_dev.sh`/`run_dev.bat` は加算しません——このポリシーの下では、開発ループの `flutter run` は「実際のビルド」ではありません。
+3 つのビルドスクリプト（`build.sh`/`build.bat`/`build_linux.sh`）はいずれもアプリのバージョンを変更しません——下記の[バージョン管理](#-バージョン管理)参照。`run_dev.sh`/`run_dev.bat` は加算しません——このポリシーの下では、開発ループの `flutter run` は「実際のビルド」ではありません。
 
 ### 手動ビルド
 
@@ -92,10 +92,10 @@ flutter run -d windows           # または実際の Linux マシン上で -d l
 
 ## 🔢 バージョン管理
 
-本リポジトリは、エコシステム全体で統一されたポリシーに従います（[HYDRA-UMC-IOS-CONTROL](https://github.com/JuanenRac/HYDRA-UMC-IOS-CONTROL) と共有され、そちらでも並行して実装されています）：バージョンは**実際のビルドのたび**に自動的に加算され、`pubspec.yaml` の `version:` 行を手動で編集する必要はありません。`build.sh`/`build.bat`/`build_linux.sh` は、`flutter build` を呼び出す前に `tool/bump_version.dart` を実行し、以下を適用します：
+このリポジトリはエコシステム全体の方針に従います：ビルドはバージョンを一切変更しません。明示的な `bump` コマンド（`python tools/hydra_project_tool.py bump`）が `tool/bump_version.dart` を実行し、次を適用します：
 
-- **Patch、オドメーター方式（10 進法）：** 毎回のビルドで +1；9 を超えるとリセットされて 0 になり、代わりに minor が +1 されます——例：`0.0.9` -> `0.1.0`。Major は自動的には決して変更されません。
-- **ビルド番号**（`+` の後の部分）：単純な単調カウンター、毎回のビルドで +1、繰り上がりなし。
+- **Patch、オドメーター方式（10 進法）：** bump のたびに +1；9 を超えるとリセットされて 0 になり、代わりに minor が +1 されます——例：`0.0.9` -> `0.1.0`。Major は自動的には決して変更されません。
+- **ビルド番号**（`+` の後の部分）：単純な単調カウンター、bump のたびに +1、繰り上がりなし。
 
 同じスクリプトが `lib/app_version.dart`（生成物であり、手作業で編集されるものではありません——単純な `const` ファイルであり、`package_info_plus` のような新しいランタイム依存関係ではありません）を再生成し、アプリは実行時にこれを読み取って **Settings** 画面に自身のバージョンを表示します。バージョン履歴は [CHANGELOG.md](CHANGELOG.md) を参照してください。
 
@@ -116,14 +116,14 @@ flutter run -d windows           # または実際の Linux マシン上で -d l
 ```text
 HYDRA-UMC-DSI/
 ├── build.bat, build.sh              # flutter pub get + バージョン加算 + flutter build windows（開発機での検証）
-├── build_linux.sh                   # flutter pub get + バージョン加算 + flutter build linux（実際の CM5 ターゲット——実際の Linux 上で実行）
+├── build_linux.sh                   # flutter pub get + flutter build linux（実際の CM5 ターゲット——実際の Linux 上で実行）
 ├── run_dev.bat, run_dev.sh          # flutter run —— デスクトップシミュレーションモード
 ├── CHANGELOG.md                      # バージョン履歴（上記バージョン管理を参照）
 ├── kiosk/
 │   ├── hydra-umc-dsi.service        # systemd ユニット——cage 経由のフルスクリーン自動起動
 │   └── install_kiosk.sh             # 上記ユニットのインストール + 有効化（実際の CM5 上で実行）
 ├── tool/
-│   └── bump_version.dart            # build.bat/build.sh/build_linux.sh が毎回のビルド前に実行するバージョン加算スクリプト（上記バージョン管理を参照）
+│   └── bump_version.dart            # オドメーター式バージョンインクリメント（明示的な `bump` コマンドのみが実行）
 ├── lib/
 │   ├── main.dart                    # アプリのエントリポイント、ChangeNotifierProvider + ログインゲート、固定ダークテーマ
 │   ├── app_version.dart             # 生成物——tool/bump_version.dart によって再生成される、手動編集禁止
