@@ -1,11 +1,6 @@
 # Changelog
 
-All notable changes to HYDRA-UMC DSI are summarized here.
-
-Version numbers below follow the ecosystem-wide auto-bump policy described
-in [README.md](README.md#-versioning); earlier entries are grouped under
-the pre-policy version `0.0.0+1` the repo carried while the policy did not
-yet exist.
+All notable changes to this project are documented here.
 
 ## [Unreleased]
 
