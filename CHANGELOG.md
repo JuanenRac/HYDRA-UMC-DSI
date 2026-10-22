@@ -407,35 +407,9 @@ channel):
   `build.bat` - the real CM5/Linux target needs `build_linux.sh` run on
   actual Linux hardware).
 
-## [Unreleased policy]
+## Earlier history
 
-- **Automatic version bump on every real build.** `build.sh`/`build.bat`/
-  `build_linux.sh` now run `tool/bump_version.dart` before `flutter
-  build`, which bumps `pubspec.yaml`'s `version:` line on every
-  invocation: patch +1, with an odometer-style carry into minor once
-  patch would exceed 9 (`0.0.9` -> `0.1.0`), and a plain monotonic
-  build-number (+1, no carry). No manual version editing from here on.
-  Ported directly from HYDRA-UMC-IOS-CONTROL's own `tool/bump_version.dart`
-  (implemented in parallel against the same owner directive) - same rule,
-  same generated-file shape.
-- `lib/app_version.dart` (generated, not hand-edited) now exposes
-  `kAppVersion`/`kAppBuildNumber`/`kAppVersionFull` at runtime, regenerated
-  by the same script - avoids adding `package_info_plus` as a new runtime
-  dependency (and its unverifiable-on-the-real-CM5 native Linux behavior)
-  just to show the version in the UI.
-- Settings screen (`lib/ui/settings_screen.dart`) now shows the running
-  app's own version and build number, in a tile clearly labeled "HYDRA-UMC
-  DSI version" so it isn't confused with the pre-existing "App version"
-  tile just above it, which reports the *connected server's* own version
-  from `hydraInfo`.
-- All 3 build scripts (`build.bat`, `build.sh`, `build_linux.sh`) now
-  print a visible banner (project name, what the script does, author,
-  license) via real `echo` output at launch, and pause with a keypress
-  prompt at the end - on both success and failure - so a double-clicked
-  script window doesn't close before its output can be read.
-- This file added, seeded from the real project history below.
-
-## 0.0.0+1 and prior (pre-versioning-policy history)
+### 0.0.0+1 and prior (pre-versioning-policy history)
 
 - **Initial commission** - Commissioned alongside HYDRA-UMC-EDITOR-URDF;
   full spec received in the same message. Stack decision (Flutter vs.
