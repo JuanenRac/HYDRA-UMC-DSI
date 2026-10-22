@@ -60,6 +60,6 @@ flutter:
 
   # Generates lib/l10n/app_localizations.dart from lib/l10n/app_*.arb (see
   # l10n.yaml) via `flutter gen-l10n` - the standard Flutter localization
-  # pipeline, same 7 languages (en/es/fr/de/it/ja/zh) every other client in
+  # pipeline, same 8 languages (en/es/fr/de/it/ja/zh/pt) every other client in
   # this ecosystem already ships.
   generate: true
