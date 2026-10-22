@@ -8,6 +8,9 @@ All notable changes to this project are documented here.
 - Added `tools/hydra_project_tool.py`: the same `validate`, `test`, `version`, `status` and `bump` commands in every repository. The checks run with `HYDRA_UMC_CI=1` and fail if the version changes; only `bump` changes it.
 - The live connection no longer falls back to `/ws?token=`: the token travels only as the `hydra.bearer` subprotocol, which every server since the subprotocol was added answers and which the server now requires (it refuses the address form by default). A server that does not answer it is reported as a failed connection instead of being handed the token in the address. A token that a subprotocol cannot carry is reported as rejected and no connection is attempted; `ServerInfo.wsUrl()` (unused) is gone. Three tests replace the one that expected the fallback.
 - The README and the architecture notes describe the subprotocol as the only form.
+- The README, in the eight languages, names HYDRA-UMC-SERVER (not STUDIO) as the server the panel talks to.
+- The notes in `lib/network/discovery.dart` say what was really run (Windows desktop, and a Linux build under WSL2) instead of contradicting the README.
+- Removed the unused `postSettings` and `HydraState.merge`.
 
 ## [0.2.6]
 

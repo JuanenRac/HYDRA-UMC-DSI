@@ -224,13 +224,5 @@ class HydraState {
 
   RobotView? robotById(dynamic robotId) => activeController?.robotById(robotId);
 
-  /// Shallow merge of an incoming delta/settings payload into this state's
-  /// own raw tree. See HYDRA-UMC-IOS-CONTROL's own equivalent method for
-  /// the full reasoning (a WS payload is always the full tree, so a full
-  /// replace is correct here too, not a partial merge).
-  void merge(Map<String, dynamic> other) {
-    raw.addAll(other);
-  }
-
   Map<String, dynamic> toJson() => raw;
 }

@@ -23,8 +23,9 @@
 // multicast group and receive mDNS replies with no special permission, so
 // that particular failure mode does not apply here. What *is* still
 // unverified, same as every other line of this repo (see README.md's own
-// "Honesty note on Linux verification"): this has only run in Flutter's Windows desktop
-// simulation, never on a real Linux box or the CM5 itself. A minimal kiosk
+// "Honesty note on Linux verification"): the app has run in Flutter's Windows
+// desktop simulation and, built for Linux, under Ubuntu WSL2 (x86_64), but
+// never on a real Raspberry Pi OS box or the CM5 itself. A minimal kiosk
 // image (no NetworkManager/avahi-daemon running, or a systemd-networkd
 // setup that doesn't route multicast the way a desktop distro does) could
 // still leave discoverMdns() timing out with zero replies even though

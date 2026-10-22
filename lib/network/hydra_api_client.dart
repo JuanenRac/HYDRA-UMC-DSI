@@ -12,7 +12,6 @@
 //   - POST /api/login               - obtain a bearer token.
 //   - GET  /api/hydra-info          - discovery/identity.
 //   - GET  /api/settings            - full current state, needs a bearer token (either role).
-//   - POST /api/settings            - overwrite the whole state, ADMIN only.
 //   - POST /api/stop-all            - global stop of every robot
 //   - POST /api/robot/:id/command   - atomic per-robot command, either role -
 //     the PRIMARY way this app writes (see state/robot_view_model.dart).
@@ -196,17 +195,6 @@ class HydraApiClient {
         .get(Uri.parse('$baseUrl/api/settings'), headers: {..._clientHeaders, ..._authHeaders})
         .timeout(const Duration(seconds: 5));
     return _expectJson(resp);
-  }
-
-  Future<void> postSettings(Map<String, dynamic> payload) async {
-    final resp = await _client
-        .post(
-          Uri.parse('$baseUrl/api/settings'),
-          headers: {'Content-Type': 'application/json', ..._clientHeaders, ..._authHeaders},
-          body: jsonEncode(payload),
-        )
-        .timeout(const Duration(seconds: 5));
-    _expectJson(resp);
   }
 
   /// [timeout] is 5 s for an ordinary command; a STOP uses a shorter one so a
