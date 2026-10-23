@@ -40,6 +40,11 @@ class _Seen {
   _Seen(this.route, this.body, this.controllerHeader);
 }
 
+String _tokenWithRole(String role) {
+  String part(Object json) => base64Url.encode(utf8.encode(jsonEncode(json))).replaceAll('=', '');
+  return '${part({'alg': 'HS256'})}.${part({'username': 'alice', 'role': role})}.sig';
+}
+
 class _Server {
   final HttpServer http;
   final List<_Seen> seen = [];
@@ -51,6 +56,7 @@ class _Server {
   double maxAmount = 100;
   List<Map<String, dynamic>> claims = [];
   int? jogArmedUntil;
+  String role = 'admin';
 
   _Server(this.http) {
     http.listen((request) async {
@@ -70,7 +76,7 @@ class _Server {
       seen.add(_Seen(route, json, request.headers.value('x-controller-id')));
       request.response.headers.contentType = ContentType.json;
       if (route == 'POST /api/login') {
-        request.response.write(jsonEncode({'success': true, 'token': 'token-1', 'refreshToken': 'refresh-1'}));
+        request.response.write(jsonEncode({'success': true, 'token': _tokenWithRole(role), 'refreshToken': 'refresh-1'}));
       } else if (route == 'GET /api/settings') {
         request.response.write(jsonEncode({
           'activeControllerId': 'c1',
@@ -129,9 +135,10 @@ Future<void> _until(bool Function() condition, {Duration timeout = const Duratio
   }
 }
 
-Future<(_Server, RobotViewModel)> _signedIn() async {
+Future<(_Server, RobotViewModel)> _signedIn({String role = 'admin'}) async {
   SharedPreferences.setMockInitialValues({});
   final server = await _Server.start();
+  server.role = role;
   addTearDown(server.close);
   final vm = RobotViewModel(authPrefs: AuthPrefs(secureBackend: _FakeSecureBackend()));
   addTearDown(vm.dispose);
@@ -272,5 +279,45 @@ void main() {
     ];
     await vm.refreshAccess();
     expect(vm.claimStandingOf(1), ClaimStanding.other);
+  });
+
+  test('an administrator can take over a robot someone else holds, and the request carries force', () async {
+    final (server, vm) = await _signedIn();
+    server.claims = [
+      {'robotId': 1, 'robotName': 'A1', 'ownerUsername': 'bob', 'controllerId': 'x', 'expiresAt': 1},
+    ];
+    await vm.refreshAccess();
+    expect(vm.isAdmin, isTrue);
+    expect(vm.canTakeOver(1), isTrue);
+
+    await vm.takeOverSelectedRobot();
+
+    final sent = server.to('POST /api/robot/1/claim').single;
+    expect(sent.body['force'], isTrue);
+    expect(sent.body['controllerId'], HydraApiClient.controllerId);
+  });
+
+  test('an operator never gets the take-over and nothing is sent if it is asked for anyway', () async {
+    final (server, vm) = await _signedIn(role: 'operator');
+    server.claims = [
+      {'robotId': 1, 'robotName': 'A1', 'ownerUsername': 'bob', 'controllerId': 'x', 'expiresAt': 1},
+    ];
+    await vm.refreshAccess();
+    expect(vm.isAdmin, isFalse);
+    expect(vm.canTakeOver(1), isFalse);
+
+    await vm.takeOverSelectedRobot();
+
+    expect(server.to('POST /api/robot/1/claim'), isEmpty);
+  });
+
+  test('an administrator has no take-over on a free robot or on one reserved here', () async {
+    final (server, vm) = await _signedIn();
+    expect(vm.canTakeOver(1), isFalse);
+    server.claims = [
+      {'robotId': 1, 'robotName': 'A1', 'ownerUsername': 'alice', 'controllerId': HydraApiClient.controllerId, 'expiresAt': 1},
+    ];
+    await vm.refreshAccess();
+    expect(vm.canTakeOver(1), isFalse);
   });
 }

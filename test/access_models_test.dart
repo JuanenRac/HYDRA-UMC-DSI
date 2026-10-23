@@ -6,6 +6,8 @@
 // The controller id, the reservations, the limits and the jog check: pure rules.
 // =============================================================================
 
+import 'dart:convert';
+
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:hydra_umc_dsi/models/access.dart';
@@ -104,5 +106,29 @@ void main() {
   test('limits are shown without a needless decimal', () {
     expect(formatLimit(1000.0), '1000');
     expect(formatLimit(12.5), '12.5');
+  });
+
+  String token(Map<String, dynamic> payload) {
+    String part(Object json) => base64Url.encode(utf8.encode(jsonEncode(json))).replaceAll('=', '');
+    return '${part({'alg': 'HS256'})}.${part(payload)}.sig';
+  }
+
+  test('the role is read from the token and a damaged token gives none', () {
+    expect(jwtRole(token({'role': 'admin'})), 'admin');
+    expect(jwtRole(token({'role': 'operator'})), 'operator');
+    expect(jwtRole(token({'username': 'ana'})), isNull);
+    expect(jwtRole('not-a-token'), isNull);
+    expect(jwtRole('a.%%%.c'), isNull);
+    expect(jwtRole(null), isNull);
+    expect(jwtRole(''), isNull);
+  });
+
+  test('the take-over applies to an administrator on a robot someone else holds', () {
+    expect(canTakeOverRobot('admin', ClaimStanding.other), isTrue);
+    expect(canTakeOverRobot('admin', ClaimStanding.mineElsewhere), isTrue);
+    expect(canTakeOverRobot('admin', ClaimStanding.free), isFalse);
+    expect(canTakeOverRobot('admin', ClaimStanding.mineHere), isFalse);
+    expect(canTakeOverRobot('operator', ClaimStanding.other), isFalse);
+    expect(canTakeOverRobot(null, ClaimStanding.other), isFalse);
   });
 }

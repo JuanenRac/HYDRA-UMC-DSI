@@ -16,6 +16,7 @@ All notable changes to this project are documented here.
 - The README, in the eight languages, names HYDRA-UMC-SERVER (not STUDIO) as the server the panel talks to.
 - The notes in `lib/network/discovery.dart` say what was really run (Windows desktop, and a Linux build under WSL2) instead of contradicting the README.
 - Removed the unused `postSettings` and `HydraState.merge`.
+- **Take control (administrators only).** On a robot someone else holds, an administrator's session shows a **Take control** button that asks for confirmation and then reserves the robot with `force: true`. The role comes from the session token (the server checks it again); an operator never sees the button and nothing is sent if it is asked for anyway. Texts in the eight languages and unit tests for the role, the rule and the request.
 
 ## [0.2.6]
 

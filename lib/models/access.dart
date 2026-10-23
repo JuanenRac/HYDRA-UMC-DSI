@@ -14,6 +14,7 @@
 //     server checks it again).
 // =============================================================================
 
+import 'dart:convert';
 import 'dart:math';
 
 final RegExp _controllerIdPattern = RegExp(r'^[A-Za-z0-9._:-]{1,64}$');
@@ -83,6 +84,25 @@ ClaimStanding claimStanding(ClaimInfo? claim, String myUsername, String myContro
   if (claim.controllerId == null || claim.controllerId == myControllerId) return ClaimStanding.mineHere;
   return ClaimStanding.mineElsewhere;
 }
+
+/// The role the session token carries (`admin` or `operator`), or null when it cannot be read. The server
+/// checks the role again on every request; this only decides whether the take-over button is shown.
+String? jwtRole(String? token) {
+  if (token == null) return null;
+  final parts = token.split('.');
+  if (parts.length < 2) return null;
+  try {
+    final payload = jsonDecode(utf8.decode(base64Url.decode(base64Url.normalize(parts[1]))));
+    final role = payload is Map ? payload['role'] : null;
+    return role is String && role.isNotEmpty ? role : null;
+  } catch (_) {
+    return null;
+  }
+}
+
+/// Whether the take-over button applies: the session is an administrator's and someone else holds the robot.
+bool canTakeOverRobot(String? role, ClaimStanding standing) =>
+    role == 'admin' && (standing == ClaimStanding.other || standing == ClaimStanding.mineElsewhere);
 
 /// The size of a jog and the range of an absolute jog the server allows for one model.
 class JogLimits {

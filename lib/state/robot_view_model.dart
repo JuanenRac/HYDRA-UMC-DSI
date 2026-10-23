@@ -959,6 +959,19 @@ class RobotViewModel extends ChangeNotifier {
   /// Reserves the selected robot for this account on this installation.
   Future<void> claimSelectedRobot() => _runAccessRequest('claim', (c, id) => c.postClaim(id));
 
+  /// Whether this session is an administrator's (the role in its token; the server checks it again).
+  bool get isAdmin => jwtRole(apiClient?.authToken) == 'admin';
+
+  /// Whether the take-over button applies to [robotId]: an administrator, and someone else holds it.
+  bool canTakeOver(dynamic robotId) => canTakeOverRobot(jwtRole(apiClient?.authToken), claimStandingOf(robotId));
+
+  /// Takes the selected robot over from whoever holds it (`force: true`; the server accepts it from administrators
+  /// only). The screen asks the operator to confirm first; nothing is sent when it does not apply.
+  Future<void> takeOverSelectedRobot() {
+    if (!canTakeOver(selectedRobotId)) return Future.value();
+    return _runAccessRequest('claim', (c, id) => c.postClaim(id, force: true));
+  }
+
   /// Releases the selected robot's reservation. Also ends the arming of its jog, as the server does.
   Future<void> releaseSelectedRobot() => _runAccessRequest('release', (c, id) async {
         final answer = await c.postRelease(id);

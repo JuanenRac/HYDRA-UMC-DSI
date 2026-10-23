@@ -83,6 +83,13 @@ class _AccessPanelState extends State<AccessPanel> {
                   onPressed: () => setState(() => _showList = !_showList),
                   child: Text(l10n.accessListShow),
                 ),
+                // Only for an administrator, only on a robot someone else holds, and never without asking first.
+                if (vm.canTakeOver(widget.robotId))
+                  OutlinedButton(
+                    key: const ValueKey('access-take-over'),
+                    onPressed: busy ? null : () => _confirmTakeOver(context, l10n, claim?.ownerUsername ?? ''),
+                    child: Text(l10n.accessTakeOver),
+                  ),
               ],
             ),
             if (_showList)
@@ -100,6 +107,30 @@ class _AccessPanelState extends State<AccessPanel> {
         ),
       ),
     );
+  }
+
+  Future<void> _confirmTakeOver(BuildContext context, AppLocalizations l10n, String owner) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialog) => AlertDialog(
+        key: const ValueKey('access-take-over-dialog'),
+        title: Text(l10n.accessTakeOverTitle),
+        content: Text(l10n.accessTakeOverMessage(owner)),
+        actions: [
+          TextButton(
+            key: const ValueKey('access-take-over-cancel'),
+            onPressed: () => Navigator.of(dialog).pop(false),
+            child: Text(l10n.accessTakeOverCancel),
+          ),
+          FilledButton(
+            key: const ValueKey('access-take-over-confirm'),
+            onPressed: () => Navigator.of(dialog).pop(true),
+            child: Text(l10n.accessTakeOverConfirm),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true) await widget.vm.takeOverSelectedRobot();
   }
 
   List<Widget> _armingSection(AppLocalizations l10n, RobotViewModel vm, bool busy) {
