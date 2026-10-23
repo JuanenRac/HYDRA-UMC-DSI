@@ -11,6 +11,18 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class ClientPrefs {
   static const _keyControllerId = 'hydra_controller_id';
+  static const _keyConditionalMode = 'hydra_conditional_mode';
+
+  /// The conditional-writes mode chosen in this app (`off`, `standard`, `strict`); null before any choice.
+  Future<String?> loadConditionalMode() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_keyConditionalMode);
+  }
+
+  Future<void> saveConditionalMode(String mode) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_keyConditionalMode, mode);
+  }
 
   /// The controller id kept for this installation, or null before the first one was saved.
   Future<String?> loadControllerId() async {

@@ -53,6 +53,8 @@ enum HydraErrorKind {
   claimControllerRequired,
   jogNotArmed,
   jogOverLimit,
+  // A conditional write was refused (412): the robot changed since this app read it.
+  revisionChanged,
 }
 
 class HydraError {
@@ -102,6 +104,8 @@ class HydraError {
         return l10n.errJogNotArmed;
       case HydraErrorKind.jogOverLimit:
         return l10n.errJogOverLimit(params['limit'] ?? '');
+      case HydraErrorKind.revisionChanged:
+        return l10n.errRevisionChanged(params['command'] ?? '');
     }
   }
 }

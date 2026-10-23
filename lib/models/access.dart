@@ -42,12 +42,17 @@ class ClaimInfo {
   /// Epoch milliseconds, the server's clock.
   final int expiresAt;
 
+  /// Until when (the server's clock) the jog of this robot is armed for this reservation; null when it is not,
+  /// or the server predates the field.
+  final int? jogArmedUntil;
+
   const ClaimInfo({
     required this.robotId,
     required this.robotName,
     required this.ownerUsername,
     required this.controllerId,
     required this.expiresAt,
+    this.jogArmedUntil,
   });
 
   static List<ClaimInfo> listFromJson(Map<String, dynamic> json) {
@@ -63,6 +68,7 @@ class ClaimInfo {
         ownerUsername: item['ownerUsername'] is String ? item['ownerUsername'] as String : '',
         controllerId: controller is String && controller.isNotEmpty ? controller : null,
         expiresAt: item['expiresAt'] is num ? (item['expiresAt'] as num).toInt() : 0,
+        jogArmedUntil: item['jogArmedUntil'] is num && (item['jogArmedUntil'] as num) > 0 ? (item['jogArmedUntil'] as num).toInt() : null,
       ));
     }
     return out;

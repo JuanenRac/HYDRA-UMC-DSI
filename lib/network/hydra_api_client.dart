@@ -24,6 +24,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import '../models/access.dart';
+import '../models/contract_v2.dart';
 
 class HydraApiException implements Exception {
   final String message;
@@ -34,7 +35,13 @@ class HydraApiException implements Exception {
   final String? code;
   /// The server's own `error` text, when it sent one.
   final String? serverMessage;
-  HydraApiException(this.message, {this.statusCode, this.code, this.serverMessage});
+  /// The revision the server put in a 412 answer: the one the robot is at now.
+  final String? revision;
+  HydraApiException(this.message, {this.statusCode, this.code, this.serverMessage, this.revision});
+
+  /// 412 `revision-mismatch`: the robot changed since this app read it, so a conditional write was refused and
+  /// nothing was applied.
+  bool get isRevisionMismatch => statusCode == 412 || code == 'revision-mismatch';
 
   /// A 401, or a 403 that says the token expired or is invalid: a refresh or
   /// a new login can cure it. (A plain 403 is a missing role permission.)
@@ -227,11 +234,18 @@ class HydraApiClient {
     dynamic robotId,
     Map<String, dynamic> payload, {
     Duration timeout = const Duration(seconds: 5),
+    String? ifMatch,
   }) async {
     final resp = await _client
         .post(
           Uri.parse('$baseUrl/api/robot/$robotId/command'),
-          headers: {'Content-Type': 'application/json', ..._clientHeaders, ..._controllerHeaders, ..._authHeaders},
+          headers: {
+            'Content-Type': 'application/json',
+            ..._clientHeaders,
+            ..._controllerHeaders,
+            ..._authHeaders,
+            'If-Match': ?ifMatch,
+          },
           body: jsonEncode({...payload, 'controllerId': controllerId}),
         )
         .timeout(timeout);
@@ -240,11 +254,17 @@ class HydraApiClient {
 
   static Map<String, String> get _controllerHeaders => {'X-Controller-Id': controllerId};
 
-  Future<Map<String, dynamic>> _postControl(String path, Map<String, dynamic> body) async {
+  Future<Map<String, dynamic>> _postControl(String path, Map<String, dynamic> body, {String? ifMatch}) async {
     final resp = await _client
         .post(
           Uri.parse('$baseUrl$path'),
-          headers: {'Content-Type': 'application/json', ..._clientHeaders, ..._controllerHeaders, ..._authHeaders},
+          headers: {
+            'Content-Type': 'application/json',
+            ..._clientHeaders,
+            ..._controllerHeaders,
+            ..._authHeaders,
+            'If-Match': ?ifMatch,
+          },
           body: jsonEncode({...body, 'controllerId': controllerId}),
         )
         .timeout(const Duration(seconds: 5));
@@ -262,12 +282,39 @@ class HydraApiClient {
   /// Reserves a robot for this account on this controller. [ttlMs] null lets
   /// the server pick its default; [force] (administrators only) takes over a
   /// reservation held by someone else.
-  Future<Map<String, dynamic>> postClaim(dynamic robotId, {int? ttlMs, bool force = false}) =>
-      _postControl('/api/robot/$robotId/claim', {'ttlMs': ?ttlMs, if (force) 'force': true});
+  Future<Map<String, dynamic>> postClaim(dynamic robotId, {int? ttlMs, bool force = false, String? ifMatch}) =>
+      _postControl('/api/robot/$robotId/claim', {'ttlMs': ?ttlMs, if (force) 'force': true}, ifMatch: ifMatch);
 
   /// Releases the reservation of a robot held by this account on this
   /// controller (idempotent on the server).
-  Future<Map<String, dynamic>> postRelease(dynamic robotId) => _postControl('/api/robot/$robotId/release', {});
+  Future<Map<String, dynamic>> postRelease(dynamic robotId, {String? ifMatch}) =>
+      _postControl('/api/robot/$robotId/release', {}, ifMatch: ifMatch);
+
+  /// One robot with its revision (GET /api/robot/:id); null from an older server without the route.
+  Future<RobotRead?> getRobot(dynamic robotId) async {
+    final resp = await _client
+        .get(Uri.parse('$baseUrl/api/robot/$robotId'), headers: {..._clientHeaders, ..._authHeaders})
+        .timeout(const Duration(seconds: 5));
+    try {
+      final answer = _expectJson(resp);
+      final robot = answer['robot'];
+      if (robot is! Map<String, dynamic>) return null;
+      return RobotRead(robot, revisionOf(answer));
+    } on HydraApiException catch (e) {
+      if (e.isNotFound) return null;
+      rethrow;
+    }
+  }
+
+  /// The audit record as the server sent it (GET /api/audit, administrators only), as text: the hash of each line
+  /// is the SHA-256 of its exact text, so the answer is not parsed here. [query] comes from [AuditRecord.query].
+  Future<String> getAuditBody(String query) async {
+    final resp = await _client
+        .get(Uri.parse('$baseUrl/api/audit$query'), headers: {..._clientHeaders, ..._authHeaders})
+        .timeout(const Duration(seconds: 10));
+    _throwForStatus(resp);
+    return resp.body;
+  }
 
   /// Arms (true) or disarms (false) the jog of one robot; only demanded by the
   /// server when the administrator turned it on.
@@ -310,29 +357,7 @@ class HydraApiClient {
   }
 
   Map<String, dynamic> _expectJson(http.Response resp) {
-    if (resp.statusCode < 200 || resp.statusCode >= 300) {
-      // The server's error body carries a reason (`error`) and, for the auth
-      // middleware, a stable `code`: keep both so the caller can tell an
-      // expired session from a missing permission, an unknown command (400)
-      // or a robot reserved by someone else (409).
-      String? code;
-      String? serverMessage;
-      try {
-        final body = jsonDecode(resp.body);
-        if (body is Map) {
-          if (body['code'] is String) code = body['code'] as String;
-          if (body['error'] is String) serverMessage = body['error'] as String;
-        }
-      } catch (_) {
-        // Not JSON (a proxy's HTML page, say): the status alone has to do.
-      }
-      throw HydraApiException(
-        'HTTP ${resp.statusCode} from ${resp.request?.url.path}',
-        statusCode: resp.statusCode,
-        code: code,
-        serverMessage: serverMessage,
-      );
-    }
+    _throwForStatus(resp);
     final Object? decoded;
     try {
       decoded = jsonDecode(resp.body);
@@ -343,6 +368,36 @@ class HydraApiClient {
       throw HydraApiException('Response is not a JSON object');
     }
     return decoded;
+  }
+
+  /// Throws the [HydraApiException] of an answer that is not a success.
+  void _throwForStatus(http.Response resp) {
+    if (resp.statusCode < 200 || resp.statusCode >= 300) {
+      // The server's error body carries a reason (`error`) and, for the auth
+      // middleware, a stable `code`: keep both so the caller can tell an
+      // expired session from a missing permission, an unknown command (400)
+      // or a robot reserved by someone else (409).
+      String? code;
+      String? serverMessage;
+      String? revision;
+      try {
+        final body = jsonDecode(resp.body);
+        if (body is Map) {
+          if (body['code'] is String) code = body['code'] as String;
+          if (body['error'] is String) serverMessage = body['error'] as String;
+          revision = revisionOf(body);
+        }
+      } catch (_) {
+        // Not JSON (a proxy's HTML page, say): the status alone has to do.
+      }
+      throw HydraApiException(
+        'HTTP ${resp.statusCode} from ${resp.request?.url.path}',
+        statusCode: resp.statusCode,
+        code: code,
+        serverMessage: serverMessage,
+        revision: revision,
+      );
+    }
   }
 
   void close() => _client.close();

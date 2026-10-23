@@ -14,7 +14,9 @@ import 'package:flutter/material.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../../models/access.dart';
+import '../../models/contract_v2.dart';
 import '../../state/robot_view_model.dart';
+import 'audit_dialog.dart';
 
 class AccessPanel extends StatefulWidget {
   final RobotViewModel vm;
@@ -92,7 +94,17 @@ class _AccessPanelState extends State<AccessPanel> {
                   ),
               ],
             ),
-            if (_showList)
+            // The audit record is for administrators only (the server refuses it to anyone else).
+            if (vm.isAdmin)
+              Align(
+                alignment: Alignment.centerLeft,
+                child: OutlinedButton(
+                  key: const ValueKey('access-audit'),
+                  onPressed: () => showDialog<void>(context: context, builder: (_) => AuditDialog(vm: vm)),
+                  child: Text(l10n.auditOpen),
+                ),
+              ),
+            if (_showList) ...[
               if (vm.claims.isEmpty)
                 Text(l10n.accessListEmpty, style: const TextStyle(color: Colors.grey))
               else
@@ -101,6 +113,22 @@ class _AccessPanelState extends State<AccessPanel> {
                     l10n.accessListItem(c.robotName.isEmpty ? '#${c.robotId}' : c.robotName, c.ownerUsername),
                     style: const TextStyle(color: Colors.white70, fontSize: 12),
                   ),
+              // Whether a write checks that the robot has not changed since this app read it (If-Match).
+              const SizedBox(height: 8),
+              Text(l10n.accessConditionalLabel, style: const TextStyle(color: Colors.grey, fontSize: 11)),
+              SegmentedButton<ConditionalMode>(
+                key: const ValueKey('access-conditional'),
+                showSelectedIcon: false,
+                segments: [
+                  ButtonSegment(value: ConditionalMode.standard, label: Text(l10n.accessConditionalStandard)),
+                  ButtonSegment(value: ConditionalMode.strict, label: Text(l10n.accessConditionalStrict)),
+                  ButtonSegment(value: ConditionalMode.off, label: Text(l10n.accessConditionalOff)),
+                ],
+                selected: {vm.conditionalMode},
+                onSelectionChanged: (s) => vm.setConditionalMode(s.first),
+              ),
+              Text(l10n.accessConditionalHint, style: const TextStyle(color: Colors.grey, fontSize: 11)),
+            ],
             // The jog arming exists only when the administrator turned it on in the server.
             if (safety != null && safety.armRequired) ..._armingSection(l10n, vm, busy),
           ],

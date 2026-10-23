@@ -28,6 +28,7 @@ import 'package:flutter/foundation.dart';
 
 import '../l10n/language_prefs.dart';
 import '../models/access.dart';
+import '../models/contract_v2.dart';
 import '../models/hydra_state.dart';
 import '../models/server_info.dart';
 import '../models/stop_all_result.dart';
@@ -54,6 +55,9 @@ class SystemMetrics {
     this.tempIsReal = true,
   });
 }
+
+/// Why the audit record could not be read, for the sentence the screen shows.
+enum AuditFailure { forbidden, unavailable, session, network, other }
 
 class RobotViewModel extends ChangeNotifier {
   // injectable for real test coverage of the login/_attemptTokenRefresh/
@@ -144,6 +148,7 @@ class RobotViewModel extends ChangeNotifier {
   Future<void> init() async {
     languageOverride = await _languagePrefs.loadLocale();
     // The controller id of this installation: made once, kept, and adopted here.
+    conditionalMode = ConditionalMode.fromKey(await _clientPrefs.loadConditionalMode());
     final storedControllerId = await _clientPrefs.loadControllerId();
     if (isValidControllerId(storedControllerId)) {
       HydraApiClient.controllerId = storedControllerId!;
@@ -374,6 +379,7 @@ class RobotViewModel extends ChangeNotifier {
         notifyListeners();
       },
       onDelta: _applyRobotDelta,
+      onClaims: _applyClaimsPush,
       onError: (error) {
         lastError = error;
         // The server's "Access denied" frame and the 1008 close that follows
@@ -556,18 +562,32 @@ class RobotViewModel extends ChangeNotifier {
     // A jog the server requires to be armed and that is not, or one above the
     // limit it holds for this robot's model, is not sent at all (the server
     // checks both again). Checked before the optimistic change, like the client above.
-    if (command == 'jog') {
+    if (command == 'jog' || command == 'table') {
       if (jogNeedsArming(robotId)) {
         lastError = const HydraError(HydraErrorKind.jogNotArmed);
         notifyListeners();
         return;
       }
       final amount = params?['amount'];
-      final exceeded = jogLimitExceeded(
-        amount is num ? amount.toDouble() : 0.0,
-        safetyByRobot[robotId]?.jog,
-        absolute: params?['absolute'] == true,
-      );
+      // A table move is checked as a whole, and a relative one also by where it ends.
+      final double? exceeded;
+      if (command == 'table') {
+        final xy = target.xyTablePos;
+        exceeded = params == null
+            ? null
+            : tableLimitExceeded(
+                params,
+                safetyByRobot[robotId]?.jog,
+                currentX: (xy['x'] as num?)?.toDouble() ?? 0.0,
+                currentY: (xy['y'] as num?)?.toDouble() ?? 0.0,
+              );
+      } else {
+        exceeded = jogLimitExceeded(
+          amount is num ? amount.toDouble() : 0.0,
+          safetyByRobot[robotId]?.jog,
+          absolute: params?['absolute'] == true,
+        );
+      }
       if (exceeded != null) {
         lastError = HydraError(HydraErrorKind.jogOverLimit, {'limit': formatLimit(exceeded)});
         notifyListeners();
@@ -618,12 +638,12 @@ class RobotViewModel extends ChangeNotifier {
     }
 
     final isStop = command == 'stop';
-    final isJog = command == 'jog';
+    final isJog = command == 'jog' || command == 'table';
 
     Future<void> send() async {
       if (isJog) _jogsInFlight[robotId] = (_jogsInFlight[robotId] ?? 0) + 1;
       try {
-        final answer = await _postWithRetry(robotId, payload, urgent: isStop);
+        final answer = await _postCommandConditionally(robotId, command, payload);
         final warnings = _commandWarnings(answer);
         if (warnings != null) {
           // The server answered 200 but applied nothing (a speed outside its
@@ -647,6 +667,8 @@ class RobotViewModel extends ChangeNotifier {
         // that never reached the robot.
         rollback();
         lastError = _commandError(command, e);
+        // The robot changed since this app read it: read it again so the screen shows what it is now.
+        if (e is HydraApiException && e.isRevisionMismatch) unawaited(_refreshRobot(robotId));
         // The arming ended (it times out, or a stop cleared it): the screen offers to arm again.
         if (e is HydraApiException && e.isJogNotArmed) jogArmedUntil.remove(robotId);
         if (e is HydraApiException && e.isSessionProblem) {
@@ -682,7 +704,12 @@ class RobotViewModel extends ChangeNotifier {
   // A STOP is posted with short timeouts and, when nobody answers (a network
   // failure, not a refusal), sent again up to 3 times in about a second. An
   // answer from the server, of any kind, is final.
-  Future<Map<String, dynamic>> _postWithRetry(dynamic robotId, Map<String, dynamic> payload, {required bool urgent}) async {
+  Future<Map<String, dynamic>> _postWithRetry(
+    dynamic robotId,
+    Map<String, dynamic> payload, {
+    required bool urgent,
+    String? ifMatch,
+  }) async {
     var attempt = 0;
     while (true) {
       try {
@@ -691,6 +718,7 @@ class RobotViewModel extends ChangeNotifier {
             robotId,
             payload,
             timeout: urgent ? const Duration(seconds: 2) : const Duration(seconds: 5),
+            ifMatch: ifMatch,
           ),
         );
       } on HydraApiException {
@@ -703,6 +731,133 @@ class RobotViewModel extends ChangeNotifier {
     }
   }
 
+  // Conditional writes (contract v2, block 2): every write carries the revision of the robot this app last saw
+  // (If-Match), and the server refuses it with 412 when the robot changed in between.
+
+  /// Which writes are checked (chosen in the list of reservations); the standard mode by default.
+  ConditionalMode conditionalMode = ConditionalMode.standard;
+
+  /// The last revision seen of each robot.
+  late final RevisionTracker revisions = RevisionTracker(() => conditionalMode);
+
+  // Whether the server was last seen to understand the `table` command (true until it says otherwise).
+  bool _tableCommandSupported = true;
+
+  /// When the server last pushed the reservations (this device's clock); null before the first push.
+  DateTime? claimsPushedAt;
+
+  /// Chooses which writes are checked, and keeps the choice.
+  Future<void> setConditionalMode(ConditionalMode mode) async {
+    conditionalMode = mode;
+    notifyListeners();
+    await _clientPrefs.saveConditionalMode(mode.key);
+  }
+
+  /// Runs one write with the revision this app last saw of the robot as If-Match (never for STOP, and only when the
+  /// mode and the tracker allow it), keeps the revision of the answer for the next write, and on a 412 keeps the one
+  /// the server says the robot is at now. The failure is rethrown for the caller to report.
+  Future<Map<String, dynamic>> _withRevision(dynamic robotId, String command, Future<Map<String, dynamic>> Function(String? ifMatch) call) async {
+    final ticket = revisions.begin(robotId, command);
+    try {
+      final answer = await call(ticket.ifMatch);
+      revisions.finish(robotId, ticket.seq, revisionOf(answer));
+      return answer;
+    } catch (e) {
+      revisions.finish(robotId, ticket.seq, null);
+      if (e is HydraApiException && e.isRevisionMismatch) revisions.learn(robotId, e.revision);
+      rethrow;
+    }
+  }
+
+  /// Posts a command conditionally; a `table` move goes out as the jogs that did the same on a server that has no such command.
+  Future<Map<String, dynamic>> _postCommandConditionally(dynamic robotId, String command, Map<String, dynamic> payload) async {
+    final params = payload['params'];
+    final tableParamsMap = params is Map<String, dynamic> ? params : null;
+    if (command == 'table' && !_tableCommandSupported && tableParamsMap != null) {
+      return _postTableAsJogs(robotId, tableParamsMap);
+    }
+    try {
+      return await _withRevision(
+        robotId,
+        command,
+        (ifMatch) => _postWithRetry(robotId, payload, urgent: command == 'stop', ifMatch: ifMatch),
+      );
+    } on HydraApiException catch (e) {
+      if (command == 'table' && tableParamsMap != null && isUnknownCommandAnswer(e.statusCode, e.code, e.serverMessage)) {
+        _tableCommandSupported = false;
+        return _postTableAsJogs(robotId, tableParamsMap);
+      }
+      rethrow;
+    }
+  }
+
+  Future<Map<String, dynamic>> _postTableAsJogs(dynamic robotId, Map<String, dynamic> params) async {
+    Map<String, dynamic> last = {'success': true};
+    for (final jog in tableAsJogs(params)) {
+      last = await _postWithRetry(robotId, {'command': 'jog', 'params': jog}, urgent: false);
+    }
+    return last;
+  }
+
+  /// The id of the controller that holds [robotId] in the settings tree, or null.
+  String? _controllerIdOf(dynamic robotId) {
+    final controllers = state.raw['controllers'];
+    if (controllers is! List) return null;
+    for (final c in controllers) {
+      if (c is! Map) continue;
+      final robots = c['robots'];
+      if (robots is! List) continue;
+      for (final r in robots) {
+        if (r is Map && r['id'] == robotId) return c['id'] is String ? c['id'] as String : null;
+      }
+    }
+    return null;
+  }
+
+  /// Reads one robot again (GET /api/robot/:id, which also gives the revision to use next) and puts it on screen.
+  /// Called after a 412: the robot changed under this app, and what is shown may be behind. Never raises an error.
+  Future<void> _refreshRobot(dynamic robotId) async {
+    if (apiClient == null) return;
+    try {
+      final read = await _authed((c) => c.getRobot(robotId));
+      if (read == null) return;
+      revisions.learn(robotId, read.revision);
+      final controllerId = _controllerIdOf(robotId);
+      if (controllerId == null) return;
+      _applyRobotDelta({'controllerId': controllerId, 'robotId': robotId, 'patch': read.robot});
+    } catch (e) {
+      if (e is HydraApiException && e.isSessionProblem) _forceLogout();
+    }
+  }
+
+  /// The reservations the server pushed (WebSocket message `claims`): replaces the list and the arming of this app's own reservations.
+  void _applyClaimsPush(Map<String, dynamic> msg) {
+    final list = ClaimInfo.listFromJson(msg);
+    claims = list;
+    final now = DateTime.now();
+    claimsPushedAt = now;
+    for (final claim in list) {
+      if (claim.controllerId != controllerId) continue;
+      final until = claim.jogArmedUntil;
+      final ttl = safetyByRobot[claim.robotId]?.armTtlMs ?? 60000;
+      // The server clock and this device clock may differ: the arming is shown as ending no later than its length allows.
+      if (until != null && until > now.millisecondsSinceEpoch) {
+        final byServer = DateTime.fromMillisecondsSinceEpoch(until);
+        final byLength = now.add(Duration(milliseconds: ttl));
+        jogArmedUntil[claim.robotId] = byServer.isBefore(byLength) ? byServer : byLength;
+      } else {
+        jogArmedUntil.remove(claim.robotId);
+      }
+    }
+    notifyListeners();
+  }
+
+  /// Whether the server pushed the reservations recently, so the poll of GET /api/claims can rest.
+  bool claimsArePushed([DateTime? now, Duration within = const Duration(seconds: 30)]) {
+    final at = claimsPushedAt;
+    return at != null && (now ?? DateTime.now()).difference(at) < within;
+  }
+
   // The `warnings` of a 200 answer (the server applied nothing), joined; null when there are none.
   String? _commandWarnings(Map<String, dynamic> answer) {
     final warnings = answer['warnings'];
@@ -713,6 +868,7 @@ class RobotViewModel extends ChangeNotifier {
   // The user-facing error for a command that failed, by what the server said.
   HydraError _commandError(String command, Object e) {
     if (e is HydraApiException) {
+      if (e.isRevisionMismatch) return HydraError(HydraErrorKind.revisionChanged, {'command': command});
       if (e.isJogNotArmed) return const HydraError(HydraErrorKind.jogNotArmed);
       if (e.isOtherController) return HydraError(HydraErrorKind.claimOtherController, {'detail': e.serverMessage ?? ''});
       if (e.isControllerIdRequired) return HydraError(HydraErrorKind.claimControllerRequired, {'detail': e.serverMessage ?? ''});
@@ -920,17 +1076,20 @@ class RobotViewModel extends ChangeNotifier {
   /// the server. Called when the control screen opens, when the robot changes
   /// and now and then while it is open; it never raises an error on the screen
   /// (the server may simply be an older one).
-  Future<void> refreshAccess() async {
+  Future<void> refreshAccess({bool fromPoll = false}) async {
     if (apiClient == null) return;
     final robotId = selectedRobotId;
     if (_myUsername == null) {
       final named = activeServer?.username ?? '';
       _myUsername = named.isNotEmpty ? named : await _authPrefs.loadUsername();
     }
-    try {
-      claims = await _authed((c) => c.getClaims());
-    } catch (e) {
-      if (e is HydraApiException && e.isSessionProblem) _forceLogout();
+    // The server pushes the reservations when they change: while a push is fresh the poll does not ask for them.
+    if (!(fromPoll && claimsArePushed())) {
+      try {
+        claims = await _authed((c) => c.getClaims());
+      } catch (e) {
+        if (e is HydraApiException && e.isSessionProblem) _forceLogout();
+      }
     }
     if (robotId != null) {
       try {
@@ -957,7 +1116,8 @@ class RobotViewModel extends ChangeNotifier {
   }
 
   /// Reserves the selected robot for this account on this installation.
-  Future<void> claimSelectedRobot() => _runAccessRequest('claim', (c, id) => c.postClaim(id));
+  Future<void> claimSelectedRobot() =>
+      _runAccessRequest('claim', (c, id) => _withRevision(id, 'claim', (ifMatch) => c.postClaim(id, ifMatch: ifMatch)));
 
   /// Whether this session is an administrator's (the role in its token; the server checks it again).
   bool get isAdmin => jwtRole(apiClient?.authToken) == 'admin';
@@ -974,7 +1134,7 @@ class RobotViewModel extends ChangeNotifier {
 
   /// Releases the selected robot's reservation. Also ends the arming of its jog, as the server does.
   Future<void> releaseSelectedRobot() => _runAccessRequest('release', (c, id) async {
-        final answer = await c.postRelease(id);
+        final answer = await _withRevision(id, 'release', (ifMatch) => c.postRelease(id, ifMatch: ifMatch));
         jogArmedUntil.remove(id);
         return answer;
       });
@@ -1006,12 +1166,71 @@ class RobotViewModel extends ChangeNotifier {
       lastError = null;
     } catch (e) {
       lastError = _commandError(what, e);
+      if (e is HydraApiException && e.isRevisionMismatch) unawaited(_refreshRobot(robotId));
       if (e is HydraApiException && e.isSessionProblem) _forceLogout();
     } finally {
       accessBusy = false;
     }
     notifyListeners();
     await refreshAccess();
+  }
+
+  // The audit record (contract v2, block 4), for administrators.
+  AuditRead? auditRead;
+
+  /// The chain check of the lines in [auditRead] (only after the operator asked to verify); null before.
+  ChainCheck? auditChain;
+  bool auditBusy = false;
+  AuditFailure? auditFailure;
+
+  /// Reads the audit record (administrators only): the newest lines for a filter, and with [verify] the server
+  /// checks the whole record while this app checks the chain of the lines it was given. Never raises an error on
+  /// the screen: the reason is left in [auditFailure].
+  Future<void> refreshAudit({bool verify = false, String? type, dynamic robotId, int limit = 100}) async {
+    if (apiClient == null) {
+      auditFailure = AuditFailure.network;
+      notifyListeners();
+      return;
+    }
+    auditBusy = true;
+    notifyListeners();
+    try {
+      final body = await _authed((c) => c.getAuditBody(AuditRecord.query(limit: limit, type: type, robotId: robotId, verify: verify)));
+      final read = AuditRecord.parse(body);
+      auditRead = read;
+      auditChain = verify ? AuditRecord.checkChain(read.lines) : null;
+      auditFailure = null;
+    } catch (e) {
+      auditRead = null;
+      auditChain = null;
+      if (e is HydraApiException) {
+        auditFailure = e.isSessionProblem
+            ? AuditFailure.session
+            : e.statusCode == 403
+                ? AuditFailure.forbidden
+                : e.isNotFound
+                    ? AuditFailure.unavailable
+                    : e.statusCode == null
+                        ? AuditFailure.network
+                        : AuditFailure.other;
+        if (e.isSessionProblem) _forceLogout();
+      } else {
+        auditFailure = AuditFailure.network;
+      }
+    } finally {
+      auditBusy = false;
+    }
+    notifyListeners();
+  }
+
+  /// The lines of the audit record as the server stores them (`.jsonl`), for sharing; null when they could not be read.
+  Future<String?> exportAudit({String? type, dynamic robotId, int limit = 100}) async {
+    if (apiClient == null) return null;
+    try {
+      return await _authed((c) => c.getAuditBody(AuditRecord.query(limit: limit, type: type, robotId: robotId, format: 'jsonl')));
+    } catch (_) {
+      return null;
+    }
   }
 
   /// True while a jog should not be sent: the previous tick is still on the
@@ -1036,6 +1255,18 @@ class RobotViewModel extends ChangeNotifier {
   }
 
   void jog(String target, String axis, double amount) {
+    if (target == 'xytable' && (axis == 'x' || axis == 'y')) {
+      // One atomic "table" move relative to where the table is now: the server checks the whole move against the
+      // limits of the model and applies all of it or none of it.
+      final move = tableParams(axis == 'x' ? amount : 0.0, axis == 'y' ? amount : 0.0, 'relative');
+      if (move == null) return;
+      _sendAtomicCommand(
+        'table',
+        params: move,
+        localMutate: (r) => r.setXyTableAxis(axis, (r.xyTablePos[axis] ?? 0.0) + amount),
+      );
+      return;
+    }
     final params = {'axis': axis, 'amount': amount, 'target': target};
     _sendAtomicCommand(
       'jog',

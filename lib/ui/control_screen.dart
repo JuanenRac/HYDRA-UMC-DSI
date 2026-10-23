@@ -54,7 +54,8 @@ class _ControlScreenState extends State<ControlScreen> {
       if (mounted) setState(() => _now = DateTime.now());
     });
     _accessTimer = Timer.periodic(const Duration(seconds: 15), (_) {
-      if (mounted) context.read<RobotViewModel>().refreshAccess();
+      // The server pushes the reservations when they change: while a push is recent the poll does not ask for them.
+      if (mounted) context.read<RobotViewModel>().refreshAccess(fromPoll: true);
     });
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) context.read<RobotViewModel>().refreshAccess();

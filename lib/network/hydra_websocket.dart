@@ -84,6 +84,10 @@ class HydraWebSocket {
   /// delta folded into onSettings as a full-tree replace.
   final void Function(Map<String, dynamic> delta)? onDelta;
 
+  /// The `claims` message (who reserves which robot, pushed when a reservation, an arming or a stop changes, only to
+  /// a connection that asked for remoteApiVersion=2): the same list as GET /api/claims, so the app need not poll it.
+  final void Function(Map<String, dynamic> message)? onClaims;
+
   WebSocketChannel? _channel;
   StreamSubscription? _sub;
   bool _closingByUser = false;
@@ -105,6 +109,7 @@ class HydraWebSocket {
     required this.onSettings,
     required this.onError,
     this.onDelta,
+    this.onClaims,
   });
 
   void connect() {
@@ -230,6 +235,10 @@ class HydraWebSocket {
       return;
     }
     final type = msg['type'];
+    if (type == 'claims') {
+      onClaims?.call(msg);
+      return;
+    }
     if (type == 'delta' && msg['schema'] == 2 && msg.containsKey('robotId')) {
       final handler = onDelta;
       if (handler != null) {
