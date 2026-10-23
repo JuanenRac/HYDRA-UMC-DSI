@@ -4,6 +4,7 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+- CI builds the Linux app (`flutter build linux --release`) after installing the desktop build dependencies, so a change that breaks the native build or a plugin is caught before a release.
 - **Reservations.** The Control screen shows who holds the selected robot (nobody, this display, your account on another device, another account), reserves and releases it, and lists every reservation of the server. Reservations stay optional.
 - **Controller id.** The display keeps one controller id for the installation and sends it with every reserve, release, jog-arm and command (body and `X-Controller-Id` header), so a reservation belongs to the account and to this display. The refusals of the server read differently: another account, your account on another device or window, controller id required, and jog not armed.
 - **Safety limits.** The limits of the robot's model are read from the server: a jog step above the limit is not sent (it says which limit), and when the administrator requires it the jog waits for an explicit **Arm jog** (with a countdown) that ends by itself, with STOP, or on release.
