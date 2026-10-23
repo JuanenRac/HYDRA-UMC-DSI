@@ -45,6 +45,14 @@ enum HydraErrorKind {
   commandRejected,
   commandNotApplied,
   stopNotConfirmed,
+  // Reservations and the jog (contract v2): the same account holds the robot
+  // from another controller, the reservation names a controller and the request
+  // named none, the jog is not armed, and a jog above the limit of the model
+  // that was never sent.
+  claimOtherController,
+  claimControllerRequired,
+  jogNotArmed,
+  jogOverLimit,
 }
 
 class HydraError {
@@ -86,6 +94,14 @@ class HydraError {
         return l10n.errCommandNotApplied(params['command'] ?? '', params['reason'] ?? '');
       case HydraErrorKind.stopNotConfirmed:
         return l10n.errStopNotConfirmed;
+      case HydraErrorKind.claimOtherController:
+        return l10n.errClaimOtherController(params['detail'] ?? '');
+      case HydraErrorKind.claimControllerRequired:
+        return l10n.errClaimControllerRequired(params['detail'] ?? '');
+      case HydraErrorKind.jogNotArmed:
+        return l10n.errJogNotArmed;
+      case HydraErrorKind.jogOverLimit:
+        return l10n.errJogOverLimit(params['limit'] ?? '');
     }
   }
 }

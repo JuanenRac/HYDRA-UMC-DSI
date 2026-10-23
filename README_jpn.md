@@ -53,6 +53,7 @@ Compute Module 5 上の HYDRA-UMC 自身の 5"/7" DSI タッチスクリーン�
 - **水平タッチナビゲーション**（`lib/ui/main_screen.dart`）—— 固定 1280px 幅にわたる、6 つの大きなアイコン+ラベルタブ（ダッシュボード/制御/カメラ/3D ビュー/指標/設定）からなる常設のトップバー。スマートフォン式のボトムナビゲーションバーというより、精神的には KlipperScreen に近いものです——プロジェクトオーナーが求めたカタログに一致させつつ、縦長のスマートフォンレイアウトではなく、横長のタッチパネル向けに再編成されています。
 - **ダッシュボード**（`lib/ui/dashboard_screen.dart`）—— ロボットごとのカード、`Provider` によるリアルタイムの反応、LED の慣例（緑の点滅=アクティブ、赤の点灯=非アクティブ）、統合ロボット表示、モジュールチップ（CAM/XY/ATC/PNP/CNC/LSR/BED/VAC/RCK）——本エコシステム内の他のすべてのクライアントと同じビジュアル言語です。
 - **手動制御**（`lib/ui/control_screen.dart`、`lib/ui/widgets/joystick_pad.dart`）—— 単一のスクロール列ではなく 1280x720 のフレームに合わせたサイズの左右配置レイアウト（左にジョグパッド、右にテレメトリ/速度/IO）、グローバル **STOP**（`lib/ui/widgets/stop_all.dart`）が各タブの上部バー、制御タブ、画面清掃オーバーレイに常時表示され、1 回のタップのみで（長押しも確認もなし）全ロボットを停止し（`POST /api/stop-all`）、結果をロボットごとに表示し（ロボットが失敗した場合や停止が保存されなかった場合は警告、他のアカウントが予約中のロボットには印）、ネットワークエラー時は 1 回再試行し、429 や古いサーバーではロボットごとの停止に切り替え、後の STOP が応答を得るまで「STOP 未確認」の表示を残します（丸いロボット単位の停止ボタンは長押し保護を維持）、速度/加速度スライダー、バルブ/ポンプのトグル。
+- **予約と安全上限**（`lib/ui/widgets/access_panel.dart`、`lib/models/access.dart`、`lib/network/hydra_api_client.dart`、`lib/state/robot_view_model.dart`）- Control 画面は、選択したロボットを誰が保持しているか（誰も、この端末、別の端末の同じアカウント、別のアカウント）を表示し、**予約**と**解放**を提供し、サーバーのすべての予約の一覧（`GET /api/claims`）も表示します。端末はインストールごとにコントローラーIDを1つ保持し、予約・解放・ジョグのアーム・コマンドのたびにそれを送ります（本文と `X-Controller-Id` ヘッダー）。このため予約はアカウント全体ではなく、アカウントとこの端末に属します。サーバーの拒否は区別されます：別のアカウントが予約、あなたのアカウントが別の端末またはウィンドウで予約、コントローラーID必須、ジョグ未アーム。ロボットのモデルの上限は `GET /api/safety-limits` から読み取ります：上限を超えるジョグのステップは送信されず、サーバーの警告が表示されます。管理者が要求した場合は、ジョグでロボットを動かす前に**ジョグをアームする**（カウントダウン付き）を押す必要があり、アームは自動で、STOP で、または解放時に終了します。予約は任意です：誰も予約していないロボットはこれまでどおり操作できます。
 - **カメラ**（`lib/ui/camera_screen.dart`、`lib/ui/widgets/mjpeg_view.dart`）—— HYDRA-UMC-IOS-CONTROL と同じ、手作りで依存関係のない MJPEG ストリームパーサー（WebView なし、プラットフォーム固有コードなし——Linux デスクトップ上でそのまま動作します）、明確な「カメラ無効」状態、そしてサーバーから直接ロボットのビジョンシステムをオン/オフする切り替えスイッチ。
 - **3D ビュー**（`lib/ui/three_d_screen.dart`）—— iOS/Android アプリとは異なり、STUDIO の実際の Three.js シーンを埋め込む WebView では**ありません**——`webview_flutter` には Linux デスクトップ実装がまったく存在せず、フルブラウザエンジンはこの低消費電力の組み込みパネルが必要とする以上に重いランタイム負荷になります。代わりに：小さなネイティブの等角 X/Y/Z 位置インジケーター（`CustomPainter`、3D エンジンなし）と、本ボード自身の HDMI 接続モニター上にある実際の 3D シーンを指し示す画面上の注記。完全な理由は `docs/ARCHITECTURE.md` 第 4 節を参照してください。
 - **システム指標**（`lib/ui/metrics_screen.dart`）—— iOS/Android のようにダッシュボードに折りたたまれるのではなく、専用のタブを持ち、`GET /api/system/metrics` からの CPU/メモリ/温度/稼働時間タイルと、`GET /api/hydra-info` からのホスト名/コントローラー数/ロボット数/アプリバージョンを表示します。
@@ -130,6 +131,7 @@ HYDRA-UMC-DSI/
 │   ├── models/
 │   │   ├── server_info.dart         # ディスカバリー/接続エントリ——他の 3 つのクライアントの ServerInfo をミラーリング
 │   │   ├── hydra_state.dart         # RobotView/ControllerView/HydraState——生の settings.json ツリーに対する薄い可変ビュー
+│   │   ├── access.dart            # コントローラーID・予約・安全上限・ジョグ確認（純粋なルール）
 │   │   └── stop_all_result.dart    # グローバル STOP の応答（ロボットごと）
 │   ├── network/
 │   │   ├── hydra_api_client.dart    # REST：ログイン、設定、原子的ロボット指令、システム指標——X-Hydra-Client: dsi
@@ -155,6 +157,7 @@ HYDRA-UMC-DSI/
 │       ├── metrics_screen.dart      # CM5 ホスト指標 + サーバー識別情報専用タブ
 │       ├── settings_screen.dart     # 接続情報 + サインアウト + 自身のアプリバージョン
 │       └── widgets/
+│           ├── access_panel.dart      # Control 画面の予約・ジョグアームのパネル
 │           ├── joystick_pad.dart     # ジョグ方向パッド、タッチ向けに拡大
 │           ├── stop_all.dart            # グローバル STOP ボタンと、その結果／「未確認」バナー
 │           ├── digital_readout.dart, status_led.dart

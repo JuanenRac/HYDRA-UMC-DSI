@@ -27,10 +27,12 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 
 import '../l10n/language_prefs.dart';
+import '../models/access.dart';
 import '../models/hydra_state.dart';
 import '../models/server_info.dart';
 import '../models/stop_all_result.dart';
 import '../network/auth_prefs.dart';
+import '../network/client_prefs.dart';
 import '../network/hydra_api_client.dart';
 import '../network/hydra_websocket.dart';
 import 'hydra_error.dart';
@@ -60,6 +62,7 @@ class RobotViewModel extends ChangeNotifier {
   // {SecureTokenBackend? secureBackend}. Defaults to a real AuthPrefs()
   // (backed by real platform secure storage) for every actual screen.
   final AuthPrefs _authPrefs;
+  final ClientPrefs _clientPrefs = ClientPrefs();
   final LanguagePrefs _languagePrefs = LanguagePrefs();
 
   RobotViewModel({AuthPrefs? authPrefs}) : _authPrefs = authPrefs ?? AuthPrefs();
@@ -140,6 +143,13 @@ class RobotViewModel extends ChangeNotifier {
 
   Future<void> init() async {
     languageOverride = await _languagePrefs.loadLocale();
+    // The controller id of this installation: made once, kept, and adopted here.
+    final storedControllerId = await _clientPrefs.loadControllerId();
+    if (isValidControllerId(storedControllerId)) {
+      HydraApiClient.controllerId = storedControllerId!;
+    } else {
+      await _clientPrefs.saveControllerId(HydraApiClient.controllerId);
+    }
     final saved = await _authPrefs.loadConnection();
     final token = await _authPrefs.loadToken();
     if (saved != null) {
@@ -160,6 +170,7 @@ class RobotViewModel extends ChangeNotifier {
   }
 
   Future<bool> login(ServerInfo server) async {
+    _myUsername = null;
     // A sign-out still erasing the previous session must finish first.
     await _pendingLogout;
     // Close out any previous session's client before replacing it - each
@@ -198,6 +209,10 @@ class RobotViewModel extends ChangeNotifier {
   }
 
   void logout() {
+    _myUsername = null;
+    claims = const [];
+    safetyByRobot.clear();
+    jogArmedUntil.clear();
     isLoggedIn = false;
     _ws?.disconnect();
     _metricsTimer?.cancel();
@@ -538,6 +553,28 @@ class RobotViewModel extends ChangeNotifier {
       return;
     }
 
+    // A jog the server requires to be armed and that is not, or one above the
+    // limit it holds for this robot's model, is not sent at all (the server
+    // checks both again). Checked before the optimistic change, like the client above.
+    if (command == 'jog') {
+      if (jogNeedsArming(robotId)) {
+        lastError = const HydraError(HydraErrorKind.jogNotArmed);
+        notifyListeners();
+        return;
+      }
+      final amount = params?['amount'];
+      final exceeded = jogLimitExceeded(
+        amount is num ? amount.toDouble() : 0.0,
+        safetyByRobot[robotId]?.jog,
+        absolute: params?['absolute'] == true,
+      );
+      if (exceeded != null) {
+        lastError = HydraError(HydraErrorKind.jogOverLimit, {'limit': formatLimit(exceeded)});
+        notifyListeners();
+        return;
+      }
+    }
+
     final affectedIds = <dynamic>[robotId];
     if (propagateToCombined) affectedIds.addAll(target.combinedWith);
 
@@ -597,6 +634,8 @@ class RobotViewModel extends ChangeNotifier {
           return;
         }
         lastError = null;
+        // The server disarms the jog on a stop.
+        if (isStop) jogArmedUntil.remove(robotId);
         notifyListeners();
       } catch (e) {
         // Catches everything, not just HydraApiException: a plain network
@@ -608,6 +647,8 @@ class RobotViewModel extends ChangeNotifier {
         // that never reached the robot.
         rollback();
         lastError = _commandError(command, e);
+        // The arming ended (it times out, or a stop cleared it): the screen offers to arm again.
+        if (e is HydraApiException && e.isJogNotArmed) jogArmedUntil.remove(robotId);
         if (e is HydraApiException && e.isSessionProblem) {
           // The renewal inside _authed() already failed: the session is over.
           _forceLogout();
@@ -672,6 +713,9 @@ class RobotViewModel extends ChangeNotifier {
   // The user-facing error for a command that failed, by what the server said.
   HydraError _commandError(String command, Object e) {
     if (e is HydraApiException) {
+      if (e.isJogNotArmed) return const HydraError(HydraErrorKind.jogNotArmed);
+      if (e.isOtherController) return HydraError(HydraErrorKind.claimOtherController, {'detail': e.serverMessage ?? ''});
+      if (e.isControllerIdRequired) return HydraError(HydraErrorKind.claimControllerRequired, {'detail': e.serverMessage ?? ''});
       if (e.isReservedByAnother) {
         return HydraError(HydraErrorKind.robotReserved, {'owner': e.serverMessage ?? ''});
       }
@@ -763,6 +807,7 @@ class RobotViewModel extends ChangeNotifier {
       }
 
       stopAllUnconfirmed = false;
+      jogArmedUntil.clear(); // the server disarms every jog on a global stop
       stopAllResult = result;
       for (final entry in result.robots) {
         if (!entry.stopped) continue;
@@ -823,6 +868,137 @@ class RobotViewModel extends ChangeNotifier {
           })
           .catchError((_) {}),
     );
+  }
+
+  // ---- Reservations, safety limits and jog arming (contract v2, block 1) ----
+  //
+  // Reservations are optional: a robot nobody reserved is commanded as before.
+  // The controller id (HydraApiClient.controllerId) is sent with every reserve,
+  // release, jog-arm and command, so a reservation belongs to the account AND
+  // to this installation.
+
+  /// Every active reservation, as of the last refresh (GET /api/claims).
+  List<ClaimInfo> claims = const [];
+
+  /// The limits of each robot's model the server told this app about, by robot id.
+  final Map<dynamic, RobotSafety> safetyByRobot = {};
+
+  /// Until when (this device's clock) the jog of each robot is armed from this app.
+  final Map<dynamic, DateTime> jogArmedUntil = {};
+
+  /// True while a reservation or arming request is on the wire.
+  bool accessBusy = false;
+
+  String get controllerId => HydraApiClient.controllerId;
+
+  /// The reservation of [robotId], if any.
+  ClaimInfo? claimOf(dynamic robotId) {
+    for (final c in claims) {
+      if (c.robotId == robotId) return c;
+    }
+    return null;
+  }
+
+  /// Where [robotId] stands for this installation, from the last list of reservations.
+  ClaimStanding claimStandingOf(dynamic robotId) =>
+      claimStanding(claimOf(robotId), _myUsername ?? activeServer?.username ?? '', controllerId);
+
+  // The account name of this session: a restored session has no password and
+  // so no username on the server entry; the saved one is read once.
+  String? _myUsername;
+
+  /// True when the server requires the jog of [robotId] to be armed and it is
+  /// not (this app's view of it).
+  bool jogNeedsArming(dynamic robotId, [DateTime? now]) {
+    final safety = safetyByRobot[robotId];
+    if (safety == null || !safety.armRequired) return false;
+    final until = jogArmedUntil[robotId];
+    return until == null || !until.isAfter(now ?? DateTime.now());
+  }
+
+  /// Reads the reservations and the limits of the selected robot's model from
+  /// the server. Called when the control screen opens, when the robot changes
+  /// and now and then while it is open; it never raises an error on the screen
+  /// (the server may simply be an older one).
+  Future<void> refreshAccess() async {
+    if (apiClient == null) return;
+    final robotId = selectedRobotId;
+    if (_myUsername == null) {
+      final named = activeServer?.username ?? '';
+      _myUsername = named.isNotEmpty ? named : await _authPrefs.loadUsername();
+    }
+    try {
+      claims = await _authed((c) => c.getClaims());
+    } catch (e) {
+      if (e is HydraApiException && e.isSessionProblem) _forceLogout();
+    }
+    if (robotId != null) {
+      try {
+        final safety = await _authed((c) => c.getRobotSafety(robotId));
+        if (safety != null) {
+          safetyByRobot[robotId] = safety;
+          final until = safety.jogArmedUntil;
+          final now = DateTime.now();
+          // The server clock and this device clock may differ: the arming is
+          // shown as ending no later than its length allows.
+          if (until != null && until > now.millisecondsSinceEpoch) {
+            final byServer = DateTime.fromMillisecondsSinceEpoch(until);
+            final byLength = now.add(Duration(milliseconds: safety.armTtlMs));
+            jogArmedUntil[robotId] = byServer.isBefore(byLength) ? byServer : byLength;
+          } else {
+            jogArmedUntil.remove(robotId);
+          }
+        }
+      } catch (e) {
+        if (e is HydraApiException && e.isSessionProblem) _forceLogout();
+      }
+    }
+    notifyListeners();
+  }
+
+  /// Reserves the selected robot for this account on this installation.
+  Future<void> claimSelectedRobot() => _runAccessRequest('claim', (c, id) => c.postClaim(id));
+
+  /// Releases the selected robot's reservation. Also ends the arming of its jog, as the server does.
+  Future<void> releaseSelectedRobot() => _runAccessRequest('release', (c, id) async {
+        final answer = await c.postRelease(id);
+        jogArmedUntil.remove(id);
+        return answer;
+      });
+
+  /// Arms or disarms the jog of the selected robot (only needed when the server requires it).
+  Future<void> setJogArmed(bool armed) => _runAccessRequest('jog-arm', (c, id) async {
+        final answer = await c.postJogArm(id, armed);
+        if (armed) {
+          final ttl = answer['ttlMs'] is num ? (answer['ttlMs'] as num).toInt() : (safetyByRobot[id]?.armTtlMs ?? 60000);
+          jogArmedUntil[id] = DateTime.now().add(Duration(milliseconds: ttl));
+        } else {
+          jogArmedUntil.remove(id);
+        }
+        return answer;
+      });
+
+  Future<void> _runAccessRequest(String what, Future<Map<String, dynamic>> Function(HydraApiClient, dynamic) call) async {
+    final robotId = selectedRobotId;
+    if (robotId == null) return;
+    if (apiClient == null) {
+      lastError = const HydraError(HydraErrorKind.notConnected);
+      notifyListeners();
+      return;
+    }
+    accessBusy = true;
+    notifyListeners();
+    try {
+      await _authed((c) => call(c, robotId));
+      lastError = null;
+    } catch (e) {
+      lastError = _commandError(what, e);
+      if (e is HydraApiException && e.isSessionProblem) _forceLogout();
+    } finally {
+      accessBusy = false;
+    }
+    notifyListeners();
+    await refreshAccess();
   }
 
   /// True while a jog should not be sent: the previous tick is still on the

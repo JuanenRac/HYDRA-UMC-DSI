@@ -23,6 +23,8 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import '../models/access.dart';
+
 class HydraApiException implements Exception {
   final String message;
   /// HTTP status of the server's answer; null when there was no answer.
@@ -39,11 +41,27 @@ class HydraApiException implements Exception {
   bool get isSessionProblem =>
       statusCode == 401 || (statusCode == 403 && (code == 'TOKEN_EXPIRED' || code == 'TOKEN_INVALID'));
 
-  /// A 403 about the account's role, not about the session.
-  bool get isPermissionDenied => statusCode == 403 && !isSessionProblem;
+  /// A 403 about the account's role, not about the session (a jog that is not armed is its own case).
+  bool get isPermissionDenied => statusCode == 403 && !isSessionProblem && !isJogNotArmed;
 
-  /// The robot is reserved by another account (the server's 409).
+  /// The robot is reserved and the server refused this client (409): another
+  /// account, another controller, or no controller id.
   bool get isReservedByAnother => statusCode == 409;
+
+  /// 409 `other-account`: another account holds the reservation.
+  bool get isOtherAccount => statusCode == 409 && code == 'other-account';
+
+  /// 409 `other-controller`: this account holds it from another controller
+  /// (another phone, window or tab).
+  bool get isOtherController => statusCode == 409 && code == 'other-controller';
+
+  /// `controller-id-required`: the reservation names a controller and the
+  /// request named none (409), or the server requires one to reserve (400).
+  bool get isControllerIdRequired => code == 'controller-id-required';
+
+  /// 403 `jog-not-armed`: the administrator requires the jog to be armed first
+  /// and it is not.
+  bool get isJogNotArmed => statusCode == 403 && code == 'jog-not-armed';
 
   /// The server refused the command itself (unknown command, a value it cannot take).
   bool get isRejectedCommand => statusCode == 400;
@@ -68,6 +86,12 @@ class HydraApiClient {
   bool get usesTls => baseUrl.startsWith('https://');
   String? authToken;
   final http.Client _client;
+
+  /// The controller id of this installation (see models/access.dart), sent in
+  /// the body and in the `X-Controller-Id` header of every reserve, release,
+  /// jog-arm and command. It is made once and kept (see ClientPrefs), so a
+  /// reservation made from this device can still be released after a restart.
+  static String controllerId = generateControllerId();
 
   /// [useTls] starts the client on https:// - for a server that was already
   /// seen answering TLS. It never goes back to plain http by itself: a server
@@ -207,11 +231,61 @@ class HydraApiClient {
     final resp = await _client
         .post(
           Uri.parse('$baseUrl/api/robot/$robotId/command'),
-          headers: {'Content-Type': 'application/json', ..._clientHeaders, ..._authHeaders},
-          body: jsonEncode(payload),
+          headers: {'Content-Type': 'application/json', ..._clientHeaders, ..._controllerHeaders, ..._authHeaders},
+          body: jsonEncode({...payload, 'controllerId': controllerId}),
         )
         .timeout(timeout);
     return _expectJson(resp);
+  }
+
+  static Map<String, String> get _controllerHeaders => {'X-Controller-Id': controllerId};
+
+  Future<Map<String, dynamic>> _postControl(String path, Map<String, dynamic> body) async {
+    final resp = await _client
+        .post(
+          Uri.parse('$baseUrl$path'),
+          headers: {'Content-Type': 'application/json', ..._clientHeaders, ..._controllerHeaders, ..._authHeaders},
+          body: jsonEncode({...body, 'controllerId': controllerId}),
+        )
+        .timeout(const Duration(seconds: 5));
+    return _expectJson(resp);
+  }
+
+  /// Every active reservation (GET /api/claims): who controls which robot.
+  Future<List<ClaimInfo>> getClaims() async {
+    final resp = await _client
+        .get(Uri.parse('$baseUrl/api/claims'), headers: {..._clientHeaders, ..._authHeaders})
+        .timeout(const Duration(seconds: 5));
+    return ClaimInfo.listFromJson(_expectJson(resp));
+  }
+
+  /// Reserves a robot for this account on this controller. [ttlMs] null lets
+  /// the server pick its default; [force] (administrators only) takes over a
+  /// reservation held by someone else.
+  Future<Map<String, dynamic>> postClaim(dynamic robotId, {int? ttlMs, bool force = false}) =>
+      _postControl('/api/robot/$robotId/claim', {'ttlMs': ?ttlMs, if (force) 'force': true});
+
+  /// Releases the reservation of a robot held by this account on this
+  /// controller (idempotent on the server).
+  Future<Map<String, dynamic>> postRelease(dynamic robotId) => _postControl('/api/robot/$robotId/release', {});
+
+  /// Arms (true) or disarms (false) the jog of one robot; only demanded by the
+  /// server when the administrator turned it on.
+  Future<Map<String, dynamic>> postJogArm(dynamic robotId, bool armed) =>
+      _postControl('/api/robot/$robotId/jog-arm', {'armed': armed});
+
+  /// The safety limits the server holds for one robot's model
+  /// (GET /api/safety-limits?robotId=); null from an older server without the route.
+  Future<RobotSafety?> getRobotSafety(dynamic robotId) async {
+    final resp = await _client
+        .get(Uri.parse('$baseUrl/api/safety-limits?robotId=$robotId'), headers: {..._clientHeaders, ..._authHeaders})
+        .timeout(const Duration(seconds: 5));
+    try {
+      return RobotSafety.fromJson(_expectJson(resp));
+    } on HydraApiException catch (e) {
+      if (e.isNotFound) return null;
+      rethrow;
+    }
   }
 
   /// POST /api/stop-all: the global stop. No body, no confirmation; any
