@@ -44,6 +44,19 @@ Una interfaz táctil nativa en Flutter (Dart, con target real de escritorio Linu
 | Destino | La Raspberry Pi CM5 de una celda HYDRA-UMC |
 | En hardware real | Todavía no: no consta ninguna ejecución en hardware real para esta versión |
 
+## 🚦 Estado del proyecto
+
+Cada línea es una parte de este repositorio y la luz dice hasta dónde llega hoy. Se escribe con lo que el repositorio puede demostrar (pruebas, compilaciones, ejecuciones), no con lo previsto.
+
+🟢 Hecho y verificado · 🟡 Funciona, con límites conocidos · 🟠 Hecho a medias o sin verificar · 🔴 Sin hacer o sin funcionar
+
+| Área | Estado | Qué significa aquí |
+|---|---|---|
+| Software | 🟡 | Funciona para su propósito principal; la comprobación de honestidad de arriba lista lo que aún falta |
+| Pruebas | 🟢 | 72 pruebas automáticas, ejecutadas en cada cambio |
+| Hardware real | 🔴 | Todavía no: no consta ninguna ejecución en hardware real para esta versión |
+| Documentación | 🟢 | README en ocho idiomas, comprobado contra el manifiesto en cada cambio |
+
 ## 🏗️ Qué está implementado
 
 - **Login** (`lib/ui/login_screen.dart`, `lib/state/robot_view_model.dart`) - campos de IP/puerto del servidor precargados con un valor de LAN razonable, campos de usuario/contraseña dimensionados para uso táctil y vacíos por defecto (sin ninguna credencial precargada - el precargado inicial `admin`/`admin` se eliminó cuando todos los servidores dejaron de crear esa cuenta por defecto en un primer arranque de producción real), `POST /api/login` contra la cuenta que introduzca el operador; se pueden crear cuentas adicionales de menor privilegio "operator" desde Config > Users en la interfaz web. El token de sesión se guarda en el almacén seguro de la plataforma (libsecret en Linux, que necesita un servicio de llavero en marcha: en un panel sin él la sesión dura hasta reiniciar la app y se vuelve a pedir el inicio de sesión). Un diálogo de "Buscar en la red local" (`lib/network/discovery.dart`) encuentra servidores sin necesidad de conocer ya la IP - doblemente útil aquí, ya que la CM5 en la que corre esta app suele ser el propio controlador al que debe conectarse.

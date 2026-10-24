@@ -44,6 +44,19 @@ Une interface tactile native en Flutter (Dart, avec une vraie cible desktop Linu
 | Cible | Le Raspberry Pi CM5 d'une cellule HYDRA-UMC |
 | Sur matériel réel | Pas encore : aucune exécution sur du matériel réel n'est consignée pour cette version |
 
+## 🚦 État du projet
+
+Chaque ligne est une partie de ce dépôt et le feu dit où elle en est aujourd'hui. Elle est écrite d'après ce que le dépôt peut montrer (tests, compilations, exécutions), pas d'après ce qui est prévu.
+
+🟢 Fait et vérifié · 🟡 Fonctionne, avec des limites connues · 🟠 À moitié fait ou pas encore vérifié · 🔴 Pas fait ou ne fonctionne pas
+
+| Domaine | État | Ce que cela veut dire ici |
+|---|---|---|
+| Logiciel | 🟡 | Fonctionne pour son usage principal ; la vérification d'honnêteté ci-dessus liste ce qui manque encore |
+| Tests | 🟢 | 72 tests automatiques, exécutés à chaque modification |
+| Matériel réel | 🔴 | Pas encore : aucune exécution sur du matériel réel n'est consignée pour cette version |
+| Documentation | 🟢 | README en huit langues, vérifié par rapport au manifeste à chaque modification |
+
 ## 🏗️ Ce qui est implémenté
 
 - **Connexion** (`lib/ui/login_screen.dart`, `lib/state/robot_view_model.dart`) - champs IP/port du serveur pré-remplis avec une valeur LAN raisonnable, champs nom d'utilisateur/mot de passe dimensionnés pour le tactile et laissés vides par défaut (aucun identifiant n'est pré-rempli - le pré-remplissage initial `admin`/`admin` a été supprimé lorsque chaque serveur a cessé de créer ce compte par défaut lors d'un premier démarrage de production réel), `POST /api/login` avec le compte saisi par l'opérateur ; des comptes supplémentaires à privilège réduit "operator" peuvent être créés depuis Config > Users dans l'interface web. Le jeton de session est gardé dans le stockage sécurisé de la plateforme (libsecret sous Linux, qui exige un service de trousseau actif : sur un panneau sans lui, la session dure jusqu'au redémarrage de l'application et la connexion est redemandée). Une boîte de dialogue "Scan local network" (`lib/network/discovery.dart`) trouve les serveurs sans avoir besoin de connaître déjà l'IP - doublement utile ici, puisque le CM5 sur lequel tourne cette application est souvent le contrôleur même auquel elle doit se connecter.
