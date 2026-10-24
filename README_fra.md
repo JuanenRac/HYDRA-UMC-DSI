@@ -195,6 +195,7 @@ HYDRA-UMC-DSI/
 ├── windows/                          # Runner bureau Windows - vérification sur machine de développement uniquement
 ├── docs/ARCHITECTURE.md
 ├── tools/
+│   ├── build_test.py                     # Vérification de build sans versionnage
 │   ├── ci_validate.py               # Validation manifeste/CHANGELOG/docs utilisée par CI
 │   ├── _doc_policy.py               # Règles de documentation partagées par la famille (copie de celle de HYDRA-UMC-SDK, tenue synchronisée)
 │   ├── _readme_parity.py            # Contrôle que les huit README partagent la même structure (copie de celui de HYDRA-UMC-SDK, tenue synchronisée)

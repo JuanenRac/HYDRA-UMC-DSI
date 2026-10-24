@@ -187,6 +187,7 @@ HYDRA-UMC-DSI/
 ├── windows/                          # Windows 桌面运行器——仅供开发机验证
 ├── docs/ARCHITECTURE.md
 ├── tools/
+│   ├── build_test.py                     # 不递增版本号的构建检查
 │   ├── ci_validate.py               # CI 使用的清单/CHANGELOG/文档校验
 │   ├── _doc_policy.py               # 家族共享的文档规则 (HYDRA-UMC-SDK 的副本,保持同步)
 │   ├── _readme_parity.py            # 检查八个 README 结构一致 (HYDRA-UMC-SDK 的副本,保持同步)

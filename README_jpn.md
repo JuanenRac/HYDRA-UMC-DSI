@@ -187,6 +187,7 @@ HYDRA-UMC-DSI/
 ├── windows/                          # Windows デスクトップランナー——開発機での検証専用
 ├── docs/ARCHITECTURE.md
 ├── tools/
+│   ├── build_test.py                     # バージョンを増やさないビルドチェック
 │   ├── ci_validate.py               # CI が使用するマニフェスト/CHANGELOG/ドキュメント検証
 │   ├── _doc_policy.py               # ファミリー共通のドキュメント規則 (HYDRA-UMC-SDK のコピーで、同期を維持)
 │   ├── _readme_parity.py            # 8つの README が同じ構造であることの検査 (HYDRA-UMC-SDK のコピーで、同期を維持)
