@@ -88,6 +88,14 @@ class SettingsScreen extends StatelessWidget {
           ListTile(leading: const Icon(Icons.tag), title: Text(l10n.settingsAppVersion('${info['appVersion'] ?? '?'}'))),
         ],
         const Divider(),
+        SwitchListTile(
+          secondary: const Icon(Icons.play_circle_outline),
+          title: Text(l10n.settingsConfirmPlay),
+          subtitle: Text(l10n.settingsConfirmPlaySubtitle),
+          value: vm.confirmPlay,
+          onChanged: (value) => vm.setConfirmPlay(value),
+        ),
+        const Divider(),
         ListTile(
           leading: const Icon(Icons.language),
           title: Text(l10n.settingsLanguage),

@@ -21,8 +21,10 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../l10n/app_localizations.dart';
+import '../models/access.dart';
 import '../models/hydra_state.dart';
 import '../state/robot_view_model.dart';
+import '../util/play_confirmation.dart';
 import 'widgets/access_panel.dart';
 import 'widgets/digital_readout.dart';
 import 'widgets/joystick_pad.dart';
@@ -256,6 +258,36 @@ class _ControlScreenState extends State<ControlScreen> {
     );
   }
 
+  /// PLAY: asks first (what will run, at which speed, who has the robot reserved) unless the person turned that off.
+  Future<void> _play(RobotViewModel vm, RobotView robot, AppLocalizations l10n) async {
+    if (!playNeedsConfirmation(askBeforePlay: vm.confirmPlay, robotIsPlaying: robot.isPlaying)) {
+      vm.sendCommand('play');
+      return;
+    }
+    final String reservation;
+    switch (vm.claimStandingOf(robot.id)) {
+      case ClaimStanding.free:
+        reservation = l10n.playConfirmFree;
+      case ClaimStanding.mineHere:
+      case ClaimStanding.mineElsewhere:
+        reservation = l10n.playConfirmMine;
+      case ClaimStanding.other:
+        reservation = l10n.playConfirmOther(vm.claimOf(robot.id)?.ownerUsername ?? '');
+    }
+    final go = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(l10n.playConfirmTitle),
+        content: Text(l10n.playConfirmMessage(robot.name, recordedPointsCount(robot.raw), playSpeedPercent(robot.speed), reservation)),
+        actions: [
+          TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: Text(l10n.playConfirmCancel)),
+          FilledButton(onPressed: () => Navigator.of(dialogContext).pop(true), child: Text(l10n.playConfirmStart)),
+        ],
+      ),
+    );
+    if (go == true && mounted) vm.sendCommand('play');
+  }
+
   Widget _playbackBar(RobotViewModel vm, RobotView? robot, AppLocalizations l10n) {
     final isCombined = (robot?.combinedWith.isNotEmpty ?? false);
     return Container(
@@ -267,7 +299,7 @@ class _ControlScreenState extends State<ControlScreen> {
           const StopAllButton(large: true),
           const SizedBox(width: 40),
           IconButton.filled(
-            onPressed: robot != null && robot.online ? () => vm.sendCommand('play') : null,
+            onPressed: robot != null && robot.online ? () => _play(vm, robot, l10n) : null,
             icon: const Icon(Icons.play_arrow),
             iconSize: 28,
             style: IconButton.styleFrom(backgroundColor: const Color(0xFF15803D), minimumSize: const Size(56, 56)),

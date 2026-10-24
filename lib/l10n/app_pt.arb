@@ -197,5 +197,16 @@
   "@auditLocalBrokenChanged": {"placeholders": {"seq": {"type": "String"}}},
   "auditLocalBrokenLink": "Este computador: a linha {seq} não nomeia a anterior - falta uma linha ou foi substituída.",
   "@auditLocalBrokenLink": {"placeholders": {"seq": {"type": "String"}}},
-  "auditClose": "Fechar"
+  "auditClose": "Fechar",
+  "settingsConfirmPlay": "Perguntar antes de PLAY",
+  "settingsConfirmPlaySubtitle": "Mostra o robô, os seus pontos gravados, a velocidade e quem o tem reservado antes de iniciar uma trajetória.",
+  "playConfirmTitle": "Iniciar a reprodução?",
+  "playConfirmMessage": "{robot} vai executar a trajetória que tem: {points} pontos gravados a {speed}% de velocidade.\n{reservation}",
+  "@playConfirmMessage": {"placeholders": {"robot": {"type": "String"}, "points": {"type": "int"}, "speed": {"type": "int"}, "reservation": {"type": "String"}}},
+  "playConfirmFree": "O robô não está reservado.",
+  "playConfirmMine": "Reservado por si.",
+  "playConfirmOther": "Reservado por {owner}: o servidor recusa o comando se não for seu.",
+  "@playConfirmOther": {"placeholders": {"owner": {"type": "String"}}},
+  "playConfirmStart": "Iniciar",
+  "playConfirmCancel": "Cancelar"
 }

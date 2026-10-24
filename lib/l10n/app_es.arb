@@ -197,5 +197,16 @@
   "@auditLocalBrokenChanged": {"placeholders": {"seq": {"type": "String"}}},
   "auditLocalBrokenLink": "Este equipo: la línea {seq} no nombra a la anterior: falta una línea o fue sustituida.",
   "@auditLocalBrokenLink": {"placeholders": {"seq": {"type": "String"}}},
-  "auditClose": "Cerrar"
+  "auditClose": "Cerrar",
+  "settingsConfirmPlay": "Preguntar antes de PLAY",
+  "settingsConfirmPlaySubtitle": "Muestra el robot, sus puntos grabados, la velocidad y quién lo tiene reservado antes de empezar una trayectoria.",
+  "playConfirmTitle": "¿Iniciar la reproducción?",
+  "playConfirmMessage": "{robot} ejecutará la trayectoria que tiene: {points} puntos grabados a velocidad {speed}%.\n{reservation}",
+  "@playConfirmMessage": {"placeholders": {"robot": {"type": "String"}, "points": {"type": "int"}, "speed": {"type": "int"}, "reservation": {"type": "String"}}},
+  "playConfirmFree": "El robot no está reservado.",
+  "playConfirmMine": "Reservado por ti.",
+  "playConfirmOther": "Reservado por {owner}: el servidor rechaza la orden si no es tuya.",
+  "@playConfirmOther": {"placeholders": {"owner": {"type": "String"}}},
+  "playConfirmStart": "Iniciar",
+  "playConfirmCancel": "Cancelar"
 }

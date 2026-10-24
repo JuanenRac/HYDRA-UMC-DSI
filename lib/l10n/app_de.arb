@@ -197,5 +197,16 @@
   "@auditLocalBrokenChanged": {"placeholders": {"seq": {"type": "String"}}},
   "auditLocalBrokenLink": "Dieser Computer: Zeile {seq} nennt die vorherige Zeile nicht - eine Zeile fehlt oder wurde ersetzt.",
   "@auditLocalBrokenLink": {"placeholders": {"seq": {"type": "String"}}},
-  "auditClose": "Schließen"
+  "auditClose": "Schließen",
+  "settingsConfirmPlay": "Vor PLAY nachfragen",
+  "settingsConfirmPlaySubtitle": "Zeigt vor dem Start einer Bahn den Roboter, seine aufgezeichneten Punkte, die Geschwindigkeit und wer ihn reserviert hat.",
+  "playConfirmTitle": "Wiedergabe starten?",
+  "playConfirmMessage": "{robot} fährt die vorhandene Bahn ab: {points} aufgezeichnete Punkte bei {speed}% Geschwindigkeit.\n{reservation}",
+  "@playConfirmMessage": {"placeholders": {"robot": {"type": "String"}, "points": {"type": "int"}, "speed": {"type": "int"}, "reservation": {"type": "String"}}},
+  "playConfirmFree": "Der Roboter ist nicht reserviert.",
+  "playConfirmMine": "Von Ihnen reserviert.",
+  "playConfirmOther": "Reserviert von {owner}: Der Server lehnt den Befehl ab, wenn er nicht von Ihnen ist.",
+  "@playConfirmOther": {"placeholders": {"owner": {"type": "String"}}},
+  "playConfirmStart": "Starten",
+  "playConfirmCancel": "Abbrechen"
 }

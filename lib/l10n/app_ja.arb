@@ -197,5 +197,16 @@
   "@auditLocalBrokenChanged": {"placeholders": {"seq": {"type": "String"}}},
   "auditLocalBrokenLink": "このコンピューター:{seq} 行目が直前の行を指していません。行が欠けているか置き換えられています。",
   "@auditLocalBrokenLink": {"placeholders": {"seq": {"type": "String"}}},
-  "auditClose": "閉じる"
+  "auditClose": "閉じる",
+  "settingsConfirmPlay": "PLAY の前に確認する",
+  "settingsConfirmPlaySubtitle": "軌道を開始する前に、ロボット、記録済みの点、速度、予約している人を表示します。",
+  "playConfirmTitle": "再生を開始しますか?",
+  "playConfirmMessage": "{robot} は保存されている軌道を実行します:記録済み {points} 点、速度 {speed}%。\n{reservation}",
+  "@playConfirmMessage": {"placeholders": {"robot": {"type": "String"}, "points": {"type": "int"}, "speed": {"type": "int"}, "reservation": {"type": "String"}}},
+  "playConfirmFree": "ロボットは予約されていません。",
+  "playConfirmMine": "あなたが予約しています。",
+  "playConfirmOther": "{owner} が予約しています。自分のものでない場合、サーバーはコマンドを拒否します。",
+  "@playConfirmOther": {"placeholders": {"owner": {"type": "String"}}},
+  "playConfirmStart": "開始",
+  "playConfirmCancel": "キャンセル"
 }

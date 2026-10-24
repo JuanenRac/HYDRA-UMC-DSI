@@ -215,5 +215,16 @@
   "@auditLocalBrokenChanged": {"placeholders": {"seq": {"type": "String"}}},
   "auditLocalBrokenLink": "This computer: line {seq} does not name the line before it - a line is missing or was replaced.",
   "@auditLocalBrokenLink": {"placeholders": {"seq": {"type": "String"}}},
-  "auditClose": "Close"
+  "auditClose": "Close",
+  "settingsConfirmPlay": "Ask before PLAY",
+  "settingsConfirmPlaySubtitle": "Shows the robot, its recorded points, the speed and who has it reserved before a trajectory starts.",
+  "playConfirmTitle": "Start playback?",
+  "playConfirmMessage": "{robot} will run the trajectory it has: {points} recorded points at {speed}% speed.\n{reservation}",
+  "@playConfirmMessage": {"placeholders": {"robot": {"type": "String"}, "points": {"type": "int"}, "speed": {"type": "int"}, "reservation": {"type": "String"}}},
+  "playConfirmFree": "The robot is not reserved.",
+  "playConfirmMine": "Reserved by you.",
+  "playConfirmOther": "Reserved by {owner}: the server refuses the command if it is not yours.",
+  "@playConfirmOther": {"placeholders": {"owner": {"type": "String"}}},
+  "playConfirmStart": "Start",
+  "playConfirmCancel": "Cancel"
 }

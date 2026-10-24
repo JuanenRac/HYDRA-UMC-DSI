@@ -197,5 +197,16 @@
   "@auditLocalBrokenChanged": {"placeholders": {"seq": {"type": "String"}}},
   "auditLocalBrokenLink": "此电脑:第 {seq} 行没有指向上一行-有行缺失或被替换。",
   "@auditLocalBrokenLink": {"placeholders": {"seq": {"type": "String"}}},
-  "auditClose": "关闭"
+  "auditClose": "关闭",
+  "settingsConfirmPlay": "PLAY 之前先确认",
+  "settingsConfirmPlaySubtitle": "在开始轨迹之前显示机器人、已记录的点、速度以及预留者。",
+  "playConfirmTitle": "开始播放?",
+  "playConfirmMessage": "{robot} 将执行其现有轨迹:已记录 {points} 个点,速度 {speed}%。\n{reservation}",
+  "@playConfirmMessage": {"placeholders": {"robot": {"type": "String"}, "points": {"type": "int"}, "speed": {"type": "int"}, "reservation": {"type": "String"}}},
+  "playConfirmFree": "机器人未被预留。",
+  "playConfirmMine": "由你预留。",
+  "playConfirmOther": "由 {owner} 预留:如果不是你的,服务器将拒绝该命令。",
+  "@playConfirmOther": {"placeholders": {"owner": {"type": "String"}}},
+  "playConfirmStart": "开始",
+  "playConfirmCancel": "取消"
 }

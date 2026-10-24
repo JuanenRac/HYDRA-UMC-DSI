@@ -197,5 +197,16 @@
   "@auditLocalBrokenChanged": {"placeholders": {"seq": {"type": "String"}}},
   "auditLocalBrokenLink": "Cet ordinateur : la ligne {seq} ne nomme pas la précédente - une ligne manque ou a été remplacée.",
   "@auditLocalBrokenLink": {"placeholders": {"seq": {"type": "String"}}},
-  "auditClose": "Fermer"
+  "auditClose": "Fermer",
+  "settingsConfirmPlay": "Demander avant PLAY",
+  "settingsConfirmPlaySubtitle": "Affiche le robot, ses points enregistrés, la vitesse et qui l'a réservé avant de lancer une trajectoire.",
+  "playConfirmTitle": "Lancer la lecture ?",
+  "playConfirmMessage": "{robot} va exécuter la trajectoire qu'il possède : {points} points enregistrés à {speed}% de vitesse.\n{reservation}",
+  "@playConfirmMessage": {"placeholders": {"robot": {"type": "String"}, "points": {"type": "int"}, "speed": {"type": "int"}, "reservation": {"type": "String"}}},
+  "playConfirmFree": "Le robot n'est pas réservé.",
+  "playConfirmMine": "Réservé par vous.",
+  "playConfirmOther": "Réservé par {owner} : le serveur refuse la commande si elle n'est pas la vôtre.",
+  "@playConfirmOther": {"placeholders": {"owner": {"type": "String"}}},
+  "playConfirmStart": "Lancer",
+  "playConfirmCancel": "Annuler"
 }

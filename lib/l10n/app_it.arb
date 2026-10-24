@@ -197,5 +197,16 @@
   "@auditLocalBrokenChanged": {"placeholders": {"seq": {"type": "String"}}},
   "auditLocalBrokenLink": "Questo computer: la riga {seq} non nomina la precedente - una riga manca o è stata sostituita.",
   "@auditLocalBrokenLink": {"placeholders": {"seq": {"type": "String"}}},
-  "auditClose": "Chiudi"
+  "auditClose": "Chiudi",
+  "settingsConfirmPlay": "Chiedere prima di PLAY",
+  "settingsConfirmPlaySubtitle": "Mostra il robot, i suoi punti registrati, la velocità e chi lo ha prenotato prima di avviare una traiettoria.",
+  "playConfirmTitle": "Avviare la riproduzione?",
+  "playConfirmMessage": "{robot} eseguirà la traiettoria che ha: {points} punti registrati a velocità {speed}%.\n{reservation}",
+  "@playConfirmMessage": {"placeholders": {"robot": {"type": "String"}, "points": {"type": "int"}, "speed": {"type": "int"}, "reservation": {"type": "String"}}},
+  "playConfirmFree": "Il robot non è prenotato.",
+  "playConfirmMine": "Prenotato da te.",
+  "playConfirmOther": "Prenotato da {owner}: il server rifiuta il comando se non è tuo.",
+  "@playConfirmOther": {"placeholders": {"owner": {"type": "String"}}},
+  "playConfirmStart": "Avvia",
+  "playConfirmCancel": "Annulla"
 }

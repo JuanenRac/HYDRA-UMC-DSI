@@ -149,6 +149,7 @@ class RobotViewModel extends ChangeNotifier {
     languageOverride = await _languagePrefs.loadLocale();
     // The controller id of this installation: made once, kept, and adopted here.
     conditionalMode = ConditionalMode.fromKey(await _clientPrefs.loadConditionalMode());
+    confirmPlay = await _clientPrefs.loadConfirmPlay();
     final storedControllerId = await _clientPrefs.loadControllerId();
     if (isValidControllerId(storedControllerId)) {
       HydraApiClient.controllerId = storedControllerId!;
@@ -745,6 +746,16 @@ class RobotViewModel extends ChangeNotifier {
 
   /// When the server last pushed the reservations (this device's clock); null before the first push.
   DateTime? claimsPushedAt;
+
+  /// When on (it is, until the person turns it off), PLAY shows what it is about to start and asks first.
+  bool confirmPlay = true;
+
+  /// Chooses whether PLAY asks first, and keeps the choice.
+  Future<void> setConfirmPlay(bool value) async {
+    confirmPlay = value;
+    notifyListeners();
+    await _clientPrefs.saveConfirmPlay(value);
+  }
 
   /// Chooses which writes are checked, and keeps the choice.
   Future<void> setConditionalMode(ConditionalMode mode) async {
