@@ -37,7 +37,7 @@ Uma interface tátil Flutter nativa (Dart, alvo real de desktop Linux) para o ec
 
 | | |
 |---|---|
-| Versão | `0.2.6` |
+| Versão | `0.2.7` |
 | Maturidade | Funcional |
 | Testes | 72 |
 | Tecnologia | Flutter 3.x / Dart |

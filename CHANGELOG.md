@@ -2,30 +2,43 @@
 
 All notable changes to this project are documented here.
 
-## [Unreleased]
+## [0.2.7] - PLAY asks first and conditional writes
+
+### Firmware and protocol
+
+- **Audit record for administrators.** An Audit record button under the reservations opens the lines the server wrote down about the changes that matter, newest first, with a filter by type, robot and number of lines. Verifying checks the chain of SHA-256 hashes twice: the server over the whole record and the program over the lines it was given (a changed line, a replaced line whose successor still names the old one; a filtered window only shows gaps). The lines can be copied as stored (`.jsonl`). Says why when it can not read (not an administrator, older server, expired session, no network, record switched off or locked off).
+- Tests for the three rules (`contract_v2_test.dart`, with SHA-256 vectors) and for the behaviour against a local server (`robot_view_model_conditional_test.dart`: the header, the 412, the table, the older server, the audit record).
+- The live connection no longer falls back to `/ws?token=`: the token travels only as the `hydra.bearer` subprotocol, which every server since the subprotocol was added answers and which the server now requires (it refuses the address form by default). A server that does not answer it is reported as a failed connection instead of being handed the token in the address. A token that a subprotocol cannot carry is reported as rejected and no connection is attempted; `ServerInfo.wsUrl()` (unused) is gone. Three tests replace the one that expected the fallback.
+- The README and the architecture notes describe the subprotocol as the only form.
+
+### Programs and windows
 
 - New test of the per-robot STOP: a real long press (as a finger on the touch panel gives it) reaches the command through the Tooltip that wraps the button, a quick tap does not, and a stop that is not available does nothing. It checks the widget, not the panel: it has not been tried on the real touch screen.
 - **PLAY asks first.** Before a trajectory starts the app shows the robot, its recorded points, the speed and who has it reserved (a robot reserved by someone else says the server will refuse the command). It is on by default and is turned off in Settings; a robot that is already playing is not asked again, and the choice is kept. In the eight languages, with tests of the rules, the option and the dialog (cancelling sends nothing).
 - **Conditional writes.** Every reservation, release and robot command carries the revision of the robot this program last saw (`If-Match`, kept per robot from the answers of the server and from `GET /api/robot/:id`). When someone else changed the robot in between, the server answers 412: nothing is applied, the change on screen is undone, the robot is read again so the screen shows what it is now, and the message says so in the eight languages. STOP is never conditional, a write is not conditional while another write to the same robot is on its way, and a take-over is never conditional. A choice in the list of reservations (kept on this computer) selects Standard (reservations, the table and the one-off commands; the default), Strict (everything but STOP) or Off.
-- **The XY table jog is one atomic `table` command**, relative to where the table is (checked as a whole against the limits of the model before it is sent and counted as a jog for the arming of the jog); a server that predates the command is detected and gets the jogs that did the same before.
-- **Audit record for administrators.** An Audit record button under the reservations opens the lines the server wrote down about the changes that matter, newest first, with a filter by type, robot and number of lines. Verifying checks the chain of SHA-256 hashes twice: the server over the whole record and the program over the lines it was given (a changed line, a replaced line whose successor still names the old one; a filtered window only shows gaps). The lines can be copied as stored (`.jsonl`). Says why when it can not read (not an administrator, older server, expired session, no network, record switched off or locked off).
 - **The server pushes the reservations** (WebSocket message `claims`): the list and the arming of the jog follow at once and the 15 second poll of the Control screen rests while a push is recent.
-- Tests for the three rules (`contract_v2_test.dart`, with SHA-256 vectors) and for the behaviour against a local server (`robot_view_model_conditional_test.dart`: the header, the 412, the table, the older server, the audit record).
-
-- CI builds the Linux app (`flutter build linux --release`) after installing the desktop build dependencies, so a change that breaks the native build or a plugin is caught before a release.
 - **Reservations.** The Control screen shows who holds the selected robot (nobody, this display, your account on another device, another account), reserves and releases it, and lists every reservation of the server. Reservations stay optional.
 - **Controller id.** The display keeps one controller id for the installation and sends it with every reserve, release, jog-arm and command (body and `X-Controller-Id` header), so a reservation belongs to the account and to this display. The refusals of the server read differently: another account, your account on another device or window, controller id required, and jog not armed.
-- **Safety limits.** The limits of the robot's model are read from the server: a jog step above the limit is not sent (it says which limit), and when the administrator requires it the jog waits for an explicit **Arm jog** (with a countdown) that ends by itself, with STOP, or on release.
+- The notes in `lib/network/discovery.dart` say what was really run (Windows desktop, and a Linux build under WSL2) instead of contradicting the README.
+- **Take control (administrators only).** On a robot someone else holds, an administrator's session shows a **Take control** button that asks for confirmation and then reserves the robot with `force: true`. The role comes from the session token (the server checks it again); an operator never sees the button and nothing is sent if it is asked for anyway. Texts in the eight languages and unit tests for the role, the rule and the request.
+
+### Tests, builds and checks
+
+- CI builds the Linux app (`flutter build linux --release`) after installing the desktop build dependencies, so a change that breaks the native build or a plugin is caught before a release.
 - The eight languages carry the new texts, with their tests.
 - Building no longer changes the version; raising it is the explicit `bump` command (`python tools/hydra_project_tool.py bump`). The build scripts only report the version they built, and CI fails if a build script runs a bump.
-- The banner follows the animated style of the ecosystem banners, with the name, the kind and the technologies of the project.
 - Added `tools/hydra_project_tool.py`: the same `validate`, `test`, `version`, `status` and `bump` commands in every repository. The checks run with `HYDRA_UMC_CI=1` and fail if the version changes; only `bump` changes it.
-- The live connection no longer falls back to `/ws?token=`: the token travels only as the `hydra.bearer` subprotocol, which every server since the subprotocol was added answers and which the server now requires (it refuses the address form by default). A server that does not answer it is reported as a failed connection instead of being handed the token in the address. A token that a subprotocol cannot carry is reported as rejected and no connection is attempted; `ServerInfo.wsUrl()` (unused) is gone. Three tests replace the one that expected the fallback.
-- The README and the architecture notes describe the subprotocol as the only form.
+
+### Documentation
+
 - The README, in the eight languages, names HYDRA-UMC-SERVER (not STUDIO) as the server the panel talks to.
-- The notes in `lib/network/discovery.dart` say what was really run (Windows desktop, and a Linux build under WSL2) instead of contradicting the README.
+
+### Other changes
+
+- **The XY table jog is one atomic `table` command**, relative to where the table is (checked as a whole against the limits of the model before it is sent and counted as a jog for the arming of the jog); a server that predates the command is detected and gets the jogs that did the same before.
+- **Safety limits.** The limits of the robot's model are read from the server: a jog step above the limit is not sent (it says which limit), and when the administrator requires it the jog waits for an explicit **Arm jog** (with a countdown) that ends by itself, with STOP, or on release.
+- The banner follows the animated style of the ecosystem banners, with the name, the kind and the technologies of the project.
 - Removed the unused `postSettings` and `HydraState.merge`.
-- **Take control (administrators only).** On a robot someone else holds, an administrator's session shows a **Take control** button that asks for confirmation and then reserves the robot with `force: true`. The role comes from the session token (the server checks it again); an operator never sees the button and nothing is sent if it is asked for anyway. Texts in the eight languages and unit tests for the role, the rule and the request.
 
 ## [0.2.6]
 

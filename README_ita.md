@@ -37,7 +37,7 @@ Un'interfaccia touch nativa in Flutter (Dart, con target reale desktop Linux) pe
 
 | | |
 |---|---|
-| Versione | `0.2.6` |
+| Versione | `0.2.7` |
 | Maturità | Funzionale |
 | Test | 72 |
 | Tecnologia | Flutter 3.x / Dart |

@@ -37,7 +37,7 @@ Una interfaz táctil nativa en Flutter (Dart, con target real de escritorio Linu
 
 | | |
 |---|---|
-| Versión | `0.2.6` |
+| Versión | `0.2.7` |
 | Madurez | Funcional |
 | Tests | 72 |
 | Tecnología | Flutter 3.x / Dart |

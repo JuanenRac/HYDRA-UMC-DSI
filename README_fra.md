@@ -37,7 +37,7 @@ Une interface tactile native en Flutter (Dart, avec une vraie cible desktop Linu
 
 | | |
 |---|---|
-| Version | `0.2.6` |
+| Version | `0.2.7` |
 | Maturité | Fonctionnel |
 | Tests | 72 |
 | Technologie | Flutter 3.x / Dart |

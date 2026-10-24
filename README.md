@@ -37,7 +37,7 @@ A native Flutter touch UI (Dart, real Linux desktop target) for HYDRA-UMC's own 
 
 | | |
 |---|---|
-| Version | `0.2.6` |
+| Version | `0.2.7` |
 | Maturity | Functional |
 | Tests | 72 |
 | Stack | Flutter 3.x / Dart |

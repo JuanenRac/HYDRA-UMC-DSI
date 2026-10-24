@@ -37,7 +37,7 @@ Eine native Flutter-Touch-UI (Dart, mit echtem Linux-Desktop-Ziel) für HYDRA-UM
 
 | | |
 |---|---|
-| Version | `0.2.6` |
+| Version | `0.2.7` |
 | Reifegrad | Funktionsfähig |
 | Tests | 72 |
 | Technik | Flutter 3.x / Dart |
