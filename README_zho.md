@@ -146,21 +146,27 @@ HYDRA-UMC-DSI/
 │   │   ├── server_info.dart         # 发现/连接条目——与其他 3 个客户端中的 ServerInfo 镜像一致
 │   │   ├── hydra_state.dart         # RobotView/ControllerView/HydraState——原始 settings.json 树的薄型可变视图
 │   │   ├── access.dart            # 控制器 ID、预留、安全限值与点动检查（纯规则）
-│   │   └── stop_all_result.dart    # 全局 STOP 的应答（按机器人）
+│   │   ├── stop_all_result.dart    # 全局 STOP 的应答（按机器人）
+│   │   ├── contract_v2.dart        # 服务器的第二份契约,以纯规则表达: 按机器人修订号的条件写入、工作台的原子移动和审计记录
+│   │   └── sha256.dart             # 纯 Dart 实现的 SHA-256,用于校验服务器审计记录的哈希链
 │   ├── network/
 │   │   ├── hydra_api_client.dart    # REST：登录、设置、原子化机器人指令、系统指标——X-Hydra-Client: dsi
 │   │   ├── hydra_websocket.dart     # /ws 实时同步客户端
 │   │   ├── discovery.dart           # 本设备自身真实本地子网的并发扫描
-│   │   └── auth_prefs.dart          # 持久化的连接信息 + 令牌（secure storage + shared_preferences）
+│   │   ├── auth_prefs.dart          # 持久化的连接信息 + 令牌（secure storage + shared_preferences）
+│   │   └── client_prefs.dart        # 不属于机密的小型客户端偏好 (目前: 此安装的控制器 ID)
 │   ├── state/
 │   │   ├── robot_view_model.dart    # 每个界面都监听的单一 ChangeNotifier
 │   │   └── hydra_error.dart         # 面向 RobotViewModel 的类型化错误接口（自身无 BuildContext）
 │   ├── services/
 │   │   └── backlight.dart           # 根据时间自适应调节背光
 │   ├── l10n/                        # 真实生成的本地化文件（8 种语言）——见仓库根目录的 l10n.yaml
+│   │   ├── app_*.arb                    # app_en.arb、app_es.arb、app_it.arb、app_fr.arb、app_de.arb、app_ja.arb、app_zh.arb、app_pt.arb: 各语言的文案 (下面生成的类由它们产生)
 │   │   ├── app_localizations.dart   # 生成的基类
 │   │   ├── app_localizations_en.dart, _es.dart, _it.dart, _fr.dart, _de.dart, _ja.dart, _zh.dart, _pt.dart
 │   │   └── language_prefs.dart      # 持久化的语言覆盖设置（shared_preferences）
+│   ├── util/                    # 没有独立界面的辅助模块
+│   │   └── play_confirmation.dart   # PLAY 何时先询问: 轨迹开始前确认的规则
 │   └── ui/
 │       ├── login_screen.dart        # 主机/端口/用户/密码字段 + “扫描本地网络”
 │       ├── main_screen.dart         # 水平触控导航栏（6 个选项卡）——精神上接近 KlipperScreen
@@ -181,9 +187,13 @@ HYDRA-UMC-DSI/
 ├── windows/                          # Windows 桌面运行器——仅供开发机验证
 ├── docs/ARCHITECTURE.md
 ├── tools/
-│   └── ci_validate.py               # CI 使用的清单/CHANGELOG/文档校验
+│   ├── ci_validate.py               # CI 使用的清单/CHANGELOG/文档校验
+│   ├── _doc_policy.py               # 家族共享的文档规则 (HYDRA-UMC-SDK 的副本,保持同步)
+│   ├── _readme_parity.py            # 检查八个 README 结构一致 (HYDRA-UMC-SDK 的副本,保持同步)
+│   └── hydra_project_tool.py        # 每个仓库相同的命令: validate、test、ci、version、status、bump
 ├── bump_manifest_version.py          # 将 hydra-umc.project.json 的版本与原生版本同步(--sync)
 ├── test/                             # widget_test、format_uptime_test、localization_test、robot_view_model_test、robot_view_model_silent_refresh_test、auth_prefs_test、hydra_websocket_test、hostile_answers_test、hydra_error_test, play_confirmation_test, stop_long_press_test
+├── pubspec.yaml / pubspec.lock / l10n.yaml / analysis_options.yaml # Flutter 包的定义及其锁定版本、l10n 生成器设置和 lint 规则
 ├── README.md                         # 本文件
 └── README_spa.md / README_ita.md / README_fra.md / README_deu.md / README_zho.md / README_jpn.md / README_por.md  # 翻译
 ```

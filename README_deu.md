@@ -140,13 +140,13 @@ Reale, verifizierte Lücken, die der Code dieser App noch hat - keine vagen TODO
 HYDRA-UMC-DSI/
 ├── build.bat, build.sh              # flutter pub get + Versionserhöhung + flutter build windows (Verifikation auf der Entwicklungsmaschine)
 ├── build_linux.sh                   # flutter pub get + Versionserhöhung + flutter build linux (das echte CM5-Ziel - auf echtem Linux ausführen)
+├── run_dev.bat, run_dev.sh          # flutter run - Desktop-Simulationsmodus
 ├── CHANGELOG.md                      # Versionshistorie (siehe Versionierung weiter oben)
 ├── kiosk/
 │   ├── hydra-umc-dsi.service        # systemd-Unit - Vollbild-Autostart über cage
 │   └── install_kiosk.sh             # installiert und aktiviert die obige Unit (auf dem echten CM5 ausführen)
 ├── tool/
 │   └── bump_version.dart            # Versionserhöhungs-Skript, das build.bat/build.sh/build_linux.sh vor jedem Build ausführen (siehe Versionierung weiter oben)
-├── run_dev.bat, run_dev.sh          # flutter run - Desktop-Simulationsmodus
 ├── lib/
 │   ├── main.dart                    # App-Einstiegspunkt, ChangeNotifierProvider + Login-Gate, festes dunkles Theme
 │   ├── app_version.dart             # GENERIERT - von tool/bump_version.dart regeneriert, nicht von Hand bearbeiten
@@ -154,21 +154,27 @@ HYDRA-UMC-DSI/
 │   │   ├── server_info.dart         # Discovery-/Verbindungseintrag - spiegelt ServerInfo der anderen 3 Clients
 │   │   ├── hydra_state.dart         # RobotView/ControllerView/HydraState - schlanke veränderbare Sichten auf den rohen settings.json-Baum
 │   │   ├── access.dart            # Controller-ID, Reservierungen, Sicherheitsgrenzen und Jog-Prüfung (reine Regeln)
-│   │   └── stop_all_result.dart    # Antwort des globalen STOP, Roboter für Roboter
+│   │   ├── stop_all_result.dart    # Antwort des globalen STOP, Roboter für Roboter
+│   │   ├── contract_v2.dart        # Der zweite Vertrag des Servers als reine Regeln: bedingte Schreibvorgänge nach Roboter-Revision, die atomare Tischbewegung und der Audit-Eintrag
+│   │   └── sha256.dart             # SHA-256 in reinem Dart, für die Kettenprüfung des Audit-Eintrags des Servers
 │   ├── network/
 │   │   ├── hydra_api_client.dart    # REST: Login, Settings, atomarer Roboterbefehl, Systemmetriken - X-Hydra-Client: dsi
 │   │   ├── hydra_websocket.dart     # /ws-Live-Sync-Client
 │   │   ├── discovery.dart           # Gleichzeitiger Scan der echten lokalen Subnetze dieses Geräts
-│   │   └── auth_prefs.dart          # Persistierte Verbindung + Token (secure storage + shared_preferences)
+│   │   ├── auth_prefs.dart          # Persistierte Verbindung + Token (secure storage + shared_preferences)
+│   │   └── client_prefs.dart        # Kleine clientseitige Einstellungen, die keine Geheimnisse sind (heute: die Controller-ID dieser Installation)
 │   ├── state/
 │   │   ├── robot_view_model.dart    # Einziger ChangeNotifier, den jeder Bildschirm abonniert
 │   │   └── hydra_error.dart         # Typisierte Fehleroberfläche für RobotViewModel (ohne eigenen BuildContext)
 │   ├── services/
 │   │   └── backlight.dart           # Adaptive Hintergrundbeleuchtung nach Tageszeit
 │   ├── l10n/                        # Echte generierte Lokalisierungen (8 Sprachen) - siehe l10n.yaml im Repo-Root
+│   │   ├── app_*.arb                    # app_en.arb, app_es.arb, app_it.arb, app_fr.arb, app_de.arb, app_ja.arb, app_zh.arb, app_pt.arb: die Texte jeder Sprache (die unten erzeugten Klassen entstehen daraus)
 │   │   ├── app_localizations.dart   # Generierte Basisklasse
 │   │   ├── app_localizations_en.dart, _es.dart, _it.dart, _fr.dart, _de.dart, _ja.dart, _zh.dart, _pt.dart
 │   │   └── language_prefs.dart      # Persistierte Sprachüberschreibung (shared_preferences)
+│   ├── util/                    # Hilfsfunktionen ohne eigenen Bildschirm
+│   │   └── play_confirmation.dart   # Wann PLAY zuerst nachfragt: die Regeln der Bestätigung, bevor eine Trajektorie startet
 │   └── ui/
 │       ├── login_screen.dart        # Host-/Port-/Benutzer-/Passwort-Felder + "Lokales Netzwerk durchsuchen"
 │       ├── main_screen.dart         # Horizontale Touch-Navigationsleiste (6 Tabs) - im Geiste von KlipperScreen
@@ -189,9 +195,13 @@ HYDRA-UMC-DSI/
 ├── windows/                          # Windows-Desktop-Runner - nur Verifikation auf der Entwicklungsmaschine
 ├── docs/ARCHITECTURE.md
 ├── tools/
-│   └── ci_validate.py               # Manifest/CHANGELOG/Docs-Validierung, von CI genutzt
+│   ├── ci_validate.py               # Manifest/CHANGELOG/Docs-Validierung, von CI genutzt
+│   ├── _doc_policy.py               # Von der Familie geteilte Dokumentationsregeln (Kopie der von HYDRA-UMC-SDK, synchron gehalten)
+│   ├── _readme_parity.py            # Prüfung, dass die acht READMEs dieselbe Struktur haben (Kopie der von HYDRA-UMC-SDK, synchron gehalten)
+│   └── hydra_project_tool.py        # Dieselben Befehle in jedem Repository: validate, test, ci, version, status, bump
 ├── bump_manifest_version.py          # Synchronisiert die Version von hydra-umc.project.json mit der nativen (--sync)
 ├── test/                             # widget_test, format_uptime_test, localization_test, robot_view_model_test, robot_view_model_silent_refresh_test, auth_prefs_test, hydra_websocket_test, hostile_answers_test, hydra_error_test, play_confirmation_test, stop_long_press_test
+├── pubspec.yaml / pubspec.lock / l10n.yaml / analysis_options.yaml # Die Flutter-Paketdefinition mit ihren festgelegten Versionen, die Einstellungen des l10n-Generators und die Lint-Regeln
 ├── README.md                         # Originaldokument (Englisch)
 └── README_spa.md / README_ita.md / README_fra.md / README_deu.md / README_zho.md / README_jpn.md / README_por.md  # Übersetzungen
 ```

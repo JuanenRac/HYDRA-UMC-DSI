@@ -153,21 +153,27 @@ HYDRA-UMC-DSI/
 │   │   ├── server_info.dart         # Discovery/connection entry - mirrors ServerInfo in the other 3 clients
 │   │   ├── hydra_state.dart         # RobotView/ControllerView/HydraState - thin mutable views over the raw settings.json tree
 │   │   ├── access.dart            # Controller id, reservations, safety limits and the jog check (pure rules)
-│   │   └── stop_all_result.dart    # answer of the global STOP, robot by robot
+│   │   ├── stop_all_result.dart    # answer of the global STOP, robot by robot
+│   │   ├── contract_v2.dart        # The server's second contract as pure rules: conditional writes by robot revision, the atomic table move and the audit record
+│   │   └── sha256.dart             # SHA-256 in plain Dart, for the chain check of the server's audit record
 │   ├── network/
 │   │   ├── hydra_api_client.dart    # REST: login, settings, atomic robot command, system metrics - X-Hydra-Client: dsi
 │   │   ├── hydra_websocket.dart     # /ws live sync client
 │   │   ├── discovery.dart           # Concurrent scan of this device's own real local subnet(s)
-│   │   └── auth_prefs.dart          # Persisted connection + token (secure storage + shared_preferences)
+│   │   ├── auth_prefs.dart          # Persisted connection + token (secure storage + shared_preferences)
+│   │   └── client_prefs.dart        # Small client-side preferences that are not secrets (today: the controller id of this installation)
 │   ├── state/
 │   │   ├── robot_view_model.dart    # Single ChangeNotifier every screen listens to
 │   │   └── hydra_error.dart         # Typed error surface for RobotViewModel (no BuildContext of its own)
 │   ├── services/
 │   │   └── backlight.dart           # Adaptive backlight by time of day
 │   ├── l10n/                        # Real generated localizations (8 languages) - see l10n.yaml at repo root
+│   │   ├── app_*.arb                    # app_en.arb, app_es.arb, app_it.arb, app_fr.arb, app_de.arb, app_ja.arb, app_zh.arb, app_pt.arb: the phrases of each language (the generated classes below come from them)
 │   │   ├── app_localizations.dart   # Generated base class
 │   │   ├── app_localizations_en.dart, _es.dart, _it.dart, _fr.dart, _de.dart, _ja.dart, _zh.dart, _pt.dart
 │   │   └── language_prefs.dart      # Persisted language override (shared_preferences)
+│   ├── util/                    # Helpers without a screen of their own
+│   │   └── play_confirmation.dart   # When PLAY asks first: the rules of the confirmation before a trajectory starts
 │   └── ui/
 │       ├── login_screen.dart        # Host/port/user/pass fields + "Scan local network"
 │       ├── main_screen.dart         # Horizontal touch nav bar (6 tabs) - KlipperScreen-in-spirit
@@ -188,9 +194,13 @@ HYDRA-UMC-DSI/
 ├── windows/                          # Windows desktop runner - dev-machine verification only
 ├── docs/ARCHITECTURE.md
 ├── tools/
-│   └── ci_validate.py               # Manifest/CHANGELOG/docs validation used by CI
+│   ├── ci_validate.py               # Manifest/CHANGELOG/docs validation used by CI
+│   ├── _doc_policy.py               # Documentation rules shared by the family (a copy of HYDRA-UMC-SDK's, kept in sync)
+│   ├── _readme_parity.py            # Check that the eight READMEs share one structure (a copy of HYDRA-UMC-SDK's, kept in sync)
+│   └── hydra_project_tool.py        # The same commands in every repository: validate, test, ci, version, status, bump
 ├── bump_manifest_version.py          # Syncs hydra-umc.project.json's version to the native one (--sync)
 ├── test/                             # widget_test, format_uptime_test, localization_test, robot_view_model_test, robot_view_model_silent_refresh_test, auth_prefs_test, hydra_websocket_test, hostile_answers_test, hydra_error_test, play_confirmation_test, stop_long_press_test
+├── pubspec.yaml / pubspec.lock / l10n.yaml / analysis_options.yaml # The Flutter package definition and its locked versions, the settings of the l10n generator and the lint rules
 ├── README.md                         # this file
 └── README_spa.md / README_ita.md / README_fra.md / README_deu.md / README_zho.md / README_jpn.md / README_por.md  # translations
 ```

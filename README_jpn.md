@@ -146,21 +146,27 @@ HYDRA-UMC-DSI/
 │   │   ├── server_info.dart         # ディスカバリー/接続エントリ——他の 3 つのクライアントの ServerInfo をミラーリング
 │   │   ├── hydra_state.dart         # RobotView/ControllerView/HydraState——生の settings.json ツリーに対する薄い可変ビュー
 │   │   ├── access.dart            # コントローラーID・予約・安全上限・ジョグ確認（純粋なルール）
-│   │   └── stop_all_result.dart    # グローバル STOP の応答（ロボットごと）
+│   │   ├── stop_all_result.dart    # グローバル STOP の応答（ロボットごと）
+│   │   ├── contract_v2.dart        # サーバーの第2の契約を純粋な規則として: ロボットのリビジョンによる条件付き書き込み、テーブルのアトミックな移動、監査記録
+│   │   └── sha256.dart             # 純粋な Dart による SHA-256 (サーバーの監査記録のチェーン検証用)
 │   ├── network/
 │   │   ├── hydra_api_client.dart    # REST：ログイン、設定、原子的ロボット指令、システム指標——X-Hydra-Client: dsi
 │   │   ├── hydra_websocket.dart     # /ws リアルタイム同期クライアント
 │   │   ├── discovery.dart           # このデバイス自身の実際のローカルサブネットの並行スキャン
-│   │   └── auth_prefs.dart          # 永続化された接続情報 + トークン（secure storage + shared_preferences）
+│   │   ├── auth_prefs.dart          # 永続化された接続情報 + トークン（secure storage + shared_preferences）
+│   │   └── client_prefs.dart        # 秘密ではない小さなクライアント側設定 (現在: このインストールのコントローラー ID)
 │   ├── state/
 │   │   ├── robot_view_model.dart    # すべての画面がリッスンする単一の ChangeNotifier
 │   │   └── hydra_error.dart         # RobotViewModel向けの型付きエラーサーフェス(独自のBuildContextを持たない)
 │   ├── services/
 │   │   └── backlight.dart           # 時間帯に応じた適応型バックライト
 │   ├── l10n/                        # 実際に生成されたローカライゼーション(8言語) - リポジトリルートのl10n.yamlを参照
+│   │   ├── app_*.arb                    # app_en.arb, app_es.arb, app_it.arb, app_fr.arb, app_de.arb, app_ja.arb, app_zh.arb, app_pt.arb: 各言語の文言 (下の生成クラスはこれらから作られる)
 │   │   ├── app_localizations.dart   # 生成されたベースクラス
 │   │   ├── app_localizations_en.dart, _es.dart, _it.dart, _fr.dart, _de.dart, _ja.dart, _zh.dart, _pt.dart
 │   │   └── language_prefs.dart      # 永続化された言語上書き設定(shared_preferences)
+│   ├── util/                    # 専用画面を持たない補助機能
+│   │   └── play_confirmation.dart   # PLAY が先に確認する場合: 軌道を始める前の確認のルール
 │   └── ui/
 │       ├── login_screen.dart        # ホスト/ポート/ユーザー/パスワードフィールド + 「ローカルネットワークをスキャン」
 │       ├── main_screen.dart         # 水平タッチナビゲーションバー（6 タブ）——精神的には KlipperScreen に近い
@@ -181,9 +187,13 @@ HYDRA-UMC-DSI/
 ├── windows/                          # Windows デスクトップランナー——開発機での検証専用
 ├── docs/ARCHITECTURE.md
 ├── tools/
-│   └── ci_validate.py               # CI が使用するマニフェスト/CHANGELOG/ドキュメント検証
+│   ├── ci_validate.py               # CI が使用するマニフェスト/CHANGELOG/ドキュメント検証
+│   ├── _doc_policy.py               # ファミリー共通のドキュメント規則 (HYDRA-UMC-SDK のコピーで、同期を維持)
+│   ├── _readme_parity.py            # 8つの README が同じ構造であることの検査 (HYDRA-UMC-SDK のコピーで、同期を維持)
+│   └── hydra_project_tool.py        # すべてのリポジトリで共通のコマンド: validate、test、ci、version、status、bump
 ├── bump_manifest_version.py          # hydra-umc.project.json のバージョンをネイティブ版と同期(--sync)
 ├── test/                             # widget_test、format_uptime_test、localization_test、robot_view_model_test、robot_view_model_silent_refresh_test、auth_prefs_test、hydra_websocket_test、hostile_answers_test、hydra_error_test, play_confirmation_test, stop_long_press_test
+├── pubspec.yaml / pubspec.lock / l10n.yaml / analysis_options.yaml # Flutter パッケージの定義とロックされたバージョン、l10n ジェネレーターの設定、lint ルール
 ├── README.md                         # 本ファイル
 └── README_spa.md / README_ita.md / README_fra.md / README_deu.md / README_zho.md / README_jpn.md / README_por.md  # 翻訳
 ```

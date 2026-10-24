@@ -153,21 +153,27 @@ HYDRA-UMC-DSI/
 │   │   ├── server_info.dart         # Entrada de descoberta/ligação - espelha o ServerInfo dos outros 3 clientes
 │   │   ├── hydra_state.dart         # RobotView/ControllerView/HydraState - vistas mutáveis finas sobre a árvore bruta do settings.json
 │   │   ├── access.dart            # Identificador de controlador, reservas, limites de segurança e verificação do jog (regras puras)
-│   │   └── stop_all_result.dart    # resposta do STOP global, robô a robô
+│   │   ├── stop_all_result.dart    # resposta do STOP global, robô a robô
+│   │   ├── contract_v2.dart        # O segundo contrato do servidor como regras puras: escritas condicionais por revisão do robô, o movimento atómico da mesa e o registo de auditoria
+│   │   └── sha256.dart             # SHA-256 em Dart puro, para a verificação da cadeia do registo de auditoria do servidor
 │   ├── network/
 │   │   ├── hydra_api_client.dart    # REST: início de sessão, definições, comando atómico de robô, métricas do sistema - X-Hydra-Client: dsi
 │   │   ├── hydra_websocket.dart     # Cliente de sincronização em direto /ws
 │   │   ├── discovery.dart           # Pesquisa concorrente da(s) sub-rede(s) local(is) real(is) deste dispositivo
-│   │   └── auth_prefs.dart          # Ligação + token persistidos (secure storage + shared_preferences)
+│   │   ├── auth_prefs.dart          # Ligação + token persistidos (secure storage + shared_preferences)
+│   │   └── client_prefs.dart        # Pequenas preferências do cliente que não são segredos (hoje: o id de controlador desta instalação)
 │   ├── state/
 │   │   ├── robot_view_model.dart    # Único ChangeNotifier que todos os ecrãs escutam
 │   │   └── hydra_error.dart         # Superfície de erros tipados do RobotViewModel (sem BuildContext próprio)
 │   ├── services/
 │   │   └── backlight.dart           # Retroiluminação adaptativa consoante a hora do dia
 │   ├── l10n/                        # Localizações geradas reais (8 idiomas) - veja l10n.yaml na raiz do repositório
+│   │   ├── app_*.arb                    # app_en.arb, app_es.arb, app_it.arb, app_fr.arb, app_de.arb, app_ja.arb, app_zh.arb, app_pt.arb: as frases de cada idioma (as classes geradas abaixo vêm deles)
 │   │   ├── app_localizations.dart   # Classe base gerada
 │   │   ├── app_localizations_en.dart, _es.dart, _it.dart, _fr.dart, _de.dart, _ja.dart, _zh.dart, _pt.dart
 │   │   └── language_prefs.dart      # Substituição de idioma persistida (shared_preferences)
+│   ├── util/                    # Utilitários sem ecrã próprio
+│   │   └── play_confirmation.dart   # Quando o PLAY pergunta primeiro: as regras da confirmação antes de iniciar uma trajetória
 │   └── ui/
 │       ├── login_screen.dart        # Campos de anfitrião/porta/utilizador/palavra-passe + "Procurar na rede local"
 │       ├── main_screen.dart         # Barra de navegação tátil horizontal (6 separadores) - no espírito do KlipperScreen
@@ -188,9 +194,13 @@ HYDRA-UMC-DSI/
 ├── windows/                          # Executor de desktop Windows - apenas verificação na máquina de desenvolvimento
 ├── docs/ARCHITECTURE.md
 ├── tools/
-│   └── ci_validate.py               # Validação de manifesto/CHANGELOG/documentação usada pelo CI
+│   ├── ci_validate.py               # Validação de manifesto/CHANGELOG/documentação usada pelo CI
+│   ├── _doc_policy.py               # Regras de documentação partilhadas pela família (cópia da de HYDRA-UMC-SDK, mantida em sincronia)
+│   ├── _readme_parity.py            # Verificação de que os oito README partilham a mesma estrutura (cópia da de HYDRA-UMC-SDK, mantida em sincronia)
+│   └── hydra_project_tool.py        # Os mesmos comandos em todos os repositórios: validate, test, ci, version, status, bump
 ├── bump_manifest_version.py          # Sincroniza a versão do hydra-umc.project.json com a nativa (--sync)
 ├── test/                             # widget_test, format_uptime_test, localization_test, robot_view_model_test, robot_view_model_silent_refresh_test, auth_prefs_test, hydra_websocket_test, hostile_answers_test, hydra_error_test, play_confirmation_test, stop_long_press_test
+├── pubspec.yaml / pubspec.lock / l10n.yaml / analysis_options.yaml # A definição do pacote Flutter e as suas versões fixadas, as definições do gerador de l10n e as regras de lint
 ├── README.md                         # este ficheiro
 └── README_spa.md / README_ita.md / README_fra.md / README_deu.md / README_zho.md / README_jpn.md / README_por.md  # traduções
 ```
