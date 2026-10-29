@@ -1,27 +1,30 @@
+<!-- =============================================================================
+HYDRA-UMC-DSI - Native touch UI for the CM5 DSI screen
+Copyright (C) JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
+GPL-3.0-or-later - see LICENSE
+============================================================================= -->
+
 <p align="center">
   <img src="images/HYDRA_UMC_BANNER.svg" alt="HYDRA-UMC-DSI banner" width="100%">
 </p>
-# 🖥️ HYDRA-UMC DSI
 
-<p align="center">
-  <a href="README.md">🇺🇸 English</a> |
-  <a href="README_spa.md">🇪🇸 Español</a> |
-  <a href="README_fra.md">🇫🇷 Français</a> |
-  <a href="README_ita.md">🇮🇹 Italiano</a> |
-  <a href="README_deu.md">🇩🇪 Deutsch</a> |
-  🇨🇳 <b>简体中文</b> |
-  <a href="README_jpn.md">🇯🇵 日本語</a> |
-  <a href="README_por.md">🇵🇹 Português</a>
-</p>
+# 🖥️ HYDRA-UMC-DSI
 
+<p align="center"><a href="README.md">🇺🇸 English</a> | <a href="README_spa.md">🇪🇸 Español</a> | <a href="README_fra.md">🇫🇷 Français</a> | <a href="README_ita.md">🇮🇹 Italiano</a> | <a href="README_deu.md">🇩🇪 Deutsch</a> | 🇨🇳 <b>简体中文</b> | <a href="README_jpn.md">🇯🇵 日本語</a> | <a href="README_por.md">🇵🇹 Português</a></p>
+
+### 面向 Compute Module 5 DSI 屏幕的原生触控界面
 
 <p align="center">
   <img src="https://img.shields.io/badge/License-GPL%203.0--or--later-blue.svg" alt="GPL 3.0 or later">
-  <img src="https://img.shields.io/badge/Framework-Flutter%203.x-02569B.svg" alt="Flutter">
-  <img src="https://img.shields.io/badge/Language-Dart-0175C2.svg" alt="Dart">
+  <img src="https://img.shields.io/badge/Framework-Flutter%203.x-02569B.svg" alt="Framework">
+  <img src="https://img.shields.io/badge/Language-Dart-0175C2.svg" alt="Language">
   <img src="https://img.shields.io/badge/Platform-Linux%20%7C%20CM5-E34F26.svg" alt="Platform">
+  <img src="https://img.shields.io/badge/Tests-172%20passing-2ea44f.svg" alt="Tests">
+  <img src="https://img.shields.io/badge/Version-0.2.7-0f6cbd.svg" alt="Version">
+  <img src="https://img.shields.io/badge/Maturity-functional-0F6CBD.svg" alt="Maturity">
 </p>
 
+---
 
 一个原生的 Flutter 触控界面（Dart，真实的 Linux 桌面目标），面向 HYDRA-UMC 自身在 Compute Module 5 上的 5"/7" DSI 触摸屏——两种物理面板尺寸共享完全相同的 1280x720 像素分辨率，因此本应用采用一种固定的、非自适应的布局，而不是针对两种尺寸做响应式适配。它使用与 [HYDRA-UMC SUITE](https://github.com/JuanenRac/HYDRA-UMC-SUITE)、[HYDRA-UMC-ANDROID-CONTROL](https://github.com/JuanenRac/HYDRA-UMC-ANDROID-CONTROL) 和 [HYDRA-UMC-IOS-CONTROL](https://github.com/JuanenRac/HYDRA-UMC-IOS-CONTROL) 完全相同的 [`REMOTE_API.md`](https://github.com/JuanenRac/HYDRA-UMC-SERVER/blob/main/docs/REMOTE_API.md) 契约——发现、登录、原子化的逐机器人指令，以及针对运行中的 [HYDRA-UMC-SERVER](https://github.com/JuanenRac/HYDRA-UMC-SERVER) 服务器的实时 WebSocket 同步,直接在主板本身上运行,而非通过浏览器标签页。完整设计参见 [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md),包括为何选择 Flutter（而非 Kivy）以及为何 3D 界面不是一个 WebView。
 
@@ -29,9 +32,11 @@
 
 ---
 
-**诚实核查 - 今天真正能运行的部分：** 网络层(`lib/network/hydra_api_client.dart`、`hydra_websocket.dart`、`discovery.dart`、`auth_prefs.dart`)和状态层(`lib/state/robot_view_model.dart`、`hydra_error.dart`)都是真实的并经过测试(`test/*.dart` 中 98 个测试全部通过，其中包括针对一个真实本地服务器、而非模拟对象的真实 WebSocket 连接/重连/认证拒绝往返测试),且 `flutter analyze` 没有报告任何问题。目录中的全部 6 个界面都是真实接线好的 UI，而非占位符。真正尚未构建的部分：**3D View** 界面只是一个小型的原生等距 X/Y/Z 指示器，并非真正的 3D 渲染器 - 它并未嵌入 STUDIO 的真实 Three.js 场景(因为不存在 Linux 版本的 `webview_flutter` 实现)。真实但尚未在目标硬件上验证的部分：`flutter build linux --release` 已经运行过，并生成了一个确认可以启动的二进制文件，但仅在 Ubuntu 24.04 WSL2(x86_64)环境下验证过 - 从未在 CM5 真实的 aarch64 Raspberry Pi OS 上运行过；`kiosk/hydra-umc-dsi.service` 自启动单元也从未在任何真实 Linux 机器上运行过。具体已交付的内容请见下方的 "Known Follow-ups" 和 `CHANGELOG.md`。
+**诚实核查 - 今天真正能运行的部分：** 网络层(`lib/network/hydra_api_client.dart`、`hydra_websocket.dart`、`discovery.dart`、`auth_prefs.dart`)和状态层(`lib/state/robot_view_model.dart`、`hydra_error.dart`)都是真实的并经过测试(`test/*.dart` 中 172 个测试全部通过，其中包括针对一个真实本地服务器、而非模拟对象的真实 WebSocket 连接/重连/认证拒绝往返测试),且 `flutter analyze` 没有报告任何问题。目录中的全部 6 个界面都是真实接线好的 UI，而非占位符。真正尚未构建的部分：**3D View** 界面只是一个小型的原生等距 X/Y/Z 指示器，并非真正的 3D 渲染器 - 它并未嵌入 STUDIO 的真实 Three.js 场景(因为不存在 Linux 版本的 `webview_flutter` 实现)。真实但尚未在目标硬件上验证的部分：`flutter build linux --release` 已经运行过，并生成了一个确认可以启动的二进制文件，但仅在 Ubuntu 24.04 WSL2(x86_64)环境下验证过 - 从未在 CM5 真实的 aarch64 Raspberry Pi OS 上运行过；`kiosk/hydra-umc-dsi.service` 自启动单元也从未在任何真实 Linux 机器上运行过。具体已交付的内容请见下方的 "Known Follow-ups" 和 `CHANGELOG.md`。
 
 > **安全与安防现状:**本生态系统不是经认证的安全系统。目前尚无硬件 E-STOP 通路,没有由固件强制执行的限位或联锁,也没有经过验证的运动指令;固件映像使用 CRC32 和共享密钥的 HMAC-SHA256 校验,而非非对称签名;TLS 与双向 TLS 均为可选项,默认关闭;自制电路板尚未组装或测试。在依赖此处任何说法来保障人身安全之前,请先阅读[安全基线](https://github.com/JuanenRac/HYDRA-UMC-DOCS/blob/main/docs/SECURITY_BASELINE.md)和[威胁模型](https://github.com/JuanenRac/HYDRA-UMC-DOCS/blob/main/docs/THREAT_MODEL.md)。
+
+---
 
 ## 📋 速览
 
@@ -39,10 +44,12 @@
 |---|---|
 | 版本 | `0.2.7` |
 | 成熟度 | 可用 |
-| 测试 | 72 |
+| 测试 | 172 (`flutter test`) |
 | 技术栈 | Flutter 3.x / Dart |
 | 目标 | HYDRA-UMC 工作单元的 Raspberry Pi CM5 |
 | 真实硬件 | 尚未：此版本没有在真实硬件上运行的记录 |
+
+**跳转：** [概述](#-概述) · [架构](#-架构) · [快速开始](#-快速开始) · [测试](#-测试) · [仓库结构](#-仓库结构) · [相关项目](#-相关项目)
 
 ## 🚦 项目状态
 
@@ -53,11 +60,11 @@
 | 领域 | 状态 | 在这里的含义 |
 |---|---|---|
 | 软件 | 🟡 | 主要用途可用；上面的诚实性检查列出了仍然缺少的内容 |
-| 测试 | 🟢 | 72 项自动测试，每次变更都会运行 |
+| 测试 | 🟢 | 172 项自动测试，每次变更都会运行 |
 | 真实硬件 | 🔴 | 尚未：此版本没有在真实硬件上运行的记录 |
 | 文档 | 🟢 | 八种语言的 README，每次变更都会与清单核对 |
 
-## 🏗️ 已实现的功能
+## 🎯 概述
 
 - **登录**（`lib/ui/login_screen.dart`、`lib/state/robot_view_model.dart`）—— 服务器 IP/端口字段预填了合理的局域网默认值,用户名/密码字段面向触控设计,默认留空（不预填任何硬编码凭据——一旦每台服务器在真实生产环境首次启动时不再自动创建该默认账户,最初的 `admin`/`admin` 预填就被移除了）,`POST /api/login` 针对操作员实际输入的账户;可从浏览器界面的 Config > Users 中创建额外的低权限“操作员”账户。会话令牌保存在平台的安全存储中（Linux 上为 libsecret，需要正在运行的密钥环服务；没有它的面板上，会话只持续到应用重新启动，之后会再次要求登录）。一个“扫描本地网络”对话框（`lib/network/discovery.dart`）无需预先知道 IP 即可找到服务器——这在这里尤其有用,因为本应用运行所在的 CM5,往往正是它应该连接的那个控制器本身。
 - **网络发现**（`lib/network/discovery.dart`）—— 两条路径从同一个“扫描本地网络”对话框并行运行:真实的 mDNS/Bonjour（`discoverMdns()`，通过 `multicast_dns` 包查询 `server.ts` 自身发布的 `_hydra._tcp`）,以及针对本设备自身真实本地子网的并发暴力扫描 `GET /api/hydra-info`（`scanSubnets()`）,按 host:port 去重——从 HYDRA-UMC-IOS-CONTROL 移植而来,后者是本生态系统中第一个加入真实 mDNS 发现的客户端。
@@ -77,7 +84,33 @@
 
 **状态:雏形 + 全部 6 个目录界面均已实现并连接到真实的 REMOTE_API.md 契约。** `flutter analyze` 干净通过,`flutter build windows` 与 `flutter build linux`(通过 WSL2)都能生成可运行的二进制文件,`flutter test` 通过——具体哪些已经验证、哪些还没有,包括这次 WSL2 验证与真实 CM5 硬件之间仍存在的差距,详见下文“构建”。
 
-## 🚀 构建
+## 🧩 在 HYDRA-UMC 中的角色
+
+**HYDRA-UMC-DSI** 是 CM5 自带的触摸屏：一个面向 5"/7" DSI 面板的原生 Flutter 应用，通过 REST 和 WebSocket 与 `HYDRA-UMC-SERVER` 通信，与 `HYDRA-UMC-STUDIO` 的浏览器界面并存。它没有自己的机器人逻辑；允许什么由服务器决定。
+
+## 🏛️ 架构
+
+<p align="center">
+  <img src="images/architecture.svg" alt="HYDRA-UMC-DSI architecture" width="100%">
+</p>
+
+## 🚀 快速开始
+
+需要支持 Linux 桌面的稳定版 Flutter SDK（3.x）。
+
+```bash
+flutter pub get
+./run_dev.sh      # desktop simulation, no hardware (run_dev.bat on Windows)
+./build_linux.sh  # on a Linux machine or the CM5: the real target
+```
+
+## 🧪 测试
+
+运行 `flutter test` 会执行 172 个自动测试。 不需要硬件，也不需要这台机器以外的任何东西。
+
+CI 运行 `HYDRA_UMC_CI=1 python tools/ci_validate.py`，检查清单、文档、八个 README 和图片。
+
+## 🏗️ 构建与发布
 
 需要 [Flutter SDK](https://docs.flutter.dev/get-started/install)（stable 渠道）。本仓库基于 Flutter 3.47.0 构建/验证。本仓库中只配置了 `linux/` 和 `windows/` 两个平台（没有 `android/`、`ios/`、`web/` 或 `macos/` 文件夹）——Linux 是真正的目标平台（CM5 自身的操作系统）;Windows 的存在纯粹是为了让本应用自身的逻辑能够在没有 Linux 工具链的机器上构建、运行和测试。
 
@@ -105,20 +138,52 @@ flutter run -d windows           # 或在真实 Linux 机器上使用 -d linux�
 
 **关于 Linux 验证的诚实说明：** `flutter build linux --release` 现在已经真正针对这份代码运行过了,来自一个真实的 Ubuntu 24.04 WSL2 环境,配备真实的 Linux 桌面工具链(`cmake`、`ninja-build`、`libgtk-3-dev`、`clang`)——干净构建成功,生成了一个真实的 `build/linux/x64/release/bundle/hydra_umc_dsi`,并确认它确实能够启动(在真实的 X11 显示环境下运行并保持存活,而不只是退出码为 0),而不再只是用 `flutter build windows` 作为冒烟测试替代方案。这次验证**没有**覆盖的部分:WSL2 的用户空间是 x86_64,并非 CM5 真实的 aarch64 树莓派操作系统,而且 `kiosk/hydra-umc-dsi.service` 的自启动流程仍然从未在任何真实 Linux 主机上运行过。具体哪些已验证、哪些未验证的确切清单,见 `docs/ARCHITECTURE.md` 第 7 节,剩余工作见下方的"已知后续事项"。
 
-## 🔢 版本管理
+## 📂 仓库结构
 
-本仓库遵循生态系统统一的策略：构建绝不会更改版本号。显式的 `bump` 命令（`python tools/hydra_project_tool.py bump`）会运行 `tool/bump_version.dart`，并应用：
+<p align="center">
+  <img src="images/repository-structure.svg" alt="Repository structure of HYDRA-UMC-DSI" width="100%">
+</p>
 
-- **Patch,里程表方式（十进制）：** 每次 bump +1;一旦超过 9 就重置为 0,并将 minor 加 1——例如 `0.0.9` -> `0.1.0`。Major 从不被自动修改。
-- **构建号**（`+` 之后的部分）：一个纯粹的单调计数器,每次 bump +1,不进位。
+<details>
+<summary>目录树的文本版本</summary>
 
-同一个脚本会重新生成 `lib/app_version.dart`（这是生成的文件,不是手工编辑的——一个普通的 `const` 文件,而非像 `package_info_plus` 那样引入新的运行时依赖）,应用在运行时读取它,以在 **Settings** 界面显示自身版本。完整版本历史见 [CHANGELOG.md](CHANGELOG.md)。
+```text
+HYDRA-UMC-DSI/
+├── lib/                                                              源代码
+│   ├── main.dart                                                     应用入口点，ChangeNotifierProvider + 登录门禁，固定深色主题
+│   ├── app_version.dart                                              生成文件——由 tool/bump_version.dart 重新生成，请勿手动编辑
+│   ├── models/                                                       数据模型和纯规则
+│   ├── network/                                                      REST 客户端、WebSocket 和发现
+│   ├── state/                                                        每个界面监听的状态
+│   ├── services/                                                     应用服务（背光）
+│   ├── l10n/                                                         八种语言的本地化
+│   ├── util/                                                         没有独立界面的辅助模块
+│   └── ui/                                                           界面和控件
+├── kiosk/                                                            展台单元及其安装脚本
+├── tool/                                                             版本工具
+├── linux/                                                            GTK 桌面运行器——真正的目标平台，固定 1280x720 窗口
+├── windows/                                                          Windows 桌面运行器——仅供开发机验证
+├── tools/                                                            项目工具和 CI 检查
+├── test/                                                             widget_test、format_uptime_test、localization_test、robot_view_model_test、robot_view_model_silent_refresh_test、auth_prefs_test、hydra_websocket_test、hostile_answers_test、hydra_error_test, play_confirmation_test, stop_long_press_test
+├── .github/                                                          CI 工作流和 Issue 模板
+├── images/                                                           横幅和 README 的图片
+├── build.bat / build.sh                                              flutter pub get + 版本递增 + flutter build windows（开发机验证）
+├── build_linux.sh                                                    flutter pub get + flutter build linux（真正的 CM5 目标——在真实 Linux 上运行）
+├── run_dev.bat / run_dev.sh                                          flutter run —— 桌面模拟模式
+├── CHANGELOG.md                                                      每个版本的变更
+├── docs/ARCHITECTURE.md                                              项目架构
+├── bump_manifest_version.py                                          将 hydra-umc.project.json 的版本与原生版本同步(--sync)
+├── pubspec.yaml / pubspec.lock / l10n.yaml / analysis_options.yaml   Flutter 包的定义及其锁定版本、l10n 生成器设置和 lint 规则
+├── build-test.sh                                                     不修改内容的构建检查
+├── hydra-umc.project.json                                            清单：版本、成熟度、系列
+└── test.sh                                                           运行测试
+```
 
-### 在真实 CM5 上运行
+</details>
 
-在 `build_linux.sh` 生成 `build/linux/*/release/bundle/` 之后,将整个 `bundle/` 目录复制到 CM5 的 `/opt/hydra-umc-dsi/bundle/`（它依赖二进制文件旁边的 `.so` 文件,而不仅仅是可执行文件本身）,然后运行 `sudo kiosk/install_kiosk.sh` 来安装并启用 `kiosk/hydra-umc-dsi.service`——一个 systemd 单元,通过 [`cage`](https://github.com/cage-kiosk/cage)（一个极简的 Wayland 看板合成器,只运行一个全屏客户端）在 `tty1` 上全屏启动本应用,并设置 `Restart=always`,这样崩溃时会重新启动应用,而不是留下一块黑屏。之所以选择它而非 [`flutter-pi`](https://github.com/ardera/flutter-pi)（一个面向 Raspberry Pi 的第三方裸机 Flutter 引擎嵌入器,完全不依赖任何窗口系统运行）,具体原因是它能够原样复用 `build_linux.sh` 自身真实的 `flutter build linux` 输出——而 flutter-pi 是直接针对 Flutter 引擎构建的,因此需要自己独立的构建步骤,而不能直接套用本仓库已经产生的构建结果。**诚实说明：** 已编写并审查,但从未真正在真实 CM5 或任何其他 Linux 主机上运行过——与已经在 WSL2 下验证过的 `flutter build linux` 本身不同,这个看板自启动流程仍然完全未经验证（见 `docs/ARCHITECTURE.md` 第 7 节）。具体需要针对 CM5 实际运行的树莓派操作系统镜像核实哪些假设（root 服务用户、`tty1` 所有权）,见 `kiosk/hydra-umc-dsi.service` 自身的头部注释。**今天真实部署在真实 CM5 上的 HDMI 看板,其实是 HYDRA-UMC-OS 自身的 `provisioning/install_kiosk.sh`**(极简 X11 + Chromium,已在真实硬件上验证过)——在同一设备上安装本应用基于 `cage` 的看板,会与它争夺 `tty1`。目前尚无人决定用这个原生应用取代 Chromium 看板;请先验证这一个真的能正常运行,并在同时启用两者之前先停掉另一个看板。
+## 🗺️ 路线图与已知限制
 
-## 🗺️ 已知后续事项
+**当前已知限制**
 
 这些是本应用代码中真实存在、已验证的缺口——不是含糊的 TODO,每一项都能追溯到上文代码或文档中的具体位置:
 
@@ -126,78 +191,9 @@ flutter run -d windows           # 或在真实 Linux 机器上使用 -d linux�
 - **3D 视图没有真正的原生 3D 渲染器** —— `ui/three_d_screen.dart` 目前绘制的是一个小型等距 X/Y/Z 位置指示器,而不是嵌入 STUDIO 真正的 Three.js 场景(`webview_flutter` 没有任何 Linux 实现——完整原因见 `docs/ARCHITECTURE.md` 第 4 节)。为此屏幕实现真正的原生 3D 渲染器是未来的工作,尚未开始。
 - **仍缺少在真实 CM5 硬件上的实际运行** —— `flutter build linux` 本身现在已经过验证(真实的 Ubuntu 24.04 WSL2 工具链,二进制文件确认能够真正启动——见 `docs/ARCHITECTURE.md` 第 7 节),但 `build_linux.sh` 的完整流程以及自启动单元 `kiosk/hydra-umc-dsi.service` 仍然从未真正针对 CM5 本身或任何其他真实(非 WSL2)Linux 机器运行过。第一次在那里运行它们的人应将其视为该平台目标真正的首次硬件部署,而不是走个形式——见上文的"在真实 CM5 上运行"。
 
-## 📂 仓库结构
+## 🌍 语言
 
-```text
-HYDRA-UMC-DSI/
-├── build.bat, build.sh              # flutter pub get + 版本递增 + flutter build windows（开发机验证）
-├── build_linux.sh                   # flutter pub get + flutter build linux（真正的 CM5 目标——在真实 Linux 上运行）
-├── run_dev.bat, run_dev.sh          # flutter run —— 桌面模拟模式
-├── CHANGELOG.md                      # 版本历史（见上文版本管理）
-├── kiosk/
-│   ├── hydra-umc-dsi.service        # systemd 单元——通过 cage 全屏自启动
-│   └── install_kiosk.sh             # 安装并启用上述单元（在真实 CM5 上运行）
-├── tool/
-│   └── bump_version.dart            # 里程表式版本递增（仅由显式 `bump` 命令运行）
-├── lib/
-│   ├── main.dart                    # 应用入口点，ChangeNotifierProvider + 登录门禁，固定深色主题
-│   ├── app_version.dart             # 生成文件——由 tool/bump_version.dart 重新生成，请勿手动编辑
-│   ├── models/
-│   │   ├── server_info.dart         # 发现/连接条目——与其他 3 个客户端中的 ServerInfo 镜像一致
-│   │   ├── hydra_state.dart         # RobotView/ControllerView/HydraState——原始 settings.json 树的薄型可变视图
-│   │   ├── access.dart            # 控制器 ID、预留、安全限值与点动检查（纯规则）
-│   │   ├── stop_all_result.dart    # 全局 STOP 的应答（按机器人）
-│   │   ├── contract_v2.dart        # 服务器的第二份契约,以纯规则表达: 按机器人修订号的条件写入、工作台的原子移动和审计记录
-│   │   └── sha256.dart             # 纯 Dart 实现的 SHA-256,用于校验服务器审计记录的哈希链
-│   ├── network/
-│   │   ├── hydra_api_client.dart    # REST：登录、设置、原子化机器人指令、系统指标——X-Hydra-Client: dsi
-│   │   ├── hydra_websocket.dart     # /ws 实时同步客户端
-│   │   ├── discovery.dart           # 本设备自身真实本地子网的并发扫描
-│   │   ├── auth_prefs.dart          # 持久化的连接信息 + 令牌（secure storage + shared_preferences）
-│   │   └── client_prefs.dart        # 不属于机密的小型客户端偏好 (目前: 此安装的控制器 ID)
-│   ├── state/
-│   │   ├── robot_view_model.dart    # 每个界面都监听的单一 ChangeNotifier
-│   │   └── hydra_error.dart         # 面向 RobotViewModel 的类型化错误接口（自身无 BuildContext）
-│   ├── services/
-│   │   └── backlight.dart           # 根据时间自适应调节背光
-│   ├── l10n/                        # 真实生成的本地化文件（8 种语言）——见仓库根目录的 l10n.yaml
-│   │   ├── app_*.arb                    # app_en.arb、app_es.arb、app_it.arb、app_fr.arb、app_de.arb、app_ja.arb、app_zh.arb、app_pt.arb: 各语言的文案 (下面生成的类由它们产生)
-│   │   ├── app_localizations.dart   # 生成的基类
-│   │   ├── app_localizations_en.dart, _es.dart, _it.dart, _fr.dart, _de.dart, _ja.dart, _zh.dart, _pt.dart
-│   │   └── language_prefs.dart      # 持久化的语言覆盖设置（shared_preferences）
-│   ├── util/                    # 没有独立界面的辅助模块
-│   │   └── play_confirmation.dart   # PLAY 何时先询问: 轨迹开始前确认的规则
-│   └── ui/
-│       ├── login_screen.dart        # 主机/端口/用户/密码字段 + “扫描本地网络”
-│       ├── main_screen.dart         # 水平触控导航栏（6 个选项卡）——精神上接近 KlipperScreen
-│       ├── dashboard_screen.dart    # 每机器人卡片 + 系统指标栏
-│       ├── control_screen.dart      # 点动/速度/阀门/泵/回放控制，并排触控布局
-│       ├── camera_screen.dart       # MJPEG 查看器 + 视觉开关
-│       ├── three_d_screen.dart      # 原生等距 X/Y/Z 指示器——非 WebView（见 docs/ARCHITECTURE.md §4）
-│       ├── metrics_screen.dart      # CM5 主机指标 + 服务器身份专属选项卡
-│       ├── settings_screen.dart     # 连接信息 + 退出登录 + 自身应用版本
-│       └── widgets/
-│           ├── access_panel.dart      # Control 屏幕的预留与点动解锁面板
-│           ├── audit_dialog.dart      # 服务器的审计记录(管理员)及链校验
-│           ├── joystick_pad.dart     # 点动方向键，为触控放大
-│           ├── stop_all.dart            # 全局 STOP 按钮及其结果/“未确认”横幅
-│           ├── digital_readout.dart, status_led.dart
-│           └── mjpeg_view.dart       # 手写的 MJPEG 流解析器
-├── linux/                            # GTK 桌面运行器——真正的目标平台，固定 1280x720 窗口
-├── windows/                          # Windows 桌面运行器——仅供开发机验证
-├── docs/ARCHITECTURE.md
-├── tools/
-│   ├── build_test.py                     # 不递增版本号的构建检查
-│   ├── ci_validate.py               # CI 使用的清单/CHANGELOG/文档校验
-│   ├── _doc_policy.py               # 家族共享的文档规则 (HYDRA-UMC-SDK 的副本,保持同步)
-│   ├── _readme_parity.py            # 检查八个 README 结构一致 (HYDRA-UMC-SDK 的副本,保持同步)
-│   └── hydra_project_tool.py        # 每个仓库相同的命令: validate、test、ci、version、status、bump
-├── bump_manifest_version.py          # 将 hydra-umc.project.json 的版本与原生版本同步(--sync)
-├── test/                             # widget_test、format_uptime_test、localization_test、robot_view_model_test、robot_view_model_silent_refresh_test、auth_prefs_test、hydra_websocket_test、hostile_answers_test、hydra_error_test, play_confirmation_test, stop_long_press_test
-├── pubspec.yaml / pubspec.lock / l10n.yaml / analysis_options.yaml # Flutter 包的定义及其锁定版本、l10n 生成器设置和 lint 规则
-├── README.md                         # 本文件
-└── README_spa.md / README_ita.md / README_fra.md / README_deu.md / README_zho.md / README_jpn.md / README_por.md  # 翻译
-```
+本 README 和仓库文档提供八种语言：英语、西班牙语、德语、法语、意大利语、日语、中文和葡萄牙语（葡萄牙）。它们同时编写，并由 CI 检查八个文件拥有相同的章节和相同的链接。
 
 ## 🔗 相关项目
 
@@ -292,23 +288,26 @@ HYDRA-UMC-DSI/
 - **[HYDRA-UMC-OPS-AGENT](https://github.com/JuanenRac/HYDRA-UMC-OPS-AGENT)** — 维护事件协调器：一个低权限的边缘角色采集经过脱敏的库存/健康快照，一个控制面角色以只读方式渲染它，并请求某个 AI 提供方给出诊断建议——从不应用补丁，也从不部署任何内容。
 - **[HYDRA-UMC-DEV-SERVER](https://github.com/JuanenRac/HYDRA-UMC-DEV-SERVER)** — 可复现的开发主机（Raspberry Pi 5 / CM5），保存整个生态系统的源代码，并在持久队列下运行有界的构建/测试任务；这是专用的开发角色，明确区别于运行中的 CM5。
 
----
+## 📚 文档
 
-## 📚 文档与社区
+更多阅读：
 
-- **[CONTRIBUTING.md](CONTRIBUTING.md)** —— 提交 Pull Request 所需的技术栈和编码规范。
-- **[CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)** —— 本社区所期望的行为准则。
-- **[SECURITY.md](SECURITY.md)** —— 如何报告漏洞，以及本项目真实的安全关注重点。
-- **[SUPPORT.md](SUPPORT.md)** —— 在哪里提问和报告缺陷。
-- **[LICENSE.md](LICENSE.md)** —— 本项目自身的许可证。
+* [生态系统的安全基线](https://github.com/JuanenRac/HYDRA-UMC-DOCS/blob/main/docs/SECURITY_BASELINE.md)
+* [生态系统的威胁模型](https://github.com/JuanenRac/HYDRA-UMC-DOCS/blob/main/docs/THREAT_MODEL.md)
+* [本仓库的更新日志](CHANGELOG.md)
+* [本仓库的许可证](LICENSE.md)
+
+## 🤝 参与贡献与社区
+
+* 提交 pull request 之前，请运行 `HYDRA_UMC_CI=1 py -3 tools/ci_validate.py`（或 `HYDRA_UMC_CI=1 python3 tools/ci_validate.py`）：它必须输出 `CI_VALIDATION=PASS`。此检查不要运行 `build.sh` 或 `build.bat`；构建不是检查。
+* 八个 README 由 HYDRA-UMC-DOCS 中的同一个源生成；请勿手工编辑。修改源文件，再用 `tools/make_readmes.py` 重新生成。
+* 不要在 README 中声称尚未运行过的内容：属实时请写“仅模拟”或“尚未在硬件上试过”。
+* 请参阅 [CONTRIBUTING.md](CONTRIBUTING.md)、[行为准则](CODE_OF_CONDUCT.md)、[SECURITY.md](SECURITY.md) 和 [SUPPORT.md](SUPPORT.md)。
 
 ## 👤 作者
-**JuanenRac** (Electro Hobby 3D)
-📧 electrohobby3d@gmail.com
-📺 [youtube.com/@electrohobby3d](https://youtube.com/@electrohobby3d)
+
+**JuanenRac (Electro Hobby 3D)** · electrohobby3d@gmail.com
 
 ## 📜 许可证
 
-源代码采用 **GNU 通用公共许可证 v3.0（GPL-3.0-or-later）**——见 [`LICENSE`](LICENSE)。
-
-文档（本 README 及其自身的翻译版本——`README_spa.md`、`README_ita.md`、`README_fra.md`、`README_deu.md`、`README_zho.md`、`README_jpn.md`、`README_por.md`）依据 **知识共享 署名-相同方式共享 4.0 国际许可协议（CC BY-SA 4.0）** 提供。完整文本见 https://creativecommons.org/licenses/by-sa/4.0/。
+GPL-3.0-or-later - [LICENSE](LICENSE).

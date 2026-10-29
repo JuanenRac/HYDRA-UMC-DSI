@@ -1,27 +1,30 @@
+<!-- =============================================================================
+HYDRA-UMC-DSI - Native touch UI for the CM5 DSI screen
+Copyright (C) JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
+GPL-3.0-or-later - see LICENSE
+============================================================================= -->
+
 <p align="center">
   <img src="images/HYDRA_UMC_BANNER.svg" alt="HYDRA-UMC-DSI banner" width="100%">
 </p>
-# 🖥️ HYDRA-UMC DSI
 
-<p align="center">
-  🇺🇸 <b>English</b> |
-  <a href="README_spa.md">🇪🇸 Español</a> |
-  <a href="README_fra.md">🇫🇷 Français</a> |
-  <a href="README_ita.md">🇮🇹 Italiano</a> |
-  <a href="README_deu.md">🇩🇪 Deutsch</a> |
-  <a href="README_zho.md">🇨🇳 简体中文</a> |
-  <a href="README_jpn.md">🇯🇵 日本語</a> |
-  <a href="README_por.md">🇵🇹 Português</a>
-</p>
+# 🖥️ HYDRA-UMC-DSI
 
+<p align="center">🇺🇸 <b>English</b> | <a href="README_spa.md">🇪🇸 Español</a> | <a href="README_fra.md">🇫🇷 Français</a> | <a href="README_ita.md">🇮🇹 Italiano</a> | <a href="README_deu.md">🇩🇪 Deutsch</a> | <a href="README_zho.md">🇨🇳 简体中文</a> | <a href="README_jpn.md">🇯🇵 日本語</a> | <a href="README_por.md">🇵🇹 Português</a></p>
+
+### A native touch interface for the Compute Module 5 DSI screen
 
 <p align="center">
   <img src="https://img.shields.io/badge/License-GPL%203.0--or--later-blue.svg" alt="GPL 3.0 or later">
-  <img src="https://img.shields.io/badge/Framework-Flutter%203.x-02569B.svg" alt="Flutter">
-  <img src="https://img.shields.io/badge/Language-Dart-0175C2.svg" alt="Dart">
+  <img src="https://img.shields.io/badge/Framework-Flutter%203.x-02569B.svg" alt="Framework">
+  <img src="https://img.shields.io/badge/Language-Dart-0175C2.svg" alt="Language">
   <img src="https://img.shields.io/badge/Platform-Linux%20%7C%20CM5-E34F26.svg" alt="Platform">
+  <img src="https://img.shields.io/badge/Tests-172%20passing-2ea44f.svg" alt="Tests">
+  <img src="https://img.shields.io/badge/Version-0.2.7-0f6cbd.svg" alt="Version">
+  <img src="https://img.shields.io/badge/Maturity-functional-0F6CBD.svg" alt="Maturity">
 </p>
 
+---
 
 A native Flutter touch UI (Dart, real Linux desktop target) for HYDRA-UMC's own 5"/7" DSI touchscreen on the Compute Module 5 - both physical panel sizes share the exact same 1280x720 pixel resolution, so this app ships one fixed, non-responsive layout instead of adapting to two sizes. It speaks the exact same [`REMOTE_API.md`](https://github.com/JuanenRac/HYDRA-UMC-SERVER/blob/main/docs/REMOTE_API.md) contract [HYDRA-UMC SUITE](https://github.com/JuanenRac/HYDRA-UMC-SUITE), [HYDRA-UMC-ANDROID-CONTROL](https://github.com/JuanenRac/HYDRA-UMC-ANDROID-CONTROL), and [HYDRA-UMC-IOS-CONTROL](https://github.com/JuanenRac/HYDRA-UMC-IOS-CONTROL) use - discovery, login, atomic per-robot commands, and live WebSocket sync against a running [HYDRA-UMC-SERVER](https://github.com/JuanenRac/HYDRA-UMC-SERVER), run directly on the board itself rather than over a browser tab. See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the full design, including why Flutter (not Kivy) and why the 3D screen isn't a WebView.
 
@@ -29,9 +32,11 @@ A native Flutter touch UI (Dart, real Linux desktop target) for HYDRA-UMC's own 
 
 ---
 
-**Honesty check - what actually runs today:** the networking layer (`lib/network/hydra_api_client.dart`, `hydra_websocket.dart`, `discovery.dart`, `auth_prefs.dart`) and the state layer (`lib/state/robot_view_model.dart`, `hydra_error.dart`) are real and tested (98 tests passing across `test/*.dart`, including a real WebSocket connect/reconnect/auth-rejection round trip against a genuine local server, not a mock), and `flutter analyze` reports no issues. All 6 catalog screens are real, wired UI, not placeholders. What is genuinely not built: the **3D View** screen is a small native isometric X/Y/Z indicator, not a real 3D renderer - it does not embed STUDIO's Three.js scene (no Linux `webview_flutter` implementation exists). What is real but unverified on target hardware: `flutter build linux --release` has been run and produces a binary confirmed to launch, but only under Ubuntu 24.04 WSL2 (x86_64) - never on the CM5's real aarch64 Raspberry Pi OS - and the `kiosk/hydra-umc-dsi.service` autostart unit has never run on any real Linux machine at all. See "Known Follow-ups" below and `CHANGELOG.md` for exactly what has shipped so far.
+**Honesty check - what actually runs today:** the networking layer (`lib/network/hydra_api_client.dart`, `hydra_websocket.dart`, `discovery.dart`, `auth_prefs.dart`) and the state layer (`lib/state/robot_view_model.dart`, `hydra_error.dart`) are real and tested (172 tests passing across `test/*.dart`, including a real WebSocket connect/reconnect/auth-rejection round trip against a genuine local server, not a mock), and `flutter analyze` reports no issues. All 6 catalog screens are real, wired UI, not placeholders. What is genuinely not built: the **3D View** screen is a small native isometric X/Y/Z indicator, not a real 3D renderer - it does not embed STUDIO's Three.js scene (no Linux `webview_flutter` implementation exists). What is real but unverified on target hardware: `flutter build linux --release` has been run and produces a binary confirmed to launch, but only under Ubuntu 24.04 WSL2 (x86_64) - never on the CM5's real aarch64 Raspberry Pi OS - and the `kiosk/hydra-umc-dsi.service` autostart unit has never run on any real Linux machine at all. See "Known Follow-ups" below and `CHANGELOG.md` for exactly what has shipped so far.
 
 > **Safety and security status:** this ecosystem is not a certified safety system. There is no hardware E-STOP path, no firmware-enforced limits or interlocks and no verified motion command yet; firmware images are checked with CRC32 and a shared-key HMAC-SHA256, not with an asymmetric signature; TLS and mutual TLS are optional and off by default; no custom board has been populated or tested yet. Read the [security baseline](https://github.com/JuanenRac/HYDRA-UMC-DOCS/blob/main/docs/SECURITY_BASELINE.md) and the [threat model](https://github.com/JuanenRac/HYDRA-UMC-DOCS/blob/main/docs/THREAT_MODEL.md) before relying on any statement here for the safety of a person.
+
+---
 
 ## 📋 At a glance
 
@@ -39,10 +44,12 @@ A native Flutter touch UI (Dart, real Linux desktop target) for HYDRA-UMC's own 
 |---|---|
 | Version | `0.2.7` |
 | Maturity | Functional |
-| Tests | 72 |
+| Tests | 172 (`flutter test`) |
 | Stack | Flutter 3.x / Dart |
 | Target | The Raspberry Pi CM5 of a HYDRA-UMC cell |
 | On real hardware | Not yet: no run on real hardware is recorded for this version |
+
+**Jump to:** [Overview](#-overview) · [Architecture](#-architecture) · [Quick start](#-quick-start) · [Testing](#-testing) · [Repository Structure](#-repository-structure) · [Related Projects](#-related-projects)
 
 ## 🚦 Project status
 
@@ -53,11 +60,11 @@ Each line is one part of this repository and the light says how far it is today.
 | Area | State | What it means here |
 |---|---|---|
 | Software | 🟡 | Works for its main purpose; the honesty check above lists what is still missing |
-| Tests | 🟢 | 72 automated tests, run on every change |
+| Tests | 🟢 | 172 automated tests, run on every change |
 | Real hardware | 🔴 | Not yet: no run on real hardware is recorded for this version |
 | Documentation | 🟢 | README in eight languages, checked against the manifest on every change |
 
-## 🏗️ What's implemented
+## 🎯 Overview
 
 - **Login** (`lib/ui/login_screen.dart`, `lib/state/robot_view_model.dart`) - server IP/port fields pre-filled with a sane LAN default, username/password fields sized for touch and left blank by default (no hardcoded credential is pre-filled - the initial `admin`/`admin` pre-fill was removed once every server started refusing to seed that default account on a real production first start), `POST /api/login` against whatever account the operator enters; additional lower-privilege "operator" accounts can be created from Config > Users in the browser UI. The session token is kept in the platform's secure storage (libsecret on Linux, which needs a running keyring service: on a panel without one the session lasts until the app restarts and the login is asked again). A "Scan local network" dialog (`lib/network/discovery.dart`) finds servers without needing to already know the IP - doubly useful here, since the CM5 this app runs on is often the very controller it should connect to.
 - **Network discovery** (`lib/network/discovery.dart`) - two paths run in parallel from the same "Scan local network" dialog: real mDNS/Bonjour (`discoverMdns()`, querying `server.ts`'s own `_hydra._tcp` publish via the `multicast_dns` package) and a concurrent brute-force scan of `GET /api/hydra-info` across this device's own real local subnet(s) (`scanSubnets()`), deduplicated by host:port - ported from HYDRA-UMC-IOS-CONTROL, the first client in this ecosystem to add real mDNS discovery.
@@ -77,7 +84,33 @@ Each line is one part of this repository and the light says how far it is today.
 
 **Status: scaffold + all 6 catalog screens implemented and connected to the real REMOTE_API.md contract.** `flutter analyze` clean, `flutter build windows` and `flutter build linux` (via WSL2) both produce a running binary, `flutter test` passes - see "Building" below for exactly what has and hasn't been verified, including the remaining gap between this WSL2 verification and the real CM5 hardware.
 
-## 🚀 Building
+## 🧩 Role in HYDRA-UMC
+
+**HYDRA-UMC-DSI** is the touch screen of the CM5 itself: a native Flutter app for the 5"/7" DSI panel that talks to `HYDRA-UMC-SERVER` over its REST and WebSocket interface, next to the browser interface of `HYDRA-UMC-STUDIO`. It holds no robot logic of its own; the server decides what is allowed.
+
+## 🏛️ Architecture
+
+<p align="center">
+  <img src="images/architecture.svg" alt="HYDRA-UMC-DSI architecture" width="100%">
+</p>
+
+## 🚀 Quick start
+
+Requires the stable Flutter SDK (3.x) with Linux desktop support.
+
+```bash
+flutter pub get
+./run_dev.sh      # desktop simulation, no hardware (run_dev.bat on Windows)
+./build_linux.sh  # on a Linux machine or the CM5: the real target
+```
+
+## 🧪 Testing
+
+172 automated tests run with `flutter test`. They need no hardware and nothing outside this machine.
+
+The CI runs `HYDRA_UMC_CI=1 python tools/ci_validate.py`, which checks the manifest, the documents, the eight READMEs and the pictures.
+
+## 🏗️ Build & Release
 
 Requires the [Flutter SDK](https://docs.flutter.dev/get-started/install) (stable channel). This repo is built/verified against Flutter 3.47.0. Only `linux/` and `windows/` are configured as platforms in this repo (no `android/`, `ios/`, `web/`, or `macos/` folders) - Linux is the real target (the CM5's own OS); Windows exists purely so this app's own logic can be built, run, and tested on a machine without a Linux toolchain.
 
@@ -105,27 +138,52 @@ flutter run -d windows           # or -d linux on a real Linux machine, for a li
 
 **Honesty note on Linux verification:** `flutter build linux --release` has now actually been run against this code, from a real Ubuntu 24.04 WSL2 environment with a real Linux desktop toolchain (`cmake`, `ninja-build`, `libgtk-3-dev`, `clang`) - it builds cleanly and produces a genuine `build/linux/x64/release/bundle/hydra_umc_dsi`, confirmed to actually launch (it ran under a real X11 display and stayed alive, not just a passing exit code), not only `flutter build windows` as a smoke-test substitute. What this does **not** cover: WSL2's userspace is x86_64, not the CM5's real aarch64 Raspberry Pi OS, and `kiosk/hydra-umc-dsi.service`'s autostart flow has still never run on any real Linux box. See `docs/ARCHITECTURE.md` section 7 for the exact list of what was and wasn't verified, and "Known Follow-ups" below for what remains.
 
-## 🔢 Versioning
+## 📂 Repository Structure
 
-This repo follows an ecosystem-wide policy: building never changes the version. The explicit bump command (`python tools/hydra_project_tool.py bump`) runs `tool/bump_version.dart`, which applies:
+<p align="center">
+  <img src="images/repository-structure.svg" alt="Repository structure of HYDRA-UMC-DSI" width="100%">
+</p>
 
-- **Patch, odometer-style (base 10):** +1 on every bump; once it would
-  exceed 9 it resets to 0 and minor gets +1 instead - e.g. `0.0.9` ->
-  `0.1.0`. Major is never touched automatically.
-- **Build number** (the part after `+`): a plain monotonic counter, +1 on
-  every build, no carry.
+<details>
+<summary>Text version of the tree</summary>
 
-The same script regenerates `lib/app_version.dart` (generated, not
-hand-edited - a plain `const` file, not a new runtime dependency like
-`package_info_plus`), which the app reads at runtime to show its own
-version on the **Settings** screen. See [CHANGELOG.md](CHANGELOG.md) for
-the version history.
+```text
+HYDRA-UMC-DSI/
+├── lib/                                                              source code
+│   ├── main.dart                                                     App entry point, ChangeNotifierProvider + login gate, fixed dark theme
+│   ├── app_version.dart                                              GENERATED - regenerated by tool/bump_version.dart, do not hand-edit
+│   ├── models/                                                       data models and pure rules
+│   ├── network/                                                      REST client, WebSocket and discovery
+│   ├── state/                                                        the state every screen listens to
+│   ├── services/                                                     services of the app (backlight)
+│   ├── l10n/                                                         localizations in eight languages
+│   ├── util/                                                         Helpers without a screen of their own
+│   └── ui/                                                           screens and widgets
+├── kiosk/                                                            kiosk unit and its installer
+├── tool/                                                             version tooling
+├── linux/                                                            GTK desktop runner - the REAL target, fixed 1280x720 window
+├── windows/                                                          Windows desktop runner - dev-machine verification only
+├── tools/                                                            project tools and CI checks
+├── test/                                                             widget_test, format_uptime_test, localization_test, robot_view_model_test, robot_view_model_silent_refresh_test, auth_prefs_test, hydra_websocket_test, hostile_answers_test, hydra_error_test, play_confirmation_test, stop_long_press_test
+├── .github/                                                          CI workflow and issue templates
+├── images/                                                           banner and the pictures of the README
+├── build.bat / build.sh                                              flutter pub get + version bump + flutter build windows (dev-machine verification)
+├── build_linux.sh                                                    flutter pub get + flutter build linux (the real CM5 target - run on real Linux)
+├── run_dev.bat / run_dev.sh                                          flutter run - desktop simulation mode
+├── CHANGELOG.md                                                      what changed in each version
+├── docs/ARCHITECTURE.md                                              architecture of the project
+├── bump_manifest_version.py                                          Syncs hydra-umc.project.json's version to the native one (--sync)
+├── pubspec.yaml / pubspec.lock / l10n.yaml / analysis_options.yaml   The Flutter package definition and its locked versions, the settings of the l10n generator and the lint rules
+├── build-test.sh                                                     non-mutating build check
+├── hydra-umc.project.json                                            manifest: version, maturity, family
+└── test.sh                                                           runs the tests
+```
 
-### Running on the real CM5
+</details>
 
-After `build_linux.sh` produces `build/linux/*/release/bundle/`, copy the whole `bundle/` directory to the CM5 (it depends on the `.so` files alongside the binary, not just the executable itself) to `/opt/hydra-umc-dsi/bundle/`, then run `sudo kiosk/install_kiosk.sh` to install and enable `kiosk/hydra-umc-dsi.service`, a systemd unit that launches the app fullscreen on `tty1` via [`cage`](https://github.com/cage-kiosk/cage) (a minimal Wayland kiosk compositor that runs exactly one fullscreen client), with `Restart=always` so a crash re-launches it rather than dropping to a blank screen. Chosen over [`flutter-pi`](https://github.com/ardera/flutter-pi) (a third-party bare-metal Flutter engine embedder for Raspberry Pi, running without any window system at all) specifically because it reuses `build_linux.sh`'s own real `flutter build linux` output unmodified - flutter-pi builds against the Flutter engine directly instead, so it would need its own separate build step, not a drop-in on top of the build this repo already produces. **Honesty note:** written and reviewed, never actually run against a real CM5 or any other Linux box - unlike `flutter build linux` itself, which is now verified under WSL2 (see `docs/ARCHITECTURE.md` section 7), this kiosk autostart flow remains entirely unverified. See `kiosk/hydra-umc-dsi.service`'s own header comment for the exact assumptions (root service user, `tty1` ownership) that would need checking against whatever Raspberry Pi OS image the CM5 actually runs. **The real, deployed HDMI kiosk on the real CM5 today is HYDRA-UMC-OS's own `provisioning/install_kiosk.sh`** (minimal X11 + Chromium, verified on real hardware) - installing this app's own `cage`-based kiosk on the same device would fight it for `tty1`. Nobody has decided this native app replaces the Chromium kiosk; verify this one actually runs first, and stop the other kiosk before ever enabling both.
+## 🗺️ Roadmap & Known limits
 
-## 🗺️ Known Follow-ups
+**Known limits today**
 
 Real, verified gaps this app's own code still has - not vague TODOs, each one traceable to a specific place in the code or docs above:
 
@@ -133,78 +191,9 @@ Real, verified gaps this app's own code still has - not vague TODOs, each one tr
 - **3D View has no real native 3D renderer** - `ui/three_d_screen.dart` currently draws a small isometric X/Y/Z position indicator instead of embedding STUDIO's real Three.js scene (`webview_flutter` has no Linux implementation - see `docs/ARCHITECTURE.md` section 4 for the full reasoning). A real native 3D renderer for this screen is future work, not started.
 - **Real CM5 hardware run still pending** - `flutter build linux` itself is now verified (real Ubuntu 24.04 WSL2 toolchain, binary confirmed to actually launch - see `docs/ARCHITECTURE.md` section 7), but `build_linux.sh`'s full flow and the `kiosk/hydra-umc-dsi.service` autostart unit have still never run against the actual CM5 or any other real (non-WSL2) Linux machine. Whoever runs them there for the first time should treat that as the real first hardware deploy of this platform target, not a formality - see "Running on the real CM5" above.
 
-## 📂 Repository Structure
+## 🌍 Languages
 
-```text
-HYDRA-UMC-DSI/
-├── build.bat, build.sh              # flutter pub get + version bump + flutter build windows (dev-machine verification)
-├── build_linux.sh                   # flutter pub get + flutter build linux (the real CM5 target - run on real Linux)
-├── run_dev.bat, run_dev.sh          # flutter run - desktop simulation mode
-├── CHANGELOG.md                      # version history (see Versioning above)
-├── kiosk/
-│   ├── hydra-umc-dsi.service        # systemd unit - fullscreen autostart via cage
-│   └── install_kiosk.sh             # installs + enables the unit above (run on the real CM5)
-├── tool/
-│   └── bump_version.dart            # Odometer-style version bump (run only by the explicit `bump` command)
-├── lib/
-│   ├── main.dart                    # App entry point, ChangeNotifierProvider + login gate, fixed dark theme
-│   ├── app_version.dart             # GENERATED - regenerated by tool/bump_version.dart, do not hand-edit
-│   ├── models/
-│   │   ├── server_info.dart         # Discovery/connection entry - mirrors ServerInfo in the other 3 clients
-│   │   ├── hydra_state.dart         # RobotView/ControllerView/HydraState - thin mutable views over the raw settings.json tree
-│   │   ├── access.dart            # Controller id, reservations, safety limits and the jog check (pure rules)
-│   │   ├── stop_all_result.dart    # answer of the global STOP, robot by robot
-│   │   ├── contract_v2.dart        # The server's second contract as pure rules: conditional writes by robot revision, the atomic table move and the audit record
-│   │   └── sha256.dart             # SHA-256 in plain Dart, for the chain check of the server's audit record
-│   ├── network/
-│   │   ├── hydra_api_client.dart    # REST: login, settings, atomic robot command, system metrics - X-Hydra-Client: dsi
-│   │   ├── hydra_websocket.dart     # /ws live sync client
-│   │   ├── discovery.dart           # Concurrent scan of this device's own real local subnet(s)
-│   │   ├── auth_prefs.dart          # Persisted connection + token (secure storage + shared_preferences)
-│   │   └── client_prefs.dart        # Small client-side preferences that are not secrets (today: the controller id of this installation)
-│   ├── state/
-│   │   ├── robot_view_model.dart    # Single ChangeNotifier every screen listens to
-│   │   └── hydra_error.dart         # Typed error surface for RobotViewModel (no BuildContext of its own)
-│   ├── services/
-│   │   └── backlight.dart           # Adaptive backlight by time of day
-│   ├── l10n/                        # Real generated localizations (8 languages) - see l10n.yaml at repo root
-│   │   ├── app_*.arb                    # app_en.arb, app_es.arb, app_it.arb, app_fr.arb, app_de.arb, app_ja.arb, app_zh.arb, app_pt.arb: the phrases of each language (the generated classes below come from them)
-│   │   ├── app_localizations.dart   # Generated base class
-│   │   ├── app_localizations_en.dart, _es.dart, _it.dart, _fr.dart, _de.dart, _ja.dart, _zh.dart, _pt.dart
-│   │   └── language_prefs.dart      # Persisted language override (shared_preferences)
-│   ├── util/                    # Helpers without a screen of their own
-│   │   └── play_confirmation.dart   # When PLAY asks first: the rules of the confirmation before a trajectory starts
-│   └── ui/
-│       ├── login_screen.dart        # Host/port/user/pass fields + "Scan local network"
-│       ├── main_screen.dart         # Horizontal touch nav bar (6 tabs) - KlipperScreen-in-spirit
-│       ├── dashboard_screen.dart    # Per-robot cards + system metrics bar
-│       ├── control_screen.dart      # Jog/speed/valve/pump/playback controls, side-by-side touch layout
-│       ├── camera_screen.dart       # MJPEG viewer + vision on/off switch
-│       ├── three_d_screen.dart      # Native isometric X/Y/Z indicator - NOT a WebView (see docs/ARCHITECTURE.md §4)
-│       ├── metrics_screen.dart      # Dedicated CM5 host metrics + server identity tab
-│       ├── settings_screen.dart     # Connection info + sign out + own app version
-│       └── widgets/
-│           ├── access_panel.dart      # Reservation and jog-arming panel of the Control screen
-│           ├── audit_dialog.dart      # Audit record of the server (administrators), with the chain check
-│           ├── joystick_pad.dart     # Jog D-pad, sized up for touch
-│           ├── stop_all.dart            # the global STOP button and its result / "not confirmed" banner
-│           ├── digital_readout.dart, status_led.dart
-│           └── mjpeg_view.dart       # Hand-rolled MJPEG stream parser
-├── linux/                            # GTK desktop runner - the REAL target, fixed 1280x720 window
-├── windows/                          # Windows desktop runner - dev-machine verification only
-├── docs/ARCHITECTURE.md
-├── tools/
-│   ├── build_test.py                     # Non-versioning build/compile check
-│   ├── ci_validate.py               # Manifest/CHANGELOG/docs validation used by CI
-│   ├── _doc_policy.py               # Documentation rules shared by the family (a copy of HYDRA-UMC-SDK's, kept in sync)
-│   ├── _readme_parity.py            # Check that the eight READMEs share one structure (a copy of HYDRA-UMC-SDK's, kept in sync)
-│   └── hydra_project_tool.py        # The same commands in every repository: validate, test, ci, version, status, bump
-├── bump_manifest_version.py          # Syncs hydra-umc.project.json's version to the native one (--sync)
-├── test/                             # widget_test, format_uptime_test, localization_test, robot_view_model_test, robot_view_model_silent_refresh_test, auth_prefs_test, hydra_websocket_test, hostile_answers_test, hydra_error_test, play_confirmation_test, stop_long_press_test
-├── pubspec.yaml / pubspec.lock / l10n.yaml / analysis_options.yaml # The Flutter package definition and its locked versions, the settings of the l10n generator and the lint rules
-├── README.md                         # this file
-└── README_spa.md / README_ita.md / README_fra.md / README_deu.md / README_zho.md / README_jpn.md / README_por.md  # translations
-```
+This README and the documents of the repository exist in eight languages: English, Spanish, German, French, Italian, Japanese, Chinese and Portuguese (Portugal). They are written together and checked in the CI so that the eight files have the same sections and the same links.
 
 ## 🔗 Related Projects
 
@@ -299,23 +288,26 @@ This project is part of the HYDRA-UMC robotics ecosystem by the same author (Jua
 - **[HYDRA-UMC-OPS-AGENT](https://github.com/JuanenRac/HYDRA-UMC-OPS-AGENT)** — maintenance-incident coordinator: a low-privilege edge role collects a sanitized inventory/health snapshot, a control-plane role renders it read-only and asks an AI provider to suggest a diagnosis - never applies a patch or deploys anything.
 - **[HYDRA-UMC-DEV-SERVER](https://github.com/JuanenRac/HYDRA-UMC-DEV-SERVER)** — reproducible development host (Raspberry Pi 5 / CM5) that stores the ecosystem's source and runs bounded build/test tasks under a durable queue; a dedicated dev role, explicitly not an operational CM5.
 
----
+## 📚 Documentation
 
-## 📚 Documentation & Community
+Where to read more:
 
-- **[CONTRIBUTING.md](CONTRIBUTING.md)** — tech stack and coding guidelines for a pull request.
-- **[CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)** — the standards of behavior expected in this community.
-- **[SECURITY.md](SECURITY.md)** — how to report a vulnerability, and this project's own real security focus areas.
-- **[SUPPORT.md](SUPPORT.md)** — where to ask questions and report bugs.
-- **[LICENSE.md](LICENSE.md)** — this project's own license.
+* [Security baseline of the ecosystem](https://github.com/JuanenRac/HYDRA-UMC-DOCS/blob/main/docs/SECURITY_BASELINE.md)
+* [Threat model of the ecosystem](https://github.com/JuanenRac/HYDRA-UMC-DOCS/blob/main/docs/THREAT_MODEL.md)
+* [Changelog of this repository](CHANGELOG.md)
+* [License of this repository](LICENSE.md)
+
+## 🤝 Contributing & Community
+
+* Before a pull request run `HYDRA_UMC_CI=1 py -3 tools/ci_validate.py` (or `HYDRA_UMC_CI=1 python3 tools/ci_validate.py`): it must print `CI_VALIDATION=PASS`. Do not run `build.sh` or `build.bat` for this check; building is not a check.
+* The eight READMEs are written from one source in HYDRA-UMC-DOCS; do not edit them by hand. Change the source and write them again with `tools/make_readmes.py`.
+* Do not state in a README what has not run: say "simulated" or "not tried on hardware" where that is the truth.
+* See [CONTRIBUTING.md](CONTRIBUTING.md), the [code of conduct](CODE_OF_CONDUCT.md), [SECURITY.md](SECURITY.md) and [SUPPORT.md](SUPPORT.md).
 
 ## 👤 AUTHOR
-**JuanenRac** (Electro Hobby 3D)
-📧 electrohobby3d@gmail.com
-📺 [youtube.com/@electrohobby3d](https://youtube.com/@electrohobby3d)
+
+**JuanenRac (Electro Hobby 3D)** · electrohobby3d@gmail.com
 
 ## 📜 LICENSE
 
-GNU General Public License v3.0 or later (GPL-3.0-or-later) for the source code - see [`LICENSE`](LICENSE).
-
-The documentation (this README and its own translations - `README_spa.md`, `README_ita.md`, `README_fra.md`, `README_deu.md`, `README_zho.md`, `README_jpn.md`, `README_por.md`) is available under **Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)**. Full text at https://creativecommons.org/licenses/by-sa/4.0/.
+GPL-3.0-or-later - [LICENSE](LICENSE).

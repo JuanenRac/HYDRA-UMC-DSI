@@ -1,0 +1,114 @@
+{
+  "repo": "HYDRA-UMC-DSI",
+  "ecosystem": "hydra",
+  "tagline": "A touch UI that holds the screens and talks to the server; the server decides.",
+  "description": "HYDRA-UMC-DSI is a Flutter app: screens on top of a view model, a REST and WebSocket client and server discovery, all talking to HYDRA-UMC-SERVER on the CM5.",
+  "columns": [
+    "WHO USES IT",
+    "THIS REPOSITORY",
+    "WHAT IT TALKS TO"
+  ],
+  "nodes": [
+    {
+      "id": "op",
+      "column": 0,
+      "level": "external",
+      "title": "The operator",
+      "lines": [
+        "touches the 5\"/7\" DSI",
+        "panel on the CM5"
+      ]
+    },
+    {
+      "id": "ui",
+      "column": 1,
+      "level": "tested",
+      "title": "lib/ui/",
+      "lines": [
+        "login, control, camera,",
+        "3D and settings screens"
+      ],
+      "code": [
+        "lib/ui/main_screen.dart",
+        "lib/ui/control_screen.dart"
+      ]
+    },
+    {
+      "id": "vm",
+      "column": 1,
+      "level": "tested",
+      "title": "robot_view_model.dart",
+      "lines": [
+        "one state for every screen,",
+        "STOP always reachable"
+      ],
+      "code": [
+        "lib/state/robot_view_model.dart"
+      ]
+    },
+    {
+      "id": "net",
+      "column": 1,
+      "level": "tested",
+      "title": "lib/network/",
+      "lines": [
+        "REST client, WebSocket,",
+        "server discovery"
+      ],
+      "code": [
+        "lib/network/hydra_api_client.dart",
+        "lib/network/hydra_websocket.dart"
+      ]
+    },
+    {
+      "id": "srv",
+      "column": 2,
+      "level": "external",
+      "title": "HYDRA-UMC-SERVER",
+      "lines": [
+        "REST and WebSocket;",
+        "login and permissions"
+      ]
+    },
+    {
+      "id": "cam",
+      "column": 2,
+      "level": "external",
+      "title": "Camera streams",
+      "lines": [
+        "MJPEG from the server"
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "from": "op",
+      "to": "ui",
+      "level": "tested",
+      "label": "touch"
+    },
+    {
+      "from": "ui",
+      "to": "vm",
+      "level": "tested"
+    },
+    {
+      "from": "vm",
+      "to": "net",
+      "level": "tested"
+    },
+    {
+      "from": "net",
+      "to": "srv",
+      "level": "tested",
+      "label": "REST + WS"
+    },
+    {
+      "from": "net",
+      "to": "cam",
+      "level": "external",
+      "label": "MJPEG"
+    }
+  ],
+  "footer": "The app has not run on a physical DSI panel; the logic is tested on a computer."
+}
