@@ -4,6 +4,7 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+- **The sign-in screen offers the machine the panel is mounted on:** the server address is pre-filled with `127.0.0.1` (port 3000) instead of an address of some other network, since the panel is fixed to the Compute Module that runs the server. A panel meant for another server still types the address or scans for it. The on-screen keyboard for the touch panel is not part of this change. 2 tests.
 - **README in the universal layout:** the README and its seven translations follow the layout that the four families share (22 sections in a fixed order), with an architecture picture and a repository-structure picture drawn from `docs/architecture.json` and `docs/structure.json`; the CI validator checks both pictures and the file tree.
 
 - **The layout of the README is checked in the CI:** the validator runs `tools/universal_readme_check.py` and lists, as a warning, what differs from the universal layout of the README.

@@ -19,7 +19,7 @@ GPL-3.0-or-later - see LICENSE
   <img src="https://img.shields.io/badge/Framework-Flutter%203.x-02569B.svg" alt="Framework">
   <img src="https://img.shields.io/badge/Language-Dart-0175C2.svg" alt="Language">
   <img src="https://img.shields.io/badge/Platform-Linux%20%7C%20CM5-E34F26.svg" alt="Platform">
-  <img src="https://img.shields.io/badge/Tests-172%20passing-2ea44f.svg" alt="Tests">
+  <img src="https://img.shields.io/badge/Tests-174%20passing-2ea44f.svg" alt="Tests">
   <img src="https://img.shields.io/badge/Version-0.2.7-0f6cbd.svg" alt="Version">
   <img src="https://img.shields.io/badge/Maturity-functional-0F6CBD.svg" alt="Maturity">
 </p>
@@ -32,7 +32,7 @@ Uma interface tátil Flutter nativa (Dart, alvo real de desktop Linux) para o ec
 
 ---
 
-**Verificação de honestidade - o que realmente funciona hoje:** a camada de rede (`lib/network/hydra_api_client.dart`, `hydra_websocket.dart`, `discovery.dart`, `auth_prefs.dart`) e a camada de estado (`lib/state/robot_view_model.dart`, `hydra_error.dart`) são reais e estão testadas (172 testes a passar em `test/*.dart`, incluindo uma volta real de ligação/religação/rejeição de autenticação por WebSocket contra um servidor local genuíno, não um simulado), e o `flutter analyze` não reporta problemas. Os 6 ecrãs do catálogo são interface real e ligada, não marcadores de posição. O que genuinamente não está construído: o ecrã **Vista 3D** é um pequeno indicador isométrico X/Y/Z nativo, não um renderizador 3D real - não embebe a cena Three.js do STUDIO (não existe nenhuma implementação de `webview_flutter` para Linux). O que é real mas não está verificado no hardware de destino: o `flutter build linux --release` foi executado e produz um binário cujo arranque está confirmado, mas apenas em Ubuntu 24.04 WSL2 (x86_64) - nunca no Raspberry Pi OS aarch64 real do CM5 - e a unidade de arranque automático `kiosk/hydra-umc-dsi.service` nunca correu em nenhuma máquina Linux real. Veja "Seguimentos conhecidos" abaixo e o `CHANGELOG.md` para saber exatamente o que foi entregue até agora.
+**Verificação de honestidade - o que realmente funciona hoje:** a camada de rede (`lib/network/hydra_api_client.dart`, `hydra_websocket.dart`, `discovery.dart`, `auth_prefs.dart`) e a camada de estado (`lib/state/robot_view_model.dart`, `hydra_error.dart`) são reais e estão testadas (174 testes a passar em `test/*.dart`, incluindo uma volta real de ligação/religação/rejeição de autenticação por WebSocket contra um servidor local genuíno, não um simulado), e o `flutter analyze` não reporta problemas. Os 6 ecrãs do catálogo são interface real e ligada, não marcadores de posição. O que genuinamente não está construído: o ecrã **Vista 3D** é um pequeno indicador isométrico X/Y/Z nativo, não um renderizador 3D real - não embebe a cena Three.js do STUDIO (não existe nenhuma implementação de `webview_flutter` para Linux). O que é real mas não está verificado no hardware de destino: o `flutter build linux --release` foi executado e produz um binário cujo arranque está confirmado, mas apenas em Ubuntu 24.04 WSL2 (x86_64) - nunca no Raspberry Pi OS aarch64 real do CM5 - e a unidade de arranque automático `kiosk/hydra-umc-dsi.service` nunca correu em nenhuma máquina Linux real. Veja "Seguimentos conhecidos" abaixo e o `CHANGELOG.md` para saber exatamente o que foi entregue até agora.
 
 > **Estado de segurança (safety e security):** este ecossistema não é um sistema de segurança certificado. Ainda não existe um caminho de E-STOP por hardware, nem limites ou interlocks impostos pelo firmware, nem um comando de movimento verificado; as imagens de firmware são verificadas com CRC-32 e uma assinatura Ed25519, e uma compilação de versão recusa as chaves de desenvolvimento publicadas (as cabeças de ferramenta e as placas de expansão atrás do relé ainda usam os bootloaders do URTC, que aceitam um HMAC-SHA256 de chave partilhada em vez de uma assinatura); TLS e TLS mútuo são opcionais e estão desativados por defeito; nenhuma placa própria foi ainda montada ou testada. Leia a [base de segurança](https://github.com/JuanenRac/HYDRA-UMC-DOCS/blob/main/docs/SECURITY_BASELINE.md) e o [modelo de ameaças](https://github.com/JuanenRac/HYDRA-UMC-DOCS/blob/main/docs/THREAT_MODEL.md) antes de confiar em qualquer afirmação aqui para a segurança de uma pessoa.
 
@@ -44,7 +44,7 @@ Uma interface tátil Flutter nativa (Dart, alvo real de desktop Linux) para o ec
 |---|---|
 | Versão | `0.2.7` |
 | Maturidade | Funcional |
-| Testes | 172 (`flutter test`) |
+| Testes | 174 (`flutter test`) |
 | Tecnologia | Flutter 3.x / Dart |
 | Destino | O Raspberry Pi CM5 de uma célula HYDRA-UMC |
 | Em hardware real | Ainda não: não há registo de execução em hardware real para esta versão |
@@ -60,7 +60,7 @@ Cada linha é uma parte deste repositório e a luz diz até onde chega hoje. É 
 | Área | Estado | O que significa aqui |
 |---|---|---|
 | Software | 🟡 | Funciona para o seu propósito principal; a verificação de honestidade acima lista o que ainda falta |
-| Testes | 🟢 | 172 testes automáticos, executados a cada alteração |
+| Testes | 🟢 | 174 testes automáticos, executados a cada alteração |
 | Hardware real | 🔴 | Ainda não: não há registo de execução em hardware real para esta versão |
 | Documentação | 🟢 | README em oito idiomas, verificado contra o manifesto a cada alteração |
 
@@ -106,7 +106,7 @@ flutter pub get
 
 ## 🧪 Testes
 
-172 testes automáticos correm com `flutter test`. Não precisam de hardware nem de nada fora desta máquina.
+174 testes automáticos correm com `flutter test`. Não precisam de hardware nem de nada fora desta máquina.
 
 A CI executa `HYDRA_UMC_CI=1 python tools/ci_validate.py`, que verifica o manifesto, os documentos, os oito README e as imagens.
 

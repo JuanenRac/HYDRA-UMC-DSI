@@ -19,6 +19,7 @@ import '../l10n/app_localizations.dart';
 import '../models/server_info.dart';
 import '../network/discovery.dart';
 import '../state/robot_view_model.dart';
+import '../util/panel_defaults.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -28,8 +29,8 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final _hostCtrl = TextEditingController(text: '192.168.1.100');
-  final _portCtrl = TextEditingController(text: '3000');
+  final _hostCtrl = TextEditingController(text: panelDefaultHost);
+  final _portCtrl = TextEditingController(text: '$panelDefaultPort');
   final _userCtrl = TextEditingController();
   final _passCtrl = TextEditingController();
   bool _isSubmitting = false;
@@ -163,7 +164,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _submit() async {
     final host = _hostCtrl.text.trim();
-    final port = int.tryParse(_portCtrl.text.trim()) ?? 3000;
+    final port = int.tryParse(_portCtrl.text.trim()) ?? panelDefaultPort;
     if (host.isEmpty || _userCtrl.text.trim().isEmpty || _passCtrl.text.isEmpty) return;
     setState(() => _isSubmitting = true);
     final server = ServerInfo(host: host, port: port, username: _userCtrl.text.trim(), password: _passCtrl.text);
