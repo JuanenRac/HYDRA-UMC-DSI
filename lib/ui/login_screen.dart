@@ -19,6 +19,7 @@ import '../l10n/app_localizations.dart';
 import '../models/server_info.dart';
 import '../network/discovery.dart';
 import '../state/robot_view_model.dart';
+import 'widgets/security_dialog.dart';
 import '../util/panel_defaults.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -223,6 +224,23 @@ class _LoginScreenState extends State<LoginScreen> {
                     onPressed: _isSubmitting ? null : _openScanDialog,
                     icon: const Icon(Icons.wifi_find),
                     label: Text(l10n.loginScanNetwork, style: const TextStyle(fontSize: 15)),
+                    style: TextButton.styleFrom(minimumSize: const Size(0, 48)),
+                  ),
+                ),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: TextButton.icon(
+                    key: const Key('login-security'),
+                    onPressed: _isSubmitting
+                        ? null
+                        : () => showSecurityDialog(
+                              context,
+                              vm,
+                              host: _hostCtrl.text.trim(),
+                              port: int.tryParse(_portCtrl.text.trim()) ?? panelDefaultPort,
+                            ),
+                    icon: const Icon(Icons.shield_outlined),
+                    label: Text(l10n.securityOpen, style: const TextStyle(fontSize: 15)),
                     style: TextButton.styleFrom(minimumSize: const Size(0, 48)),
                   ),
                 ),

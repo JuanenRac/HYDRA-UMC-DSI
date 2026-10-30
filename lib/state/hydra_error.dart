@@ -55,6 +55,9 @@ enum HydraErrorKind {
   jogOverLimit,
   // A conditional write was refused (412): the robot changed since this app read it.
   revisionChanged,
+  // No secure connection could be made (certificate not trusted, or the server
+  // does not speak TLS): the person is pointed to the security settings.
+  tlsFailed,
 }
 
 class HydraError {
@@ -106,6 +109,8 @@ class HydraError {
         return l10n.errJogOverLimit(params['limit'] ?? '');
       case HydraErrorKind.revisionChanged:
         return l10n.errRevisionChanged(params['command'] ?? '');
+      case HydraErrorKind.tlsFailed:
+        return l10n.errTlsFailed;
     }
   }
 }

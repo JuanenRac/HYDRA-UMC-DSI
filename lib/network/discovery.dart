@@ -37,11 +37,11 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:http/http.dart' as http;
 import 'package:multicast_dns/multicast_dns.dart';
 
 import '../models/server_info.dart';
 import 'hydra_api_client.dart';
+import 'tls_settings.dart';
 
 const String _mdnsServiceType = '_hydra._tcp.local';
 
@@ -76,7 +76,7 @@ Stream<ServerInfo> discoverMdns({Duration timeout = const Duration(seconds: 4)})
           final host = ip.address.address;
           final port = srv.port;
           if (!seen.add('$host:$port')) continue;
-          final apiClient = HydraApiClient(host, port);
+          final apiClient = HydraApiClient(host, port, client: createDiscoveryClient());
           try {
             final info = await apiClient.getHydraInfo();
             if (info != null) yield ServerInfo.fromHydraInfo(host, port, info);
@@ -137,7 +137,7 @@ Future<List<String>> _candidatePrefixes({String? lastHost}) async {
 Stream<ServerInfo> scanSubnets({String? lastHost}) async* {
   final prefixes = await _candidatePrefixes(lastHost: lastHost);
 
-  final client = http.Client();
+  final client = createDiscoveryClient();
   try {
     for (final prefix in prefixes) {
       final hosts = List.generate(254, (i) => '$prefix.${i + 1}');

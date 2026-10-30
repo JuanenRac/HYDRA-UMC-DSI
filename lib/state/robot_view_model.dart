@@ -36,6 +36,7 @@ import '../network/auth_prefs.dart';
 import '../network/client_prefs.dart';
 import '../network/hydra_api_client.dart';
 import '../network/hydra_websocket.dart';
+import '../network/tls_settings.dart';
 import 'hydra_error.dart';
 
 class SystemMetrics {
@@ -67,6 +68,10 @@ class RobotViewModel extends ChangeNotifier {
   // (backed by real platform secure storage) for every actual screen.
   final AuthPrefs _authPrefs;
   final ClientPrefs _clientPrefs = ClientPrefs();
+  final TlsPrefs _tlsPrefs = TlsPrefs();
+
+  /// How the app reaches the server and what it trusts (see network/tls_settings.dart).
+  TlsSettings tlsSettings = const TlsSettings();
   final LanguagePrefs _languagePrefs = LanguagePrefs();
 
   RobotViewModel({AuthPrefs? authPrefs}) : _authPrefs = authPrefs ?? AuthPrefs();
@@ -147,6 +152,8 @@ class RobotViewModel extends ChangeNotifier {
 
   Future<void> init() async {
     languageOverride = await _languagePrefs.loadLocale();
+    tlsSettings = await _tlsPrefs.load();
+    TlsSettingsStore.current = tlsSettings;
     // The controller id of this installation: made once, kept, and adopted here.
     conditionalMode = ConditionalMode.fromKey(await _clientPrefs.loadConditionalMode());
     confirmPlay = await _clientPrefs.loadConfirmPlay();
@@ -208,7 +215,9 @@ class RobotViewModel extends ChangeNotifier {
       await connect();
       return true;
     } catch (e) {
-      lastError = HydraError(HydraErrorKind.loginError, {'error': '$e'});
+      lastError = isTlsFailure(e)
+          ? const HydraError(HydraErrorKind.tlsFailed)
+          : HydraError(HydraErrorKind.loginError, {'error': '$e'});
       notifyListeners();
       return false;
     }
@@ -342,7 +351,9 @@ class RobotViewModel extends ChangeNotifier {
       if (client.usesTls) unawaited(_authPrefs.saveUseTls(true));
       notifyListeners();
     } catch (e) {
-      lastError = HydraError(HydraErrorKind.fetchFailed, {'error': '$e'});
+      lastError = isTlsFailure(e)
+          ? const HydraError(HydraErrorKind.tlsFailed)
+          : HydraError(HydraErrorKind.fetchFailed, {'error': '$e'});
       connectionStatus = 'error';
       if (e is HydraApiException && e.isSessionProblem) {
         // The token is dead and could not be renewed. Sign out for real and
@@ -755,6 +766,19 @@ class RobotViewModel extends ChangeNotifier {
     confirmPlay = value;
     notifyListeners();
     await _clientPrefs.saveConfirmPlay(value);
+  }
+
+  /// Keeps new security settings for the next connections. Returns what is
+  /// wrong with them (and keeps nothing) or null when they were saved.
+  Future<TlsProblem?> setTlsSettings(TlsSettings value) async {
+    final problem = value.validate();
+    if (problem != null) return problem;
+    final clean = value.normalized();
+    tlsSettings = clean;
+    TlsSettingsStore.current = clean;
+    await _tlsPrefs.save(clean);
+    notifyListeners();
+    return null;
   }
 
   /// Chooses which writes are checked, and keeps the choice.

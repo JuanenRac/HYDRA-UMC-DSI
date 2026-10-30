@@ -33,6 +33,7 @@ import 'package:web_socket_channel/io.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import '../state/hydra_error.dart';
+import 'tls_settings.dart';
 
 enum WsStatus { connecting, connected, disconnected }
 
@@ -167,6 +168,7 @@ class HydraWebSocket {
         url,
         protocols: bearer != null ? [wsTokenSubprotocol, bearer] : null,
         pingInterval: pingInterval,
+        customClient: createHttpClient(),
       );
       _channel = channel;
       _sub = channel.stream.listen(

@@ -23,7 +23,9 @@ import 'package:provider/provider.dart';
 
 import '../app_version.dart';
 import '../l10n/app_localizations.dart';
+import '../network/tls_settings.dart';
 import '../state/robot_view_model.dart';
+import 'widgets/security_dialog.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -94,6 +96,21 @@ class SettingsScreen extends StatelessWidget {
           subtitle: Text(l10n.settingsConfirmPlaySubtitle),
           value: vm.confirmPlay,
           onChanged: (value) => vm.setConfirmPlay(value),
+        ),
+        const Divider(),
+        ListTile(
+          key: const Key('settings-security'),
+          leading: const Icon(Icons.shield_outlined),
+          title: Text(l10n.securityTitle),
+          subtitle: Text(vm.tlsSettings.pinnedFingerprint.isNotEmpty
+              ? TlsFingerprint.display(vm.tlsSettings.pinnedFingerprint)
+              : l10n.securityIntro),
+          onTap: () => showSecurityDialog(
+            context,
+            vm,
+            host: vm.activeServer?.host ?? '',
+            port: vm.activeServer?.port ?? 3000,
+          ),
         ),
         const Divider(),
         ListTile(
