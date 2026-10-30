@@ -15,7 +15,6 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:hydra_umc_dsi/models/hydra_state.dart';
 import 'package:hydra_umc_dsi/models/server_info.dart';
 import 'package:hydra_umc_dsi/network/auth_prefs.dart';
 import 'package:hydra_umc_dsi/state/hydra_error.dart';
