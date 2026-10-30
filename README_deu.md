@@ -132,7 +132,7 @@ Alle 3 Build-Skripte (`build.sh`/`build.bat`/`build_linux.sh`) ändern die Versi
 flutter pub get
 flutter analyze                  # statische Analyse - kein Compiler nötig
 flutter test                     # Widget-Tests
-dart run tool/bump_version.dart  # erhöht die Version, genau wie build.sh/build.bat/build_linux.sh
+python tools/hydra_project_tool.py bump  # erhöht die Version (ein Build tut das nie)
 flutter build windows            # Smoke-Test auf der Entwicklungsmaschine - erzeugt build/windows/x64/runner/Release/hydra_umc_dsi.exe
 flutter build linux              # das ECHTE Ziel - muss auf einer echten Linux-Maschine ausgeführt werden, erzeugt build/linux/*/release/bundle/
 flutter run -d windows           # oder -d linux auf einer echten Linux-Maschine, für eine Live-Entwicklungsschleife im Desktop-Simulationsmodus
@@ -153,7 +153,7 @@ flutter run -d windows           # oder -d linux auf einer echten Linux-Maschine
 HYDRA-UMC-DSI/
 ├── lib/                                                              Quellcode
 │   ├── main.dart                                                     App-Einstiegspunkt, ChangeNotifierProvider + Login-Gate, festes dunkles Theme
-│   ├── app_version.dart                                              GENERIERT - von tool/bump_version.dart regeneriert, nicht von Hand bearbeiten
+│   ├── app_version.dart                                              GENERIERT - von bump_manifest_version.py regeneriert, nicht von Hand bearbeiten
 │   ├── models/                                                       Datenmodelle und reine Regeln
 │   ├── network/                                                      REST-Client, WebSocket und Erkennung
 │   ├── state/                                                        der Zustand, den jede Ansicht beobachtet
@@ -162,7 +162,6 @@ HYDRA-UMC-DSI/
 │   ├── util/                                                         Hilfsfunktionen ohne eigenen Bildschirm
 │   └── ui/                                                           Ansichten und Widgets
 ├── kiosk/                                                            Kiosk-Unit und ihr Installationsskript
-├── tool/                                                             Versionswerkzeug
 ├── linux/                                                            GTK-Desktop-Runner - das ECHTE Ziel, festes 1280x720-Fenster
 ├── windows/                                                          Windows-Desktop-Runner - nur Verifikation auf der Entwicklungsmaschine
 ├── tools/                                                            Projektwerkzeuge und CI-Prüfungen

@@ -132,7 +132,7 @@ CI は `HYDRA_UMC_CI=1 python tools/ci_validate.py` を実行し、マニフェ�
 flutter pub get
 flutter analyze                  # 静的解析——コンパイラ不要
 flutter test                     # ウィジェットテスト
-dart run tool/bump_version.dart  # バージョンを加算、build.sh/build.bat/build_linux.sh が行うのと同じ
+python tools/hydra_project_tool.py bump  # バージョンを加算（ビルドでは決して行わない）
 flutter build windows            # 開発機でのスモークテスト——build/windows/x64/runner/Release/hydra_umc_dsi.exe を生成
 flutter build linux              # 実際のターゲット——実際の Linux マシン上で実行する必要があります。build/linux/*/release/bundle/ を生成
 flutter run -d windows           # または実際の Linux マシン上で -d linux、ライブなデスクトップシミュレーション開発ループ用
@@ -153,7 +153,7 @@ flutter run -d windows           # または実際の Linux マシン上で -d l
 HYDRA-UMC-DSI/
 ├── lib/                                                              ソースコード
 │   ├── main.dart                                                     アプリのエントリポイント、ChangeNotifierProvider + ログインゲート、固定ダークテーマ
-│   ├── app_version.dart                                              生成物——tool/bump_version.dart によって再生成される、手動編集禁止
+│   ├── app_version.dart                                              生成物——bump_manifest_version.py によって再生成される、手動編集禁止
 │   ├── models/                                                       データモデルと純粋なルール
 │   ├── network/                                                      REST クライアント、WebSocket、探索
 │   ├── state/                                                        すべての画面が監視する状態
@@ -162,7 +162,6 @@ HYDRA-UMC-DSI/
 │   ├── util/                                                         専用画面を持たない補助機能
 │   └── ui/                                                           画面とウィジェット
 ├── kiosk/                                                            キオスクのユニットとインストーラー
-├── tool/                                                             バージョン用ツール
 ├── linux/                                                            GTK デスクトップランナー——実際のターゲット、固定 1280x720 ウィンドウ
 ├── windows/                                                          Windows デスクトップランナー——開発機での検証専用
 ├── tools/                                                            プロジェクトのツールと CI の検査

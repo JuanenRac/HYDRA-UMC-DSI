@@ -132,7 +132,7 @@ Les 3 scripts de compilation (`build.sh`/`build.bat`/`build_linux.sh`) ne change
 flutter pub get
 flutter analyze                  # analyse statique - aucun compilateur nécessaire
 flutter test                     # tests de widgets
-dart run tool/bump_version.dart  # incrémente la version, comme le font build.sh/build.bat/build_linux.sh
+python tools/hydra_project_tool.py bump  # incrémente la version (un build ne le fait jamais)
 flutter build windows            # test de fumée sur machine de développement - produit build/windows/x64/runner/Release/hydra_umc_dsi.exe
 flutter build linux              # la cible RÉELLE - doit s'exécuter sur une vraie machine Linux, produit build/linux/*/release/bundle/
 flutter run -d windows           # ou -d linux sur une vraie machine Linux, pour une boucle de développement en direct en simulation bureau
@@ -153,7 +153,7 @@ flutter run -d windows           # ou -d linux sur une vraie machine Linux, pour
 HYDRA-UMC-DSI/
 ├── lib/                                                              code source
 │   ├── main.dart                                                     Point d'entrée de l'app, ChangeNotifierProvider + porte de connexion, thème sombre fixe
-│   ├── app_version.dart                                              GÉNÉRÉ - régénéré par tool/bump_version.dart, à ne pas modifier à la main
+│   ├── app_version.dart                                              GÉNÉRÉ - régénéré par bump_manifest_version.py, à ne pas modifier à la main
 │   ├── models/                                                       modèles de données et règles pures
 │   ├── network/                                                      client REST, WebSocket et découverte
 │   ├── state/                                                        l'état que chaque écran écoute
@@ -162,7 +162,6 @@ HYDRA-UMC-DSI/
 │   ├── util/                                                         Utilitaires sans écran propre
 │   └── ui/                                                           écrans et widgets
 ├── kiosk/                                                            unité kiosque et son installateur
-├── tool/                                                             outil de versions
 ├── linux/                                                            Runner bureau GTK - la cible RÉELLE, fenêtre fixe 1280x720
 ├── windows/                                                          Runner bureau Windows - vérification sur machine de développement uniquement
 ├── tools/                                                            outils du projet et vérifications de la CI

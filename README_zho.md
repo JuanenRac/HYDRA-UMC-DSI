@@ -132,7 +132,7 @@ CI 运行 `HYDRA_UMC_CI=1 python tools/ci_validate.py`，检查清单、文档�
 flutter pub get
 flutter analyze                  # 静态分析——无需编译器
 flutter test                     # 组件测试
-dart run tool/bump_version.dart  # 递增版本号，与 build.sh/build.bat/build_linux.sh 所做的相同
+python tools/hydra_project_tool.py bump  # 递增版本号（构建从不这样做）
 flutter build windows            # 开发机冒烟测试——生成 build/windows/x64/runner/Release/hydra_umc_dsi.exe
 flutter build linux              # 真正的目标平台——必须在真实的 Linux 机器上运行，生成 build/linux/*/release/bundle/
 flutter run -d windows           # 或在真实 Linux 机器上使用 -d linux，用于实时桌面模拟开发循环
@@ -153,7 +153,7 @@ flutter run -d windows           # 或在真实 Linux 机器上使用 -d linux�
 HYDRA-UMC-DSI/
 ├── lib/                                                              源代码
 │   ├── main.dart                                                     应用入口点，ChangeNotifierProvider + 登录门禁，固定深色主题
-│   ├── app_version.dart                                              生成文件——由 tool/bump_version.dart 重新生成，请勿手动编辑
+│   ├── app_version.dart                                              生成文件——由 bump_manifest_version.py 重新生成，请勿手动编辑
 │   ├── models/                                                       数据模型和纯规则
 │   ├── network/                                                      REST 客户端、WebSocket 和发现
 │   ├── state/                                                        每个界面监听的状态
@@ -162,7 +162,6 @@ HYDRA-UMC-DSI/
 │   ├── util/                                                         没有独立界面的辅助模块
 │   └── ui/                                                           界面和控件
 ├── kiosk/                                                            展台单元及其安装脚本
-├── tool/                                                             版本工具
 ├── linux/                                                            GTK 桌面运行器——真正的目标平台，固定 1280x720 窗口
 ├── windows/                                                          Windows 桌面运行器——仅供开发机验证
 ├── tools/                                                            项目工具和 CI 检查

@@ -132,7 +132,7 @@ Los 3 scripts de compilación (`build.sh`/`build.bat`/`build_linux.sh`) no cambi
 flutter pub get
 flutter analyze                  # análisis estático - no necesita compilador
 flutter test                     # pruebas de widgets
-dart run tool/bump_version.dart  # incrementa la versión, igual que build.sh/build.bat/build_linux.sh
+python tools/hydra_project_tool.py bump  # sube la versión (compilar nunca lo hace)
 flutter build windows            # prueba de humo en la máquina de desarrollo - produce build/windows/x64/runner/Release/hydra_umc_dsi.exe
 flutter build linux              # el target REAL - debe ejecutarse en una máquina Linux real, produce build/linux/*/release/bundle/
 flutter run -d windows           # o -d linux en una máquina Linux real, para un ciclo de desarrollo en vivo con simulación de escritorio
@@ -153,7 +153,7 @@ flutter run -d windows           # o -d linux en una máquina Linux real, para u
 HYDRA-UMC-DSI/
 ├── lib/                                                              código fuente
 │   ├── main.dart                                                     Punto de entrada, ChangeNotifierProvider + puerta de login, tema oscuro fijo
-│   ├── app_version.dart                                              GENERADO - regenerado por tool/bump_version.dart, no editar a mano
+│   ├── app_version.dart                                              GENERADO - regenerado por bump_manifest_version.py, no editar a mano
 │   ├── models/                                                       modelos de datos y reglas puras
 │   ├── network/                                                      cliente REST, WebSocket y descubrimiento
 │   ├── state/                                                        el estado que escucha cada pantalla
@@ -162,7 +162,6 @@ HYDRA-UMC-DSI/
 │   ├── util/                                                         Utilidades sin pantalla propia
 │   └── ui/                                                           pantallas y widgets
 ├── kiosk/                                                            unidad de quiosco y su instalador
-├── tool/                                                             herramienta de versiones
 ├── linux/                                                            Runner de escritorio GTK - el target REAL, ventana fija 1280x720
 ├── windows/                                                          Runner de escritorio Windows - solo verificación en máquina de desarrollo
 ├── tools/                                                            herramientas del proyecto y comprobaciones del CI

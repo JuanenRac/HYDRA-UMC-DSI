@@ -132,7 +132,7 @@ Tutti e 3 gli script di compilazione (`build.sh`/`build.bat`/`build_linux.sh`) n
 flutter pub get
 flutter analyze                  # analisi statica - non serve un compilatore
 flutter test                     # test dei widget
-dart run tool/bump_version.dart  # incrementa la versione, come fanno build.sh/build.bat/build_linux.sh
+python tools/hydra_project_tool.py bump  # incrementa la versione (una build non lo fa mai)
 flutter build windows            # smoke test sulla macchina di sviluppo - produce build/windows/x64/runner/Release/hydra_umc_dsi.exe
 flutter build linux              # il target REALE - deve essere eseguito su una macchina Linux reale, produce build/linux/*/release/bundle/
 flutter run -d windows           # oppure -d linux su una macchina Linux reale, per un ciclo di sviluppo live in simulazione desktop
@@ -153,7 +153,7 @@ flutter run -d windows           # oppure -d linux su una macchina Linux reale, 
 HYDRA-UMC-DSI/
 ├── lib/                                                              codice sorgente
 │   ├── main.dart                                                     Entry point dell'app, ChangeNotifierProvider + gate di login, tema scuro fisso
-│   ├── app_version.dart                                              GENERATO - rigenerato da tool/bump_version.dart, non modificare a mano
+│   ├── app_version.dart                                              GENERATO - rigenerato da bump_manifest_version.py, non modificare a mano
 │   ├── models/                                                       modelli di dati e regole pure
 │   ├── network/                                                      client REST, WebSocket e individuazione
 │   ├── state/                                                        lo stato che ogni schermata ascolta
@@ -162,7 +162,6 @@ HYDRA-UMC-DSI/
 │   ├── util/                                                         Utilità senza schermata propria
 │   └── ui/                                                           schermate e widget
 ├── kiosk/                                                            unità kiosk e il suo installatore
-├── tool/                                                             strumento per le versioni
 ├── linux/                                                            Runner desktop GTK - il target REALE, finestra fissa 1280x720
 ├── windows/                                                          Runner desktop Windows - solo verifica sulla macchina di sviluppo
 ├── tools/                                                            strumenti del progetto e controlli della CI
