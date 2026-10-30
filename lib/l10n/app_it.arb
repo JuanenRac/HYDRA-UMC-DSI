@@ -227,5 +227,11 @@
   "securitySave": "Salva",
   "securityCancel": "Annulla",
   "securityOpen": "Impostazioni di sicurezza",
-  "securityNeedsHost": "Inserisci prima host e porta del server."
+  "securityNeedsHost": "Inserisci prima host e porta del server.",
+  "errRobotDisabled": "Il robot è in modalità sicura (disabilitato): il comando {command} non è stato applicato. Funziona solo STOP finché un amministratore non lo abilita.",
+  "@errRobotDisabled": {"placeholders": {"command": {"type": "String"}}},
+  "errEnableNotAllowed": "Il server non permette di abilitare un robot da un'app (l'opzione è disattivata). Un amministratore può attivarla nell'amministrazione del server.",
+  "errAdminRequired": "Solo un amministratore può abilitare un robot.",
+  "controlDisableHold": "Disabilita il robot - modalità sicura (tieni premuto)",
+  "controlEnableHold": "Modalità sicura - disabilitato. Tieni premuto per abilitare il robot"
 }

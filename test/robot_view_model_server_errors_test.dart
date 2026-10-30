@@ -212,10 +212,10 @@ void main() {
     expect(vm.selectedRobot!.isPlaying, isTrue, reason: 'the command went through, so it stays applied');
   });
 
-  test('enable and disable are not offered any more', () async {
+  test('a command the app does not know is not sent', () async {
     final (server, vm) = await _signedIn();
 
-    vm.sendCommand('disable');
+    vm.sendCommand('shutdown');
     await Future<void>.delayed(const Duration(milliseconds: 100));
 
     expect(server.commands, isEmpty);

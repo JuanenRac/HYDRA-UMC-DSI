@@ -227,5 +227,11 @@
   "securitySave": "Speichern",
   "securityCancel": "Abbrechen",
   "securityOpen": "Sicherheitseinstellungen",
-  "securityNeedsHost": "Geben Sie zuerst Host und Port des Servers ein."
+  "securityNeedsHost": "Geben Sie zuerst Host und Port des Servers ein.",
+  "errRobotDisabled": "Der Roboter ist im sicheren Modus (deaktiviert): Der Befehl {command} wurde nicht ausgeführt. Nur STOP funktioniert, bis ein Administrator ihn aktiviert.",
+  "@errRobotDisabled": {"placeholders": {"command": {"type": "String"}}},
+  "errEnableNotAllowed": "Der Server erlaubt es nicht, einen Roboter von einer App aus zu aktivieren (die Option ist aus). Ein Administrator kann sie in der Server-Verwaltung einschalten.",
+  "errAdminRequired": "Nur ein Administrator kann einen Roboter aktivieren.",
+  "controlDisableHold": "Roboter deaktivieren - sicherer Modus (halten)",
+  "controlEnableHold": "Sicherer Modus - deaktiviert. Halten, um den Roboter zu aktivieren"
 }

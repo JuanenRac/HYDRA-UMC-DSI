@@ -905,6 +905,9 @@ class RobotViewModel extends ChangeNotifier {
     if (e is HydraApiException) {
       if (e.isRevisionMismatch) return HydraError(HydraErrorKind.revisionChanged, {'command': command});
       if (e.isJogNotArmed) return const HydraError(HydraErrorKind.jogNotArmed);
+      if (e.isRobotDisabled) return HydraError(HydraErrorKind.robotDisabled, {'command': command});
+      if (e.isEnableNotAllowed) return const HydraError(HydraErrorKind.enableNotAllowed);
+      if (e.isAdminRequired) return const HydraError(HydraErrorKind.adminRequired);
       if (e.isOtherController) return HydraError(HydraErrorKind.claimOtherController, {'detail': e.serverMessage ?? ''});
       if (e.isControllerIdRequired) return HydraError(HydraErrorKind.claimControllerRequired, {'detail': e.serverMessage ?? ''});
       if (e.isReservedByAnother) {
@@ -934,9 +937,17 @@ class RobotViewModel extends ChangeNotifier {
         _sendAtomicCommand(command, params: {'paused': paused}, propagateToCombined: true, localMutate: (r) => r.setPaused(paused));
       case 'stop':
         _sendAtomicCommand(command, propagateToCombined: true, localMutate: (r) => r.stop());
+      // Safe mode of the selected robot (only this robot, never its combined group). `disable` stops it and the server
+      // then refuses everything but STOP; `enable` brings it back, is off by default on the server and only for an
+      // administrator, so the server may answer 403.
+      case 'disable':
+        _sendAtomicCommand(command, localMutate: (r) {
+          r.stop();
+          r.setEnabled(false);
+        });
+      case 'enable':
+        _sendAtomicCommand(command, localMutate: (r) => r.setEnabled(true));
       default:
-        // (There is no "enable"/"disable": the server has no such command and
-        // answers 400.)
         lastError = HydraError(HydraErrorKind.unknownCommand, {'command': command});
         notifyListeners();
     }

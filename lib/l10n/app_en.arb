@@ -247,5 +247,11 @@
   "securitySave": "Save",
   "securityCancel": "Cancel",
   "securityOpen": "Security settings",
-  "securityNeedsHost": "Enter the host and port of the server first."
+  "securityNeedsHost": "Enter the host and port of the server first.",
+  "errRobotDisabled": "The robot is in safe mode (disabled): the {command} command was not applied. Only STOP works until an administrator enables it.",
+  "@errRobotDisabled": {"placeholders": {"command": {"type": "String"}}},
+  "errEnableNotAllowed": "The server does not allow enabling a robot from an app (the option is off). An administrator can turn it on in Server Admin.",
+  "errAdminRequired": "Only an administrator can enable a robot.",
+  "controlDisableHold": "Disable the robot - safe mode (hold)",
+  "controlEnableHold": "Safe mode - disabled. Hold to enable the robot"
 }

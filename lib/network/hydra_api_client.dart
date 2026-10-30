@@ -50,7 +50,7 @@ class HydraApiException implements Exception {
       statusCode == 401 || (statusCode == 403 && (code == 'TOKEN_EXPIRED' || code == 'TOKEN_INVALID'));
 
   /// A 403 about the account's role, not about the session (a jog that is not armed is its own case).
-  bool get isPermissionDenied => statusCode == 403 && !isSessionProblem && !isJogNotArmed;
+  bool get isPermissionDenied => statusCode == 403 && !isSessionProblem && !isJogNotArmed && !isEnableNotAllowed && !isAdminRequired;
 
   /// The robot is reserved and the server refused this client (409): another
   /// account, another controller, or no controller id.
@@ -70,6 +70,15 @@ class HydraApiException implements Exception {
   /// 403 `jog-not-armed`: the administrator requires the jog to be armed first
   /// and it is not.
   bool get isJogNotArmed => statusCode == 403 && code == 'jog-not-armed';
+
+  /// 423 `robot-disabled`: the robot is in safe mode; only STOP, disable and enable work on it.
+  bool get isRobotDisabled => statusCode == 423 || code == 'robot-disabled';
+
+  /// 403 `enable-not-allowed`: the server option that lets a client enable a robot is off (its default).
+  bool get isEnableNotAllowed => statusCode == 403 && code == 'enable-not-allowed';
+
+  /// 403 `admin-required`: only an administrator may enable a robot.
+  bool get isAdminRequired => statusCode == 403 && code == 'admin-required';
 
   /// The server refused the command itself (unknown command, a value it cannot take).
   bool get isRejectedCommand => statusCode == 400;

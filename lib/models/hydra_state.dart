@@ -22,6 +22,15 @@ class RobotView {
   dynamic get id => raw['id'];
   String get name => raw['name'] is String ? raw['name'] as String : 'Robot $id';
   bool get online => raw['online'] == true;
+
+  /// False while the robot is in safe mode (the server refuses everything but STOP, disable and enable); a robot that
+  /// says nothing is enabled.
+  bool get isEnabled => raw['enabled'] != false;
+
+  void setEnabled(bool enabled) {
+    raw['enabled'] = enabled;
+  }
+
   String get model => raw['model'] is String ? raw['model'] as String : 'Generic (6-DOF)';
   String get role => raw['role'] is String ? raw['role'] as String : 'Idle';
   String get tool => raw['tool'] is String ? raw['tool'] as String : 'None';

@@ -227,5 +227,11 @@
   "securitySave": "保存",
   "securityCancel": "取消",
   "securityOpen": "安全设置",
-  "securityNeedsHost": "请先输入服务器的主机和端口。"
+  "securityNeedsHost": "请先输入服务器的主机和端口。",
+  "errRobotDisabled": "机器人处于安全模式（已禁用），{command} 命令未执行。在管理员启用之前，只有 STOP 可用。",
+  "@errRobotDisabled": {"placeholders": {"command": {"type": "String"}}},
+  "errEnableNotAllowed": "服务器不允许从应用启用机器人（该选项已关闭）。管理员可以在服务器管理中打开它。",
+  "errAdminRequired": "只有管理员才能启用机器人。",
+  "controlDisableHold": "禁用机器人 - 安全模式（长按）",
+  "controlEnableHold": "安全模式 - 已禁用。长按以启用机器人"
 }

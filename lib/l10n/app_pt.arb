@@ -227,5 +227,11 @@
   "securitySave": "Guardar",
   "securityCancel": "Cancelar",
   "securityOpen": "Definições de segurança",
-  "securityNeedsHost": "Indique primeiro o anfitrião e a porta do servidor."
+  "securityNeedsHost": "Indique primeiro o anfitrião e a porta do servidor.",
+  "errRobotDisabled": "O robô está em modo seguro (desativado): o comando {command} não foi aplicado. Só o STOP funciona até um administrador o ativar.",
+  "@errRobotDisabled": {"placeholders": {"command": {"type": "String"}}},
+  "errEnableNotAllowed": "O servidor não permite ativar um robô a partir de uma app (a opção está desligada). Um administrador pode ligá-la na administração do servidor.",
+  "errAdminRequired": "Só um administrador pode ativar um robô.",
+  "controlDisableHold": "Desativar o robô - modo seguro (manter premido)",
+  "controlEnableHold": "Modo seguro - desativado. Manter premido para ativar o robô"
 }

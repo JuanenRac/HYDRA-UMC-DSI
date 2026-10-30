@@ -58,6 +58,11 @@ enum HydraErrorKind {
   // No secure connection could be made (certificate not trusted, or the server
   // does not speak TLS): the person is pointed to the security settings.
   tlsFailed,
+  // Safe mode of a robot: it is disabled (every command but STOP is refused), the server option that allows enabling is
+  // off, or the account is not an administrator.
+  robotDisabled,
+  enableNotAllowed,
+  adminRequired,
 }
 
 class HydraError {
@@ -111,6 +116,12 @@ class HydraError {
         return l10n.errRevisionChanged(params['command'] ?? '');
       case HydraErrorKind.tlsFailed:
         return l10n.errTlsFailed;
+      case HydraErrorKind.robotDisabled:
+        return l10n.errRobotDisabled(params['command'] ?? '');
+      case HydraErrorKind.enableNotAllowed:
+        return l10n.errEnableNotAllowed;
+      case HydraErrorKind.adminRequired:
+        return l10n.errAdminRequired;
     }
   }
 }

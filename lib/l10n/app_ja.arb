@@ -227,5 +227,11 @@
   "securitySave": "保存",
   "securityCancel": "キャンセル",
   "securityOpen": "セキュリティ設定",
-  "securityNeedsHost": "先にサーバーのホストとポートを入力してください。"
+  "securityNeedsHost": "先にサーバーのホストとポートを入力してください。",
+  "errRobotDisabled": "ロボットはセーフモード(無効)のため、{command} コマンドは適用されませんでした。管理者が有効にするまで STOP だけが使えます。",
+  "@errRobotDisabled": {"placeholders": {"command": {"type": "String"}}},
+  "errEnableNotAllowed": "このサーバーはアプリからロボットを有効にすることを許可していません(オプションがオフです)。管理者はサーバー管理でオンにできます。",
+  "errAdminRequired": "ロボットを有効にできるのは管理者だけです。",
+  "controlDisableHold": "ロボットを無効にする - セーフモード(長押し)",
+  "controlEnableHold": "セーフモード - 無効。長押しでロボットを有効にします"
 }

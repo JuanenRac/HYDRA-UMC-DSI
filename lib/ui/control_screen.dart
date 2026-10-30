@@ -313,6 +313,18 @@ class _ControlScreenState extends State<ControlScreen> {
           ),
           const SizedBox(width: 40),
           _LongPressButton(
+            color: robot?.isEnabled == false ? const Color(0xFF047857) : const Color(0xFF475569),
+            icon: robot?.isEnabled == false ? Icons.power_settings_new : Icons.power_off,
+            tooltip: robot?.isEnabled == false ? l10n.controlEnableHold : l10n.controlDisableHold,
+            // Anyone signed in can disable a robot (like a stop); only an administrator is offered the enable.
+            enabled: robot != null && (robot.isEnabled ? true : vm.isAdmin),
+            onConfirm: () {
+              HapticFeedback.mediumImpact();
+              vm.sendCommand(robot?.isEnabled == false ? 'enable' : 'disable');
+            },
+          ),
+          const SizedBox(width: 20),
+          _LongPressButton(
             color: const Color(0xFF991B1B),
             icon: Icons.stop,
             tooltip: isCombined ? l10n.controlStopAllHold : l10n.controlStopHold,
