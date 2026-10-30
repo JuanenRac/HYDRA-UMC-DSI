@@ -4,6 +4,8 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+## [0.2.8] - Safe mode of a robot, HTTPS first with a certificate you can trust, the machine the panel is mounted on at sign-in and the version moved by the shared project tool
+
 - **Safe mode of a robot:** the control bar has a button to disable the selected robot (hold to confirm, like STOP): the robot stops, its valves and pumps go off and the server refuses everything but STOP. A disabled robot shows the button in green; an administrator can hold it to enable the robot again. The server keeps enabling off by default, so the refusal says so in its own words (enabling not allowed, administrator required), and a command sent to a disabled robot says the robot is in safe mode, in the eight languages.
 
 - **The version is moved by the shared project tool alone:** `python tools/hydra_project_tool.py bump` raises the build number and rewrites `lib/app_version.dart` itself, and the Dart script `tool/bump_version.dart` is gone. The version name keeps three components and the build number (the part after `+`) a plain counter, in the form Flutter accepts.

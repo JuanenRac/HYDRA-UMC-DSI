@@ -15,12 +15,12 @@ GPL-3.0-or-later - see LICENSE
 ### Compute Module 5 の DSI 画面向けネイティブのタッチ UI
 
 <p align="center">
-  <img src="https://img.shields.io/badge/License-GPL%208.0--or--later-blue.svg" alt="GPL 3.0 or later">
-  <img src="https://img.shields.io/badge/Framework-Flutter%208.x-02569B.svg" alt="Framework">
+  <img src="https://img.shields.io/badge/License-GPL%203.0--or--later-blue.svg" alt="GPL 3.0 or later">
+  <img src="https://img.shields.io/badge/Framework-Flutter%203.x-02569B.svg" alt="Framework">
   <img src="https://img.shields.io/badge/Language-Dart-0175C2.svg" alt="Language">
   <img src="https://img.shields.io/badge/Platform-Linux%20%7C%20CM5-E34F26.svg" alt="Platform">
   <img src="https://img.shields.io/badge/Tests-208%20passing-2ea44f.svg" alt="Tests">
-  <img src="https://img.shields.io/badge/Version-0.2.7-0f6cbd.svg" alt="Version">
+  <img src="https://img.shields.io/badge/Version-0.2.8-0f6cbd.svg" alt="Version">
   <img src="https://img.shields.io/badge/Maturity-functional-0F6CBD.svg" alt="Maturity">
 </p>
 
@@ -42,7 +42,7 @@ Compute Module 5 上の HYDRA-UMC 自身の 5"/7" DSI タッチスクリーン�
 
 | | |
 |---|---|
-| バージョン | `0.2.7` |
+| バージョン | `0.2.8` |
 | 成熟度 | 機能する |
 | テスト | 208 (`flutter test`) |
 | 技術 | Flutter 3.x / Dart |
@@ -83,8 +83,6 @@ Compute Module 5 上の HYDRA-UMC 自身の 5"/7" DSI タッチスクリーン�
 - **8言語対応UI**（`lib/l10n/`、標準の `flutter gen-l10n` パイプライン）—— 英語・スペイン語・フランス語・ドイツ語・イタリア語・日本語・中国語・ポルトガル語に対応し、このエコシステムの他のクライアントと同じです。`設定 > 言語` に保存される上書き設定はデフォルトでOSのロケールに従います。`RobotViewModel.lastError` は整形済みの英語テキストではなく型付きの `HydraError` になっているため、ビジネスロジック側のエラーメッセージも画面の静的なテキストと同様に正しくローカライズされます。
 
 **状態：雛形 + 全 6 のカタログ画面が実装され、実際の REMOTE_API.md 契約に接続済み。** `flutter analyze` はクリーン、`flutter build windows` と `flutter build linux`(WSL2 経由)はどちらも動作するバイナリを生成し、`flutter test` はパスします——何が検証済みで何がまだかの正確な内容(この WSL2 検証と実際の CM5 実機との間に残るギャップも含む)は、下記「ビルド」を参照してください。
-
-**接続のセキュリティ：** パネルはまず HTTPS で接続します。平文 HTTP は、このマシン自身（既定は `127.0.0.1`）に対してのみ、またはサインイン画面と設定の「セキュリティ」ウィンドウで許可した場合にローカルネットワーク上のサーバーに対して（その外側は、それも許可した場合のみ）使われます。自己署名証明書のサーバーは、そこで読み取って確認した SHA-256 フィンガープリント、または指定した CA で信頼されます。
 
 ## 🧩 HYDRA-UMC での役割
 
@@ -132,7 +130,7 @@ CI は `HYDRA_UMC_CI=1 python tools/ci_validate.py` を実行し、マニフェ�
 flutter pub get
 flutter analyze                  # 静的解析——コンパイラ不要
 flutter test                     # ウィジェットテスト
-python tools/hydra_project_tool.py bump  # バージョンを加算（ビルドでは決して行わない）
+dart run tool/bump_version.dart  # バージョンを加算、build.sh/build.bat/build_linux.sh が行うのと同じ
 flutter build windows            # 開発機でのスモークテスト——build/windows/x64/runner/Release/hydra_umc_dsi.exe を生成
 flutter build linux              # 実際のターゲット——実際の Linux マシン上で実行する必要があります。build/linux/*/release/bundle/ を生成
 flutter run -d windows           # または実際の Linux マシン上で -d linux、ライブなデスクトップシミュレーション開発ループ用

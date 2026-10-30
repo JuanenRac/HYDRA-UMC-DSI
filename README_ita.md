@@ -15,12 +15,12 @@ GPL-3.0-or-later - see LICENSE
 ### Un'interfaccia touch nativa per lo schermo DSI del Compute Module 5
 
 <p align="center">
-  <img src="https://img.shields.io/badge/License-GPL%208.0--or--later-blue.svg" alt="GPL 3.0 or later">
-  <img src="https://img.shields.io/badge/Framework-Flutter%208.x-02569B.svg" alt="Framework">
+  <img src="https://img.shields.io/badge/License-GPL%203.0--or--later-blue.svg" alt="GPL 3.0 or later">
+  <img src="https://img.shields.io/badge/Framework-Flutter%203.x-02569B.svg" alt="Framework">
   <img src="https://img.shields.io/badge/Language-Dart-0175C2.svg" alt="Language">
   <img src="https://img.shields.io/badge/Platform-Linux%20%7C%20CM5-E34F26.svg" alt="Platform">
   <img src="https://img.shields.io/badge/Tests-208%20passing-2ea44f.svg" alt="Tests">
-  <img src="https://img.shields.io/badge/Version-0.2.7-0f6cbd.svg" alt="Version">
+  <img src="https://img.shields.io/badge/Version-0.2.8-0f6cbd.svg" alt="Version">
   <img src="https://img.shields.io/badge/Maturity-functional-0F6CBD.svg" alt="Maturity">
 </p>
 
@@ -42,7 +42,7 @@ Un'interfaccia touch nativa in Flutter (Dart, con target reale desktop Linux) pe
 
 | | |
 |---|---|
-| Versione | `0.2.7` |
+| Versione | `0.2.8` |
 | Maturità | Funzionale |
 | Test | 208 (`flutter test`) |
 | Tecnologia | Flutter 3.x / Dart |
@@ -83,8 +83,6 @@ Ogni riga è una parte di questo repository e il semaforo dice a che punto è og
 - **UI in 8 lingue** (`lib/l10n/`, pipeline standard `flutter gen-l10n`) - inglese, spagnolo, francese, tedesco, italiano, giapponese, cinese e portoghese, come il resto dei client di questo ecosistema. Un'impostazione persistente in `Impostazioni > Lingua` usa come predefinita la lingua di sistema; `RobotViewModel.lastError` è un `HydraError` tipizzato invece di testo inglese già formattato, quindi anche i messaggi di errore della logica di business vengono tradotti correttamente, non solo il testo statico delle schermate.
 
 **Stato: scaffold + tutte le 6 schermate del catalogo implementate e collegate al contratto reale REMOTE_API.md.** `flutter analyze` pulito, sia `flutter build windows` che `flutter build linux` (via WSL2) producono un binario funzionante, `flutter test` passa - vedere "Compilazione" più sotto per cosa è stato verificato e cosa no, incluso il divario rimasto tra questa verifica su WSL2 e il vero hardware della CM5.
-
-**Sicurezza della connessione:** il pannello si connette prima in HTTPS. L'HTTP in chiaro è usato solo verso questa stessa macchina (predefinito `127.0.0.1`) o, se consentito nella finestra Sicurezza dell'accesso e delle Impostazioni, verso un server della rete locale (fuori da essa solo se anche questo è consentito). Un server con certificato autofirmato è considerato attendibile tramite l'impronta SHA-256 letta da esso e confermata lì, o tramite una CA fornita.
 
 ## 🧩 Ruolo in HYDRA-UMC
 
@@ -132,7 +130,7 @@ Tutti e 3 gli script di compilazione (`build.sh`/`build.bat`/`build_linux.sh`) n
 flutter pub get
 flutter analyze                  # analisi statica - non serve un compilatore
 flutter test                     # test dei widget
-python tools/hydra_project_tool.py bump  # incrementa la versione (una build non lo fa mai)
+dart run tool/bump_version.dart  # incrementa la versione, come fanno build.sh/build.bat/build_linux.sh
 flutter build windows            # smoke test sulla macchina di sviluppo - produce build/windows/x64/runner/Release/hydra_umc_dsi.exe
 flutter build linux              # il target REALE - deve essere eseguito su una macchina Linux reale, produce build/linux/*/release/bundle/
 flutter run -d windows           # oppure -d linux su una macchina Linux reale, per un ciclo di sviluppo live in simulazione desktop

@@ -15,12 +15,12 @@ GPL-3.0-or-later - see LICENSE
 ### 面向 Compute Module 5 DSI 屏幕的原生触控界面
 
 <p align="center">
-  <img src="https://img.shields.io/badge/License-GPL%208.0--or--later-blue.svg" alt="GPL 3.0 or later">
-  <img src="https://img.shields.io/badge/Framework-Flutter%208.x-02569B.svg" alt="Framework">
+  <img src="https://img.shields.io/badge/License-GPL%203.0--or--later-blue.svg" alt="GPL 3.0 or later">
+  <img src="https://img.shields.io/badge/Framework-Flutter%203.x-02569B.svg" alt="Framework">
   <img src="https://img.shields.io/badge/Language-Dart-0175C2.svg" alt="Language">
   <img src="https://img.shields.io/badge/Platform-Linux%20%7C%20CM5-E34F26.svg" alt="Platform">
   <img src="https://img.shields.io/badge/Tests-208%20passing-2ea44f.svg" alt="Tests">
-  <img src="https://img.shields.io/badge/Version-0.2.7-0f6cbd.svg" alt="Version">
+  <img src="https://img.shields.io/badge/Version-0.2.8-0f6cbd.svg" alt="Version">
   <img src="https://img.shields.io/badge/Maturity-functional-0F6CBD.svg" alt="Maturity">
 </p>
 
@@ -42,7 +42,7 @@ GPL-3.0-or-later - see LICENSE
 
 | | |
 |---|---|
-| 版本 | `0.2.7` |
+| 版本 | `0.2.8` |
 | 成熟度 | 可用 |
 | 测试 | 208 (`flutter test`) |
 | 技术栈 | Flutter 3.x / Dart |
@@ -83,8 +83,6 @@ GPL-3.0-or-later - see LICENSE
 - **8 语言界面**（`lib/l10n/`，标准的 `flutter gen-l10n` 流程）—— 英语、西班牙语、法语、德语、意大利语、日语、中文和葡萄牙语，与本生态系统的其他客户端保持一致。`设置 > 语言` 中的持久化设置默认跟随系统语言；`RobotViewModel.lastError` 现在是带类型的 `HydraError`，而不是预先格式化好的英文文本，因此业务逻辑层的错误提示也能正确本地化，而不只是界面上的静态文本。
 
 **状态:雏形 + 全部 6 个目录界面均已实现并连接到真实的 REMOTE_API.md 契约。** `flutter analyze` 干净通过,`flutter build windows` 与 `flutter build linux`(通过 WSL2)都能生成可运行的二进制文件,`flutter test` 通过——具体哪些已经验证、哪些还没有,包括这次 WSL2 验证与真实 CM5 硬件之间仍存在的差距,详见下文“构建”。
-
-**连接安全：** 面板先通过 HTTPS 连接。明文 HTTP 只用于本机自身（默认 `127.0.0.1`），或在登录界面和设置的“安全”窗口中允许后用于本地网络中的服务器（在本地网络之外还需另外允许）。使用自签名证书的服务器，通过从它读取并在那里确认的 SHA-256 指纹，或所给的 CA 来信任。
 
 ## 🧩 在 HYDRA-UMC 中的角色
 
@@ -132,7 +130,7 @@ CI 运行 `HYDRA_UMC_CI=1 python tools/ci_validate.py`，检查清单、文档�
 flutter pub get
 flutter analyze                  # 静态分析——无需编译器
 flutter test                     # 组件测试
-python tools/hydra_project_tool.py bump  # 递增版本号（构建从不这样做）
+dart run tool/bump_version.dart  # 递增版本号，与 build.sh/build.bat/build_linux.sh 所做的相同
 flutter build windows            # 开发机冒烟测试——生成 build/windows/x64/runner/Release/hydra_umc_dsi.exe
 flutter build linux              # 真正的目标平台——必须在真实的 Linux 机器上运行，生成 build/linux/*/release/bundle/
 flutter run -d windows           # 或在真实 Linux 机器上使用 -d linux，用于实时桌面模拟开发循环

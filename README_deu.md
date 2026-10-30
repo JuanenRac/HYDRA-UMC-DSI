@@ -15,12 +15,12 @@ GPL-3.0-or-later - see LICENSE
 ### Eine native Touch-Oberfläche für den DSI-Bildschirm des Compute Module 5
 
 <p align="center">
-  <img src="https://img.shields.io/badge/License-GPL%208.0--or--later-blue.svg" alt="GPL 3.0 or later">
-  <img src="https://img.shields.io/badge/Framework-Flutter%208.x-02569B.svg" alt="Framework">
+  <img src="https://img.shields.io/badge/License-GPL%203.0--or--later-blue.svg" alt="GPL 3.0 or later">
+  <img src="https://img.shields.io/badge/Framework-Flutter%203.x-02569B.svg" alt="Framework">
   <img src="https://img.shields.io/badge/Language-Dart-0175C2.svg" alt="Language">
   <img src="https://img.shields.io/badge/Platform-Linux%20%7C%20CM5-E34F26.svg" alt="Platform">
   <img src="https://img.shields.io/badge/Tests-208%20passing-2ea44f.svg" alt="Tests">
-  <img src="https://img.shields.io/badge/Version-0.2.7-0f6cbd.svg" alt="Version">
+  <img src="https://img.shields.io/badge/Version-0.2.8-0f6cbd.svg" alt="Version">
   <img src="https://img.shields.io/badge/Maturity-functional-0F6CBD.svg" alt="Maturity">
 </p>
 
@@ -42,7 +42,7 @@ Eine native Flutter-Touch-UI (Dart, mit echtem Linux-Desktop-Ziel) für HYDRA-UM
 
 | | |
 |---|---|
-| Version | `0.2.7` |
+| Version | `0.2.8` |
 | Reifegrad | Funktionsfähig |
 | Tests | 208 (`flutter test`) |
 | Technik | Flutter 3.x / Dart |
@@ -83,8 +83,6 @@ Jede Zeile ist ein Teil dieses Repositorys, und die Ampel sagt, wie weit er heut
 - **UI in 8 Sprachen** (`lib/l10n/`, Standard-`flutter gen-l10n`-Pipeline) - Englisch, Spanisch, Französisch, Deutsch, Italienisch, Japanisch, Chinesisch und Portugiesisch, wie bei den übrigen Clients dieses Ökosystems. Eine gespeicherte Einstellung unter `Einstellungen > Sprache` verwendet standardmäßig die Systemsprache; `RobotViewModel.lastError` ist ein typisierter `HydraError` statt vorformatiertem englischem Text, sodass auch die Fehlermeldungen der Geschäftslogik korrekt lokalisiert werden, nicht nur der statische Bildschirmtext.
 
 **Status: Grundgerüst + alle 6 Katalogbildschirme implementiert und an den echten REMOTE_API.md-Vertrag angebunden.** `flutter analyze` sauber, `flutter build windows` und `flutter build linux` (über WSL2) erzeugen beide eine lauffähige Binärdatei, `flutter test` besteht - siehe "Build" weiter unten für genau das, was bereits verifiziert ist und was nicht, einschließlich der verbleibenden Lücke zwischen dieser WSL2-Verifikation und der echten CM5-Hardware.
-
-**Verbindungssicherheit:** Das Panel verbindet sich zuerst per HTTPS. Unverschlüsseltes HTTP wird nur zu diesem Rechner selbst (Standard `127.0.0.1`) verwendet oder, wenn es im Fenster Sicherheit der Anmeldung und der Einstellungen erlaubt ist, zu einem Server im lokalen Netzwerk (außerhalb nur, wenn auch das erlaubt ist). Einem Server mit selbst signiertem Zertifikat wird über den SHA-256-Fingerabdruck vertraut, der von ihm gelesen und dort bestätigt wird, oder über eine angegebene CA.
 
 ## 🧩 Rolle in HYDRA-UMC
 
@@ -132,7 +130,7 @@ Alle 3 Build-Skripte (`build.sh`/`build.bat`/`build_linux.sh`) ändern die Versi
 flutter pub get
 flutter analyze                  # statische Analyse - kein Compiler nötig
 flutter test                     # Widget-Tests
-python tools/hydra_project_tool.py bump  # erhöht die Version (ein Build tut das nie)
+dart run tool/bump_version.dart  # erhöht die Version, genau wie build.sh/build.bat/build_linux.sh
 flutter build windows            # Smoke-Test auf der Entwicklungsmaschine - erzeugt build/windows/x64/runner/Release/hydra_umc_dsi.exe
 flutter build linux              # das ECHTE Ziel - muss auf einer echten Linux-Maschine ausgeführt werden, erzeugt build/linux/*/release/bundle/
 flutter run -d windows           # oder -d linux auf einer echten Linux-Maschine, für eine Live-Entwicklungsschleife im Desktop-Simulationsmodus
