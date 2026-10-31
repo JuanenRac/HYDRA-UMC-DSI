@@ -78,7 +78,7 @@ Each line is one part of this repository and the light says how far it is today.
 - **Camera** (`lib/ui/camera_screen.dart`, `lib/ui/widgets/mjpeg_view.dart`) - the same hand-rolled, dependency-free MJPEG stream parser as HYDRA-UMC-IOS-CONTROL (no WebView, no platform-specific code - it just works on Linux desktop unmodified), a clear "Camera Disabled" state, and a switch to turn a robot's vision system on/off directly from the server.
 - **3D View** (`lib/ui/three_d_screen.dart`) - **not** a WebView embed of STUDIO's real Three.js scene, unlike the iOS/Android apps - `webview_flutter` has no Linux desktop implementation at all, and a full browser engine is a heavier runtime load than this low-power embedded panel needs. Instead: a small native isometric X/Y/Z position indicator (`CustomPainter`, no 3D engine), with an on-screen note pointing to the real 3D scene on this board's own HDMI-connected monitor. See `docs/ARCHITECTURE.md` section 4 for the full reasoning.
 - **System Metrics** (`lib/ui/metrics_screen.dart`) - its own dedicated tab (not folded into the Dashboard the way iOS/Android do it) with CPU/memory/temperature/uptime tiles from `GET /api/system/metrics`, plus hostname/controller-count/robot-count/app-version from `GET /api/hydra-info`.
-- **Settings** (`lib/ui/settings_screen.dart`) - connection info, server identity, sign out, and this app's own version (see [Versioning](#-versioning) below).
+- **Settings** (`lib/ui/settings_screen.dart`) - connection info, server identity, sign out, and this app's own version (see [Versioning](#versioning) below).
 - **Kiosk autostart** (`kiosk/hydra-umc-dsi.service`, `kiosk/install_kiosk.sh`) - systemd unit launching the app fullscreen on `tty1` via `cage`, `Restart=always`. See "Running on the real CM5" below.
 - **8-language UI** (`lib/l10n/`, standard `flutter gen-l10n` pipeline) - English, Spanish, French, German, Italian, Japanese, Chinese and Portuguese, matching every other client in this ecosystem. A persisted `Settings > Language` override defaults to the OS locale; `RobotViewModel.lastError` is a typed `HydraError` rather than pre-formatted English text, so business-logic error messages localize correctly too, not just static screen chrome.
 
@@ -122,7 +122,7 @@ Requires the [Flutter SDK](https://docs.flutter.dev/get-started/install) (stable
 ./run_dev.sh         # Git Bash / WSL, or run_dev.bat for cmd/PowerShell - desktop simulation mode (flutter run), no hardware needed
 ```
 
-All 3 build scripts (`build.sh`/`build.bat`/`build_linux.sh`) leave the app's version alone - see [Versioning](#-versioning) below. `run_dev.sh`/`run_dev.bat` do not - a dev-loop `flutter run` is not a "real build" under that policy.
+All 3 build scripts (`build.sh`/`build.bat`/`build_linux.sh`) leave the app's version alone - see [Versioning](#versioning) below. `run_dev.sh`/`run_dev.bat` do not - a dev-loop `flutter run` is not a "real build" under that policy.
 
 ### Manual build
 
@@ -137,6 +137,10 @@ flutter run -d windows           # or -d linux on a real Linux machine, for a li
 ```
 
 **Honesty note on Linux verification:** `flutter build linux --release` has now actually been run against this code, from a real Ubuntu 24.04 WSL2 environment with a real Linux desktop toolchain (`cmake`, `ninja-build`, `libgtk-3-dev`, `clang`) - it builds cleanly and produces a genuine `build/linux/x64/release/bundle/hydra_umc_dsi`, confirmed to actually launch (it ran under a real X11 display and stayed alive, not just a passing exit code), not only `flutter build windows` as a smoke-test substitute. What this does **not** cover: WSL2's userspace is x86_64, not the CM5's real aarch64 Raspberry Pi OS, and `kiosk/hydra-umc-dsi.service`'s autostart flow has still never run on any real Linux box. See `docs/ARCHITECTURE.md` section 7 for the exact list of what was and wasn't verified, and "Known Follow-ups" below for what remains.
+
+### Versioning
+
+This repo follows an ecosystem-wide policy: building never changes the version. The explicit bump command (`python tools/hydra_project_tool.py bump`) runs `bump_manifest_version.py`, which raises the `pubspec.yaml` version (the build number after `+` is a plain monotonic counter, +1 on every bump, no carry) and keeps the manifest in step. It also regenerates `lib/app_version.dart` (generated, not hand-edited), which the app reads at runtime to show its own version on the **Settings** screen. See [CHANGELOG.md](CHANGELOG.md) for the version history.
 
 ## 📂 Repository Structure
 

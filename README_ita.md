@@ -78,7 +78,7 @@ Ogni riga è una parte di questo repository e il semaforo dice a che punto è og
 - **Camera** (`lib/ui/camera_screen.dart`, `lib/ui/widgets/mjpeg_view.dart`) - lo stesso parser MJPEG scritto a mano e senza dipendenze usato da HYDRA-UMC-IOS-CONTROL (nessuna WebView, nessun codice specifico della piattaforma - funziona su desktop Linux senza modifiche), uno stato chiaro di "Camera Disabilitata" e un interruttore per attivare/disattivare la visione di un robot direttamente dal server.
 - **Vista 3D** (`lib/ui/three_d_screen.dart`) - **non** è una WebView che incorpora la vera scena Three.js di STUDIO, a differenza delle app iOS/Android - `webview_flutter` non ha alcuna implementazione per desktop Linux, e un motore browser completo rappresenta un carico di runtime maggiore di quanto serva a questo pannello embedded a basso consumo. Al suo posto: un piccolo indicatore isometrico nativo di posizione X/Y/Z (`CustomPainter`, nessun motore 3D), con una nota a schermo che rimanda alla vera scena 3D sul monitor collegato via HDMI a questa stessa scheda. Vedere la sezione 4 di `docs/ARCHITECTURE.md` per il ragionamento completo.
 - **Metriche di Sistema** (`lib/ui/metrics_screen.dart`) - una scheda dedicata (non integrata nella Dashboard come fanno iOS/Android) con riquadri di CPU/memoria/temperatura/uptime da `GET /api/system/metrics`, più hostname/numero di controller/numero di robot/versione app da `GET /api/hydra-info`.
-- **Impostazioni** (`lib/ui/settings_screen.dart`) - informazioni di connessione, identità del server, logout e la versione stessa di questa app (vedere [Versionamento](#-versionamento) più sotto).
+- **Impostazioni** (`lib/ui/settings_screen.dart`) - informazioni di connessione, identità del server, logout e la versione stessa di questa app (vedere [Versionamento](#versionamento) più sotto).
 - **Avvio automatico kiosk** (`kiosk/hydra-umc-dsi.service`, `kiosk/install_kiosk.sh`) - unit systemd che avvia l'app a schermo intero su `tty1` tramite `cage`, con `Restart=always`. Vedere "Esecuzione sul CM5 reale" più sotto.
 - **UI in 8 lingue** (`lib/l10n/`, pipeline standard `flutter gen-l10n`) - inglese, spagnolo, francese, tedesco, italiano, giapponese, cinese e portoghese, come il resto dei client di questo ecosistema. Un'impostazione persistente in `Impostazioni > Lingua` usa come predefinita la lingua di sistema; `RobotViewModel.lastError` è un `HydraError` tipizzato invece di testo inglese già formattato, quindi anche i messaggi di errore della logica di business vengono tradotti correttamente, non solo il testo statico delle schermate.
 
@@ -122,7 +122,7 @@ Richiede il [Flutter SDK](https://docs.flutter.dev/get-started/install) (canale 
 ./run_dev.sh         # Git Bash / WSL, oppure run_dev.bat per cmd/PowerShell - modalità simulazione desktop (flutter run), senza bisogno dell'hardware
 ```
 
-Tutti e 3 gli script di compilazione (`build.sh`/`build.bat`/`build_linux.sh`) non cambiano la versione dell'app - vedere [Versionamento](#-versionamento) più sotto. `run_dev.sh`/`run_dev.bat` non lo fanno - un `flutter run` da ciclo di sviluppo non è una "compilazione reale" secondo questa policy.
+Tutti e 3 gli script di compilazione (`build.sh`/`build.bat`/`build_linux.sh`) non cambiano la versione dell'app - vedere [Versionamento](#versionamento) più sotto. `run_dev.sh`/`run_dev.bat` non lo fanno - un `flutter run` da ciclo di sviluppo non è una "compilazione reale" secondo questa policy.
 
 ### Compilazione manuale
 
@@ -137,6 +137,10 @@ flutter run -d windows           # oppure -d linux su una macchina Linux reale, 
 ```
 
 **Nota di onestà sulla verifica Linux:** `flutter build linux --release` è stato ora effettivamente eseguito su questo codice, da un vero ambiente Ubuntu 24.04 su WSL2 con una vera toolchain desktop Linux (`cmake`, `ninja-build`, `libgtk-3-dev`, `clang`) - compila pulito e produce un vero `build/linux/x64/release/bundle/hydra_umc_dsi`, confermato come effettivamente avviabile (è stato eseguito sotto un vero display X11 ed è rimasto attivo, non solo un codice di uscita 0), non solo `flutter build windows` come sostituto di smoke test. Cosa **non** copre questo: lo userspace di WSL2 è x86_64, non il vero aarch64 del Raspberry Pi OS della CM5, e il flusso di autoavvio di `kiosk/hydra-umc-dsi.service` non è comunque mai stato eseguito su una vera macchina Linux. Vedere la sezione 7 di `docs/ARCHITECTURE.md` per l'elenco esatto di ciò che è stato e non è stato verificato, e "Prossimi Passi Noti" più sotto per ciò che resta da fare.
+
+### Versionamento
+
+Questo repository segue una politica a livello di ecosistema: compilare non cambia mai la versione. Il comando `bump` esplicito (`python tools/hydra_project_tool.py bump`) esegue `bump_manifest_version.py`, che alza la versione di `pubspec.yaml` (il build number dopo `+` è un contatore monotono semplice, +1 a ogni bump, senza riporto) e tiene allineato il manifesto. Rigenera anche `lib/app_version.dart` (generato, non modificato a mano), che l'app legge a runtime per mostrare la propria versione nella schermata **Impostazioni**. Vedi [CHANGELOG.md](CHANGELOG.md) per la cronologia delle versioni.
 
 ## 📂 Struttura del repository
 
