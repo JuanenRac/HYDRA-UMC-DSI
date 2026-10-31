@@ -27,6 +27,11 @@
 # can't be verified without the real board either - acceptable for a
 # single-purpose embedded kiosk appliance with no other login use, not a
 # general-purpose desktop.
+#
+# LOCAL SCREEN: this unit starts only when the setting HYDRA_LOCAL_SCREEN is dsi
+# (see local_screen.sh). It reads /etc/hydra-umc/local-screen.conf, and
+# ExecCondition skips the start, without a failure, for hdmi (the default) and
+# none, so it never takes tty1 from the HDMI kiosk of HYDRA-UMC-OS.
 # =============================================================================
 
 [Unit]
@@ -37,6 +42,8 @@ After=getty@tty1.service
 
 [Service]
 Type=simple
+EnvironmentFile=-/etc/hydra-umc/local-screen.conf
+ExecCondition=/bin/sh -c 'test "$${HYDRA_LOCAL_SCREEN:-hdmi}" = dsi'
 ExecStart=/usr/bin/cage -- /opt/hydra-umc-dsi/bundle/hydra_umc_dsi
 StandardInput=tty
 StandardOutput=journal

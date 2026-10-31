@@ -26,6 +26,8 @@ jobs:
           python-version: "3.12"
       - name: Validate manifest, version, documentation and secret policy
         run: python tools/ci_validate.py
+      - name: Check the kiosk installer and its local screen setting
+        run: python tools/verify_kiosk_screen.py
       - name: Compile Python sources without running versioning build scripts
         run: |
           python - <<'PY'

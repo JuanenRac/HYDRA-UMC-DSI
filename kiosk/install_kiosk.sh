@@ -14,6 +14,15 @@
 # rather than guessing a package manager invocation that might be wrong
 # for whatever image the CM5 is actually running.
 #
+# Usage: install_kiosk.sh [--screen dsi]
+# One local screen at a time: the HDMI kiosk of HYDRA-UMC-OS and this app (cage)
+# both want tty1 and the seat of the console. Which one is installed is one
+# setting, HYDRA_LOCAL_SCREEN = hdmi | dsi | none (local_screen.sh, next to this
+# script; saved in /etc/hydra-umc/local-screen.conf). The default is hdmi, so
+# this script installs nothing until the setting says dsi: pass --screen dsi
+# once (it saves the choice) or set HYDRA_LOCAL_SCREEN=dsi. When it installs, it
+# also takes back the autologin of the HDMI kiosk on tty1.
+#
 # HONESTY NOTE: same as hydra-umc-dsi.service's own header comment - never
 # actually run against a real CM5 or any other Linux box, no Linux machine
 # is available in the environment this was written in. Treat the first
@@ -24,11 +33,36 @@ set -euo pipefail
 BUNDLE_DIR="/opt/hydra-umc-dsi/bundle"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SERVICE_SRC="$SCRIPT_DIR/hydra-umc-dsi.service"
+SYSTEMD_DIR="${HYDRA_SYSTEMD_DIR:-/etc/systemd/system}"
+SCREEN_REQUEST=""
+case "${1:-}" in
+  "") ;;
+  --screen)
+    SCREEN_REQUEST="${2:-}"
+    [ -n "$SCREEN_REQUEST" ] || { echo "--screen needs hdmi, dsi or none." >&2; exit 2; }
+    ;;
+  *) echo "Unknown option: $1 (use --screen dsi)." >&2; exit 2 ;;
+esac
 
 if [ "$(id -u)" -ne 0 ]; then
   echo "Run as root (sudo ./install_kiosk.sh)." >&2
   exit 1
 fi
+
+# --- local screen begin
+# shellcheck source=local_screen.sh
+source "${LOCAL_SCREEN_LIB:-$SCRIPT_DIR/local_screen.sh}"
+[ -z "$SCREEN_REQUEST" ] || HYDRA_LOCAL_SCREEN="$SCREEN_REQUEST"
+SCREEN="$(local_screen_read)" || exit 2
+if [ "$SCREEN" != dsi ]; then
+  echo "The local screen is '$SCREEN', not dsi: nothing is installed, so this app and the HDMI kiosk do not both take tty1." >&2
+  echo "To use the DSI screen run: sudo ./install_kiosk.sh --screen dsi" >&2
+  exit 3
+fi
+[ -z "$SCREEN_REQUEST" ] || local_screen_write dsi
+# The autologin that the HDMI kiosk of HYDRA-UMC-OS puts on tty1 would start a second session on the same console.
+rm -f "$SYSTEMD_DIR/getty@tty1.service.d/hydra-umc-autologin.conf"
+# --- local screen end
 
 if [ ! -x "$BUNDLE_DIR/hydra_umc_dsi" ]; then
   echo "Expected an executable at $BUNDLE_DIR/hydra_umc_dsi - copy build/linux/*/release/bundle/'s" >&2
@@ -42,7 +76,7 @@ if ! command -v cage >/dev/null 2>&1; then
   exit 1
 fi
 
-install -m 644 "$SERVICE_SRC" /etc/systemd/system/hydra-umc-dsi.service
+install -m 644 "$SERVICE_SRC" "$SYSTEMD_DIR/hydra-umc-dsi.service"
 systemctl daemon-reload
 
 # tty1's own getty would otherwise fight this service for the same

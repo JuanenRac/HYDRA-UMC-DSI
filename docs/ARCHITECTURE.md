@@ -179,6 +179,14 @@ Linux box) should still treat that as the real first hardware validation
 of this platform target, not a formality - see the root README's own
 "Known Follow-ups" section.
 
+**One local screen at a time.** The HDMI kiosk of HYDRA-UMC-OS and this app both want `tty1` and the seat of the
+console, so the installers share one setting, `HYDRA_LOCAL_SCREEN` = `hdmi` | `dsi` | `none`, read by
+`kiosk/local_screen.sh` from the environment, then from `/etc/hydra-umc/local-screen.conf`, then `hdmi` (the
+default). `kiosk/install_kiosk.sh` installs only for `dsi` (`--screen dsi` saves the choice and takes back the
+autologin of the HDMI kiosk), a value that is none of the three stops it, and the unit skips its start, without a
+failure, unless the saved setting is `dsi`. Tested against stubs (`tools/verify_kiosk_screen.py`); it has not run
+on a CM5.
+
 ## 8. Relationship to the rest of the ecosystem
 
 See the root [`README.md`](../README.md)'s own "Related Projects" section.
