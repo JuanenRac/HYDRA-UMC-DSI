@@ -30,6 +30,8 @@ String protectionLoweringText(AppLocalizations l10n, ProtectionLowering lowering
       ProtectionLowering.wsQueryToken => l10n.serverOptionsConfirmWs,
       ProtectionLowering.logRedactionOff => l10n.serverOptionsConfirmLog,
       ProtectionLowering.voiceSignatureOff => l10n.serverOptionsConfirmVoice,
+      ProtectionLowering.cameraCredentialsInArguments => l10n.serverOptionsConfirmCameraCredentials,
+      ProtectionLowering.newInstallTlsOff => l10n.serverOptionsConfirmInstallTls,
     };
 
 String optionSourceText(AppLocalizations l10n, OptionSource source) => switch (source) {
@@ -149,6 +151,8 @@ class _ServerOptionsDialogState extends State<ServerOptionsDialog> {
           _row(options.wsQueryToken, values.wsQueryToken, l10n.serverOptionsWsLabel, null, (v) => set(values.copyWith(wsQueryToken: v)), l10n, 'ws'),
           _row(options.logRedaction, values.logRedaction, l10n.serverOptionsLogLabel, null, (v) => set(values.copyWith(logRedaction: v)), l10n, 'log'),
           _row(options.voiceSignature, values.voiceSignature, l10n.serverOptionsVoiceLabel, null, (v) => set(values.copyWith(voiceSignature: v)), l10n, 'voice'),
+          _row(options.cameraCredentialsViaEnv, values.cameraCredentialsViaEnv, l10n.serverOptionsCameraCredentialsLabel, l10n.serverOptionsInstallHelp, (v) => set(values.copyWith(cameraCredentialsViaEnv: v)), l10n, 'camera-credentials'),
+          _row(options.newInstallTls, values.newInstallTls, l10n.serverOptionsInstallTlsLabel, null, (v) => set(values.copyWith(newInstallTls: v)), l10n, 'install-tls'),
           const SizedBox(height: 12),
           FilledButton(
             key: const ValueKey('server-options-save'),

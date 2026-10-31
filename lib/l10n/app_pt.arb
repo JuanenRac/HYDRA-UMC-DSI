@@ -307,5 +307,10 @@
   "serverOptionsWsLabel": "Aceitar um token no endereço do WebSocket (/ws?token=)",
   "serverOptionsLogLabel": "Ocultar os segredos no registo",
   "serverOptionsVoiceLabel": "Exigir uma assinatura verificada num pedido falado confirmado",
-  "serverOptionsExposureHelp": "Valores seguros: as imagens pedem um bilhete, sem token no endereço, segredos ocultados, assinatura não exigida (ative-a quando o serviço de voz partilhar a sua chave). Um valor fixado pelo ambiente do servidor não pode ser alterado aqui."
+  "serverOptionsExposureHelp": "Valores seguros: as imagens pedem um bilhete, sem token no endereço, segredos ocultados, assinatura não exigida (ative-a quando o serviço de voz partilhar a sua chave). Um valor fixado pelo ambiente do servidor não pode ser alterado aqui.",
+  "serverOptionsCameraCredentialsLabel": "Entregar a palavra-passe de uma câmara IP ao seu processo através do ambiente (não na sua linha de comandos)",
+  "serverOptionsInstallTlsLabel": "Deixar uma instalação nova ativar o TLS por si própria",
+  "serverOptionsInstallHelp": "Valores seguros: ambas ativas. A opção da câmara aplica-se da próxima vez que um processo de câmara arrancar; a do TLS só é lida no primeiro arranque de uma instalação. Um valor fixado pelo ambiente do servidor não pode ser alterado aqui.",
+  "serverOptionsConfirmCameraCredentials": "A palavra-passe de uma câmara IP ficará na linha de comandos do seu processo, onde os outros utilizadores da máquina a podem ler.",
+  "serverOptionsConfirmInstallTls": "Uma instalação nova deixa de ativar o TLS por si própria."
 }

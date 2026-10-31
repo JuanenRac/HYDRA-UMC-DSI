@@ -307,5 +307,10 @@
   "serverOptionsWsLabel": "Ein Token in der WebSocket-Adresse akzeptieren (/ws?token=)",
   "serverOptionsLogLabel": "Geheimnisse im Protokoll schwärzen",
   "serverOptionsVoiceLabel": "Eine geprüfte Signatur bei einer bestätigten gesprochenen Anfrage verlangen",
-  "serverOptionsExposureHelp": "Sichere Voreinstellungen: Bilder verlangen ein Ticket, kein Token in der Adresse, Geheimnisse geschwärzt, Signatur nicht verlangt (einschalten, sobald der Sprachdienst seinen Schlüssel teilt). Ein von der Umgebung des Servers festgelegter Wert lässt sich hier nicht ändern."
+  "serverOptionsExposureHelp": "Sichere Voreinstellungen: Bilder verlangen ein Ticket, kein Token in der Adresse, Geheimnisse geschwärzt, Signatur nicht verlangt (einschalten, sobald der Sprachdienst seinen Schlüssel teilt). Ein von der Umgebung des Servers festgelegter Wert lässt sich hier nicht ändern.",
+  "serverOptionsCameraCredentialsLabel": "Das Passwort einer IP-Kamera über die Umgebung an ihren Prozess übergeben (nicht in der Befehlszeile)",
+  "serverOptionsInstallTlsLabel": "Eine neue Installation TLS selbst einschalten lassen",
+  "serverOptionsInstallHelp": "Sichere Vorgaben: beide an. Die Kameraoption gilt beim nächsten Start eines Kameraprozesses; die TLS-Option wird nur beim ersten Start einer Installation gelesen. Ein von der Serverumgebung festgelegter Wert kann hier nicht geändert werden.",
+  "serverOptionsConfirmCameraCredentials": "Das Passwort einer IP-Kamera steht dann in der Befehlszeile ihres Prozesses, wo andere Benutzer des Rechners es lesen können.",
+  "serverOptionsConfirmInstallTls": "Eine neue Installation schaltet TLS nicht mehr selbst ein."
 }

@@ -307,5 +307,10 @@
   "serverOptionsWsLabel": "WebSocketのアドレスにあるトークンを受け付ける（/ws?token=）",
   "serverOptionsLogLabel": "ログ内の秘密情報を伏せ字にする",
   "serverOptionsVoiceLabel": "確認済みの音声リクエストに検証済みの署名を必須にする",
-  "serverOptionsExposureHelp": "安全な既定値: 画像はチケットが必要、アドレスにトークンなし、秘密情報は伏せ字、署名は必須ではない（音声サービスが鍵を共有したら有効にしてください）。サーバーの環境で固定された値はここでは変更できません。"
+  "serverOptionsExposureHelp": "安全な既定値: 画像はチケットが必要、アドレスにトークンなし、秘密情報は伏せ字、署名は必須ではない（音声サービスが鍵を共有したら有効にしてください）。サーバーの環境で固定された値はここでは変更できません。",
+  "serverOptionsCameraCredentialsLabel": "IP カメラのパスワードを、コマンドラインではなく環境経由でそのプロセスに渡す",
+  "serverOptionsInstallTlsLabel": "新規インストールが自動的に TLS を有効にする",
+  "serverOptionsInstallHelp": "安全な既定値：どちらもオン。カメラの設定は次にカメラのプロセスが起動するときに適用され、TLS の設定はインストールの初回起動時にのみ読み込まれます。サーバーの環境で固定された値はここでは変更できません。",
+  "serverOptionsConfirmCameraCredentials": "IP カメラのパスワードが、同じマシンの他のユーザーが読めるプロセスのコマンドラインに載ります。",
+  "serverOptionsConfirmInstallTls": "新規インストールは自動的に TLS を有効にしなくなります。"
 }

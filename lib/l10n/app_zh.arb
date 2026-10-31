@@ -307,5 +307,10 @@
   "serverOptionsWsLabel": "接受 WebSocket 地址中的令牌（/ws?token=）",
   "serverOptionsLogLabel": "在日志中隐去机密信息",
   "serverOptionsVoiceLabel": "要求已确认的语音请求带有已验证的签名",
-  "serverOptionsExposureHelp": "安全默认值：画面需要票据，地址中不带令牌，机密信息被隐去，不要求签名（语音服务共享其密钥后再开启）。由服务器环境固定的值无法在此更改。"
+  "serverOptionsExposureHelp": "安全默认值：画面需要票据，地址中不带令牌，机密信息被隐去，不要求签名（语音服务共享其密钥后再开启）。由服务器环境固定的值无法在此更改。",
+  "serverOptionsCameraCredentialsLabel": "通过环境（而非命令行）把 IP 摄像头的密码交给其进程",
+  "serverOptionsInstallTlsLabel": "让新安装自行开启 TLS",
+  "serverOptionsInstallHelp": "安全默认值：两项均开启。摄像头选项在下次启动摄像头进程时生效；TLS 选项仅在安装首次启动时读取。由服务器环境固定的值无法在此更改。",
+  "serverOptionsConfirmCameraCredentials": "IP 摄像头的密码将出现在其进程的命令行中，本机的其他用户可以读取。",
+  "serverOptionsConfirmInstallTls": "新安装将不再自行开启 TLS。"
 }

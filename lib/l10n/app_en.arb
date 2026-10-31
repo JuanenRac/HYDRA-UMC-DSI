@@ -327,5 +327,10 @@
   "serverOptionsWsLabel": "Accept a token in the WebSocket address (/ws?token=)",
   "serverOptionsLogLabel": "Blank out secrets in the log",
   "serverOptionsVoiceLabel": "Require a verified signature on a confirmed spoken request",
-  "serverOptionsExposureHelp": "Safe defaults: pictures ask for a ticket, no token in the address, secrets blanked out, signature not required (turn it on once the voice service shares its key). A value fixed by the server environment cannot be changed here."
+  "serverOptionsExposureHelp": "Safe defaults: pictures ask for a ticket, no token in the address, secrets blanked out, signature not required (turn it on once the voice service shares its key). A value fixed by the server environment cannot be changed here.",
+  "serverOptionsCameraCredentialsLabel": "Hand the password of an IP camera to its process through the environment (not on its command line)",
+  "serverOptionsInstallTlsLabel": "Let a new installation switch TLS on by itself",
+  "serverOptionsInstallHelp": "Safe defaults: both on. The camera option applies the next time a camera process starts; the TLS option is only read at the first start of an installation. A value fixed by the server environment cannot be changed here.",
+  "serverOptionsConfirmCameraCredentials": "The password of an IP camera will be on the command line of its process, where other users of the machine can read it.",
+  "serverOptionsConfirmInstallTls": "A new installation will no longer switch TLS on by itself."
 }

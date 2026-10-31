@@ -256,6 +256,44 @@ void main() {
     });
   });
 
+  group('camera password and TLS of a new installation', () {
+    const withInstall = '{"camera":{"open":{"value":false,"source":"default"},"credentialsViaEnv":{"value":true,"source":"default"}},'
+        '"install":{"newInstallTls":{"value":true,"source":"default"}}}';
+    final o = ServerSecurityOptions.parse(withInstall)!;
+
+    test('both are read and kept apart from the camera pictures', () {
+      expect(o.cameraCredentialsViaEnv, const ServerOption(true, OptionSource.defaultValue));
+      expect(o.newInstallTls, const ServerOption(true, OptionSource.defaultValue));
+      expect(o.cameraOpen, const ServerOption(false, OptionSource.defaultValue));
+      final old = ServerSecurityOptions.parse('{"camera":{"open":{"value":true,"source":"config"}}}')!;
+      expect(old.cameraCredentialsViaEnv, isNull);
+      expect(old.newInstallTls, isNull);
+      expect(old.toValues().cameraCredentialsViaEnv, isTrue);
+      expect(old.toValues().newInstallTls, isTrue);
+      expect(old.patch(old.toValues().copyWith(cameraCredentialsViaEnv: false, newInstallTls: false)), isNull);
+    });
+
+    test('only what changed is sent, under the group the server reads it from', () {
+      expect(o.patch(o.toValues()), isNull);
+      final body = o.patch(o.toValues().copyWith(cameraCredentialsViaEnv: false, newInstallTls: false))!;
+      expect((body['camera'] as Map)['credentialsViaEnv'], isFalse);
+      expect((body['camera'] as Map).containsKey('open'), isFalse);
+      expect((body['install'] as Map)['newInstallTls'], isFalse);
+      expect(body.keys.toSet(), {'camera', 'install'});
+    });
+
+    test('taking either away asks; putting it back or a value fixed by the environment does not', () {
+      expect(o.lowerings(o.toValues().copyWith(cameraCredentialsViaEnv: false)), [ProtectionLowering.cameraCredentialsInArguments]);
+      expect(o.lowerings(o.toValues().copyWith(newInstallTls: false)), [ProtectionLowering.newInstallTlsOff]);
+      final loose = ServerSecurityOptions.parse('{"camera":{"credentialsViaEnv":{"value":false,"source":"config"}},"install":{"newInstallTls":{"value":false,"source":"config"}}}')!;
+      expect(loose.lowerings(loose.toValues().copyWith(cameraCredentialsViaEnv: true, newInstallTls: true)), isEmpty);
+      final fixed = ServerSecurityOptions.parse('{"camera":{"credentialsViaEnv":{"value":false,"source":"env"}},"install":{"newInstallTls":{"value":false,"source":"env"}}}')!;
+      expect(fixed.cameraCredentialsViaEnv!.locked, isTrue);
+      expect(fixed.lowerings(fixed.toValues().copyWith(cameraCredentialsViaEnv: true)), isEmpty);
+      expect(fixed.patch(fixed.toValues().copyWith(cameraCredentialsViaEnv: true, newInstallTls: true)), isNull);
+    });
+  });
+
   group('against a local server', () {
     test('the list of clients and the latest sign-ins are read', () async {
       final (server, vm) = await _signedIn();

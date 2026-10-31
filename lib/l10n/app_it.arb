@@ -307,5 +307,10 @@
   "serverOptionsWsLabel": "Accettare un token nell'indirizzo del WebSocket (/ws?token=)",
   "serverOptionsLogLabel": "Oscurare i segreti nel registro",
   "serverOptionsVoiceLabel": "Richiedere una firma verificata su una richiesta vocale confermata",
-  "serverOptionsExposureHelp": "Valori sicuri: le immagini richiedono un ticket, nessun token nell'indirizzo, segreti oscurati, firma non richiesta (attivala quando il servizio vocale condivide la sua chiave). Un valore fissato dall'ambiente del server non può essere cambiato qui."
+  "serverOptionsExposureHelp": "Valori sicuri: le immagini richiedono un ticket, nessun token nell'indirizzo, segreti oscurati, firma non richiesta (attivala quando il servizio vocale condivide la sua chiave). Un valore fissato dall'ambiente del server non può essere cambiato qui.",
+  "serverOptionsCameraCredentialsLabel": "Consegnare la password di una telecamera IP al suo processo tramite l'ambiente (non sulla sua riga di comando)",
+  "serverOptionsInstallTlsLabel": "Lasciare che una nuova installazione attivi TLS da sola",
+  "serverOptionsInstallHelp": "Valori sicuri: entrambe attive. L'opzione della telecamera vale dal prossimo avvio di un processo di telecamera; quella di TLS viene letta solo al primo avvio di un'installazione. Un valore fissato dall'ambiente del server non si può cambiare qui.",
+  "serverOptionsConfirmCameraCredentials": "La password di una telecamera IP si troverà sulla riga di comando del suo processo, dove gli altri utenti della macchina possono leggerla.",
+  "serverOptionsConfirmInstallTls": "Una nuova installazione non attiverà più TLS da sola."
 }

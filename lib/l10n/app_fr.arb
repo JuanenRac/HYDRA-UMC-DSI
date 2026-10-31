@@ -307,5 +307,10 @@
   "serverOptionsWsLabel": "Accepter un jeton dans l'adresse du WebSocket (/ws?token=)",
   "serverOptionsLogLabel": "Masquer les secrets dans le journal",
   "serverOptionsVoiceLabel": "Exiger une signature vérifiée sur une demande vocale confirmée",
-  "serverOptionsExposureHelp": "Valeurs sûres : les images demandent un ticket, pas de jeton dans l'adresse, secrets masqués, signature non exigée (à activer quand le service vocal partage sa clé). Une valeur fixée par l'environnement du serveur ne peut pas être modifiée ici."
+  "serverOptionsExposureHelp": "Valeurs sûres : les images demandent un ticket, pas de jeton dans l'adresse, secrets masqués, signature non exigée (à activer quand le service vocal partage sa clé). Une valeur fixée par l'environnement du serveur ne peut pas être modifiée ici.",
+  "serverOptionsCameraCredentialsLabel": "Transmettre le mot de passe d'une caméra IP à son processus par l'environnement (et non sur sa ligne de commande)",
+  "serverOptionsInstallTlsLabel": "Laisser une nouvelle installation activer TLS d'elle-même",
+  "serverOptionsInstallHelp": "Valeurs sûres : les deux activées. L'option de la caméra s'applique au prochain démarrage d'un processus de caméra ; celle de TLS n'est lue qu'au premier démarrage d'une installation. Une valeur fixée par l'environnement du serveur ne peut pas être modifiée ici.",
+  "serverOptionsConfirmCameraCredentials": "Le mot de passe d'une caméra IP figurera sur la ligne de commande de son processus, où les autres utilisateurs de la machine peuvent le lire.",
+  "serverOptionsConfirmInstallTls": "Une nouvelle installation n'activera plus TLS d'elle-même."
 }

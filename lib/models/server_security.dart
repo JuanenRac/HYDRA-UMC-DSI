@@ -3,11 +3,12 @@
 // Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 // GPL-3.0-or-later - see LICENSE
 //
-// Seven switches of the server (GET/PUT /api/admin/server-config): the health route
+// Nine switches of the server (GET/PUT /api/admin/server-config): the health route
 // without a sign-in, the announcement of the global stop, the address kept in the
 // history of connections, the camera pictures without a ticket, a token in the
-// WebSocket address, the blanking of secrets in the log and the signature of a
-// spoken confirmation. The reading is tolerant: a server that predates an option
+// WebSocket address, the blanking of secrets in the log, the signature of a
+// spoken confirmation, the password of an IP camera handed over through the
+// environment of its process and TLS switched on by a new installation. The reading is tolerant: a server that predates an option
 // answers without it and the screen does not show that switch. A value fixed by the
 // environment of the server cannot be changed from here, and every change that
 // lowers the protection is asked about first.
@@ -42,6 +43,8 @@ class ServerSecurityValues {
   final bool wsQueryToken;
   final bool logRedaction;
   final bool voiceSignature;
+  final bool cameraCredentialsViaEnv;
+  final bool newInstallTls;
 
   const ServerSecurityValues({
     required this.healthOpen,
@@ -51,6 +54,8 @@ class ServerSecurityValues {
     required this.wsQueryToken,
     required this.logRedaction,
     required this.voiceSignature,
+    this.cameraCredentialsViaEnv = true,
+    this.newInstallTls = true,
   });
 
   ServerSecurityValues copyWith({
@@ -61,6 +66,8 @@ class ServerSecurityValues {
     bool? wsQueryToken,
     bool? logRedaction,
     bool? voiceSignature,
+    bool? cameraCredentialsViaEnv,
+    bool? newInstallTls,
   }) =>
       ServerSecurityValues(
         healthOpen: healthOpen ?? this.healthOpen,
@@ -70,11 +77,13 @@ class ServerSecurityValues {
         wsQueryToken: wsQueryToken ?? this.wsQueryToken,
         logRedaction: logRedaction ?? this.logRedaction,
         voiceSignature: voiceSignature ?? this.voiceSignature,
+        cameraCredentialsViaEnv: cameraCredentialsViaEnv ?? this.cameraCredentialsViaEnv,
+        newInstallTls: newInstallTls ?? this.newInstallTls,
       );
 }
 
 /// The changes that lower the protection of the server; the screen has a sentence for each.
-enum ProtectionLowering { healthOpen, recordAddress, cameraOpen, wsQueryToken, logRedactionOff, voiceSignatureOff }
+enum ProtectionLowering { healthOpen, recordAddress, cameraOpen, wsQueryToken, logRedactionOff, voiceSignatureOff, cameraCredentialsInArguments, newInstallTlsOff }
 
 /// Why the options could not be read or saved, for the sentence the screen shows.
 enum ServerOptionsFailure { unavailable, session, forbidden, network, other }
@@ -88,6 +97,8 @@ class ServerSecurityOptions {
   final ServerOption? wsQueryToken;
   final ServerOption? logRedaction;
   final ServerOption? voiceSignature;
+  final ServerOption? cameraCredentialsViaEnv;
+  final ServerOption? newInstallTls;
 
   const ServerSecurityOptions({
     this.healthOpen,
@@ -97,10 +108,12 @@ class ServerSecurityOptions {
     this.wsQueryToken,
     this.logRedaction,
     this.voiceSignature,
+    this.cameraCredentialsViaEnv,
+    this.newInstallTls,
   });
 
   /// True when the server reports none of them (a server that predates all of these options).
-  bool get isEmpty => [healthOpen, publishGlobalStop, recordAddress, cameraOpen, wsQueryToken, logRedaction, voiceSignature].every((o) => o == null);
+  bool get isEmpty => [healthOpen, publishGlobalStop, recordAddress, cameraOpen, wsQueryToken, logRedaction, voiceSignature, cameraCredentialsViaEnv, newInstallTls].every((o) => o == null);
 
   /// The values as the screen starts with them; an option the server does not report keeps its safe value.
   ServerSecurityValues toValues() => ServerSecurityValues(
@@ -111,6 +124,8 @@ class ServerSecurityOptions {
         wsQueryToken: wsQueryToken?.value ?? false,
         logRedaction: logRedaction?.value ?? true,
         voiceSignature: voiceSignature?.value ?? false,
+        cameraCredentialsViaEnv: cameraCredentialsViaEnv?.value ?? true,
+        newInstallTls: newInstallTls?.value ?? true,
       );
 
   static ServerOption? _option(Object? raw) {
@@ -148,6 +163,8 @@ class ServerSecurityOptions {
       wsQueryToken: _option(_at(root, 'websocket', 'allowQueryToken')),
       logRedaction: _option(_at(root, 'logging', 'redactSecrets')),
       voiceSignature: _option(_at(root, 'voice', 'requireSignature')),
+      cameraCredentialsViaEnv: _option(_at(root, 'camera', 'credentialsViaEnv')),
+      newInstallTls: _option(_at(root, 'install', 'newInstallTls')),
     );
   }
 
@@ -167,6 +184,8 @@ class ServerSecurityOptions {
     put('websocket', 'allowQueryToken', wsQueryToken, next.wsQueryToken);
     put('logging', 'redactSecrets', logRedaction, next.logRedaction);
     put('voice', 'requireSignature', voiceSignature, next.voiceSignature);
+    put('camera', 'credentialsViaEnv', cameraCredentialsViaEnv, next.cameraCredentialsViaEnv);
+    put('install', 'newInstallTls', newInstallTls, next.newInstallTls);
     return body.isEmpty ? null : body;
   }
 
@@ -182,6 +201,8 @@ class ServerSecurityOptions {
       if (rises(wsQueryToken, next.wsQueryToken)) ProtectionLowering.wsQueryToken,
       if (falls(logRedaction, next.logRedaction)) ProtectionLowering.logRedactionOff,
       if (falls(voiceSignature, next.voiceSignature)) ProtectionLowering.voiceSignatureOff,
+      if (falls(cameraCredentialsViaEnv, next.cameraCredentialsViaEnv)) ProtectionLowering.cameraCredentialsInArguments,
+      if (falls(newInstallTls, next.newInstallTls)) ProtectionLowering.newInstallTlsOff,
     ];
   }
 }
