@@ -4,6 +4,8 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+- **Steadier silent-refresh test:** the fake server of the test ignores a request that was cut off when the test closes it by force (the app may still be sending its logout, and dart:io then reported "Connection closed while receiving data" as a failure of the test), and the waits for the reconnect and for the forced logout have a limit that a loaded machine cannot reach; they still end as soon as the effect shows.
+
 ## [0.2.9] - One local screen at a time, who connects to the server, the access options of the server for administrators and the version of the client in its identity
 
 - **The client identity carries the version:** every request now sends `X-Hydra-Client: dsi/<version>` (for example `dsi/0.2.8`) instead of the bare type, as the Android app does. The server compares the type only, so access is opened and closed exactly as before, and keeps the version apart for the history of connections. A version the server would not take (1 to 24 of `0-9 A-Z a-z . _ -`) is left out and the header is just `dsi`. New `test/client_header_test.dart` (the value, what the server reads of it, versions that are refused, every request and the headers of the camera stream).

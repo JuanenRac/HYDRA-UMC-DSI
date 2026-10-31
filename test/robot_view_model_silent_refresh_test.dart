@@ -89,7 +89,14 @@ class _FakeServer {
         }
         return;
       }
-      final body = await utf8.decoder.bind(request).join();
+      // The test ends by closing the server by force while the app may still be sending its logout; dart:io then throws "Connection closed
+      // while receiving data" from the read of the body, and a real server ignores a request that was cut off.
+      final String body;
+      try {
+        body = await utf8.decoder.bind(request).join();
+      } on HttpException {
+        return;
+      }
       Map<String, dynamic> json = {};
       try {
         json = body.isNotEmpty ? jsonDecode(body) as Map<String, dynamic> : {};
@@ -127,7 +134,13 @@ class _FakeServer {
         default:
           request.response.statusCode = HttpStatus.notFound;
       }
-      await request.response.close();
+      try {
+        await request.response.close();
+      } on HttpException {
+        // the client went away before the answer was sent
+      } on SocketException {
+        // same
+      }
     });
   }
 
@@ -161,7 +174,8 @@ void main() {
     // The real 1008 close (from the FIRST WS connection) must recover on
     // its own - poll for the real, observable side effect (a second real
     // WS connection) rather than a fixed sleep.
-    final deadline = DateTime.now().add(const Duration(seconds: 5));
+    // The limit only says when a hang counts as a failure: the loop ends as soon as the effect shows, so it is generous for a loaded machine.
+    final deadline = DateTime.now().add(const Duration(seconds: 30));
     while (fakeServer.wsTokensSeen.length < 2 && DateTime.now().isBefore(deadline)) {
       await Future<void>.delayed(const Duration(milliseconds: 20));
     }
@@ -197,7 +211,8 @@ void main() {
     final ok = await vm.login(server);
     expect(ok, isTrue);
 
-    final deadline = DateTime.now().add(const Duration(seconds: 5));
+    // The limit only says when a hang counts as a failure: the loop ends as soon as the effect shows, so it is generous for a loaded machine.
+    final deadline = DateTime.now().add(const Duration(seconds: 30));
     while (vm.isLoggedIn && DateTime.now().isBefore(deadline)) {
       await Future<void>.delayed(const Duration(milliseconds: 20));
     }
