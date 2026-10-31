@@ -84,6 +84,8 @@ GPL-3.0-or-later - see LICENSE
 
 **状态:雏形 + 全部 6 个目录界面均已实现并连接到真实的 REMOTE_API.md 契约。** `flutter analyze` 干净通过,`flutter build windows` 与 `flutter build linux`(通过 WSL2)都能生成可运行的二进制文件,`flutter test` 通过——具体哪些已经验证、哪些还没有,包括这次 WSL2 验证与真实 CM5 硬件之间仍存在的差距,详见下文“构建”。
 
+**一次只用一个本地屏幕、谁在连接以及服务器的访问选项。** 只有当设置 `HYDRA_LOCAL_SCREEN` 为 `dsi` 时，展示终端安装程序才会安装该应用（`sudo kiosk/install_kiosk.sh --screen dsi` 会把它保存到 `/etc/hydra-umc/local-screen.conf`）；默认值是 HYDRA-UMC-OS 的 HDMI 展示终端 `hdmi`，`none` 则不把控制台交给任何一方，因此两个展示终端不会同时抢占 `tty1`（`tools/verify_kiosk_screen.py` 用桩程序测试；未在 CM5 上运行）。访问面板中的“连接”按钮会打开一个简单列表，列出服务器见过的应用以及最近的登录、被拒绝的登录、登出和已结束的会话（管理员能看到全部条目，其他账号只能看到自己的；没有密码或令牌，只有服务器保存地址时才会显示地址）。对管理员，第二个按钮会打开七个从服务器配置读取的开关（无需登录的健康检查路由、全局停止的通告、保留客户端地址、无需票据的摄像头画面、WebSocket 地址中的令牌、遮蔽日志中的机密、语音确认的签名）；每个开关都显示其值的来源，只发送发生变化的部分，凡是降低保护的更改都会先询问。文字提供八种语言。
+
 ## 🧩 在 HYDRA-UMC 中的角色
 
 **HYDRA-UMC-DSI** 是 CM5 自带的触摸屏：一个面向 5"/7" DSI 面板的原生 Flutter 应用，通过 REST 和 WebSocket 与 `HYDRA-UMC-SERVER` 通信，与 `HYDRA-UMC-STUDIO` 的浏览器界面并存。它没有自己的机器人逻辑；允许什么由服务器决定。
