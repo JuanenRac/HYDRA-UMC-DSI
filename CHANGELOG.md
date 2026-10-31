@@ -4,6 +4,8 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+## [0.3.0] - Steadier silent-refresh test
+
 - **Steadier silent-refresh test:** the fake server of the test ignores a request that was cut off when the test closes it by force (the app may still be sending its logout, and dart:io then reported "Connection closed while receiving data" as a failure of the test), and the waits for the reconnect and for the forced logout have a limit that a loaded machine cannot reach; they still end as soon as the effect shows.
 
 ## [0.2.9] - One local screen at a time, who connects to the server, the access options of the server for administrators and the version of the client in its identity
