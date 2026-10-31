@@ -4,6 +4,10 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+- **Who connects to the server:** a Connections button in the access panel opens a simple list of the apps the server has seen (kind, user, version, local network or from outside, the sessions open now, the sign-ins that worked or were refused, how long ago) and the latest sign-ins, refused sign-ins, sign-outs and ended sessions, read from the connection routes of the server. An administrator sees every entry and any other account only its own; no password or token is in either list, and an address appears only if the server was told to keep it. It says so plainly when the server is too old to offer them.
+
+- **Access options of the server (administrators only):** a button of the access panel opens seven switches read from the server configuration: the health route without a sign-in, the announcement of the global stop, keeping the address of each client in the history of connections, the camera pictures without a ticket, a token in the WebSocket address, the blanking of secrets in the log and the signature of a spoken confirmation. Each shows where its value comes from (default, saved from a screen, or fixed by the environment of the server, which locks it); only what changed is sent; and every change that lowers the protection asks first, listing what it opens. A server that does not offer an option does not show it. Texts in the eight languages.
+
 ## [0.2.8] - Safe mode of a robot, HTTPS first with a certificate you can trust, the machine the panel is mounted on at sign-in and the version moved by the shared project tool
 
 - **Safe mode of a robot:** the control bar has a button to disable the selected robot (hold to confirm, like STOP): the robot stops, its valves and pumps go off and the server refuses everything but STOP. A disabled robot shows the button in green; an administrator can hold it to enable the robot again. The server keeps enabling off by default, so the refusal says so in its own words (enabling not allowed, administrator required), and a command sent to a disabled robot says the robot is in safe mode, in the eight languages.

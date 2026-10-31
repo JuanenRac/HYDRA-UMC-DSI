@@ -365,6 +365,47 @@ class HydraApiClient {
     return resp.body;
   }
 
+  /// The clients the server has seen (GET /api/connections/clients) as text, for [ConnectionHistory.parseClients]. An account that
+  /// is not an administrator is given only its own entries.
+  Future<String> getConnectionClientsBody() async {
+    final resp = await _client
+        .get(Uri.parse('$baseUrl/api/connections/clients'), headers: {..._clientHeaders, ..._authHeaders})
+        .timeout(const Duration(seconds: 10));
+    _throwForStatus(resp);
+    return resp.body;
+  }
+
+  /// The latest lines of the history of sign-ins (GET /api/connections/events), newest first, as text for [ConnectionHistory.parseEvents].
+  Future<String> getConnectionEventsBody(int limit) async {
+    final resp = await _client
+        .get(Uri.parse('$baseUrl/api/connections/events?limit=${limit.clamp(1, 500)}'), headers: {..._clientHeaders, ..._authHeaders})
+        .timeout(const Duration(seconds: 10));
+    _throwForStatus(resp);
+    return resp.body;
+  }
+
+  /// The access options of the server (GET /api/admin/server-config, administrators only) as text, for [ServerSecurityOptions.parse].
+  Future<String> getServerConfigBody() async {
+    final resp = await _client
+        .get(Uri.parse('$baseUrl/api/admin/server-config'), headers: {..._clientHeaders, ..._authHeaders})
+        .timeout(const Duration(seconds: 10));
+    _throwForStatus(resp);
+    return resp.body;
+  }
+
+  /// Changes access options of the server (PUT /api/admin/server-config, administrators only); the answer is the options as they are now.
+  Future<String> putServerConfigBody(Map<String, dynamic> body) async {
+    final resp = await _client
+        .put(
+          Uri.parse('$baseUrl/api/admin/server-config'),
+          headers: {'Content-Type': 'application/json', ..._clientHeaders, ..._authHeaders},
+          body: jsonEncode(body),
+        )
+        .timeout(const Duration(seconds: 10));
+    _throwForStatus(resp);
+    return resp.body;
+  }
+
   /// Arms (true) or disarms (false) the jog of one robot; only demanded by the
   /// server when the administrator turned it on.
   Future<Map<String, dynamic>> postJogArm(dynamic robotId, bool armed) =>

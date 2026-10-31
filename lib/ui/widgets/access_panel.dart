@@ -17,6 +17,8 @@ import '../../models/access.dart';
 import '../../models/contract_v2.dart';
 import '../../state/robot_view_model.dart';
 import 'audit_dialog.dart';
+import 'connections_dialog.dart';
+import 'server_options_dialog.dart';
 
 class AccessPanel extends StatefulWidget {
   final RobotViewModel vm;
@@ -94,7 +96,16 @@ class _AccessPanelState extends State<AccessPanel> {
                   ),
               ],
             ),
-            // The audit record is for administrators only (the server refuses it to anyone else).
+            // Who connects to the server: every signed-in account sees its own entries, an administrator sees all of them.
+            Align(
+              alignment: Alignment.centerLeft,
+              child: OutlinedButton(
+                key: const ValueKey('access-connections'),
+                onPressed: () => showDialog<void>(context: context, builder: (_) => ConnectionsDialog(vm: vm)),
+                child: Text(l10n.connectionsOpen),
+              ),
+            ),
+            // The audit record and the access options of the server are for administrators only (the server refuses them to anyone else).
             if (vm.isAdmin)
               Align(
                 alignment: Alignment.centerLeft,
@@ -102,6 +113,15 @@ class _AccessPanelState extends State<AccessPanel> {
                   key: const ValueKey('access-audit'),
                   onPressed: () => showDialog<void>(context: context, builder: (_) => AuditDialog(vm: vm)),
                   child: Text(l10n.auditOpen),
+                ),
+              ),
+            if (vm.isAdmin)
+              Align(
+                alignment: Alignment.centerLeft,
+                child: OutlinedButton(
+                  key: const ValueKey('access-server-options'),
+                  onPressed: () => showDialog<void>(context: context, builder: (_) => ServerOptionsDialog(vm: vm)),
+                  child: Text(l10n.serverOptionsTitle),
                 ),
               ),
             if (_showList) ...[
