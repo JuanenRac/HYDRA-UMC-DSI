@@ -23,6 +23,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import '../app_version.dart';
 import '../models/access.dart';
 import '../models/contract_v2.dart';
 import 'tls_settings.dart';
@@ -136,7 +137,17 @@ class HydraApiClient {
   /// recognizes "suite", "android", "ios", "watch" and "dsi", so this app's
   /// access can be switched off on its own. A request with no header, or an
   /// unrecognized value, is never gated.
-  static const Map<String, String> _clientHeaders = {'X-Hydra-Client': 'dsi'};
+  ///
+  /// The value is the type and, after a slash, the version of this build
+  /// ("dsi/0.2.8"). The server compares the type only (the version goes to
+  /// its history of connections), so the version never opens or closes
+  /// access.
+  static final Map<String, String> _clientHeaders = {'X-Hydra-Client': clientHeaderValue(kAppVersion)};
+
+  /// `dsi/<version>`, or just `dsi` when the version is not one the server
+  /// takes (1 to 24 of 0-9 A-Z a-z . _ -).
+  static String clientHeaderValue(String version) =>
+      RegExp(r'^[0-9A-Za-z._-]{1,24}$').hasMatch(version) ? 'dsi/$version' : 'dsi';
 
   Future<Map<String, dynamic>> login(String username, String password) async {
     // A direct "add server, log in" flow never gets a chance to learn the

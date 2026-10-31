@@ -57,7 +57,7 @@ OS), not a stand-in for a platform this dev machine can't build.
 Identical contract to HYDRA-UMC-IOS-CONTROL's own (see that repo's own
 `docs/ARCHITECTURE.md` section 2 for the endpoint-by-endpoint breakdown,
 not repeated here to avoid drift) with exactly one difference: this app's
-own `network/hydra_api_client.dart` sends `X-Hydra-Client: dsi` instead of
+own `network/hydra_api_client.dart` sends `X-Hydra-Client: dsi/<version>` instead of
 `ios`/`android`/`suite`.
 
 HYDRA-UMC-SERVER's `serverPolicy.ts` recognizes `suite`, `android`, `ios`,
