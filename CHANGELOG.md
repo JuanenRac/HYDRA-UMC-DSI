@@ -4,6 +4,8 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+- **Bench test script:** `docs/BENCH_TESTS.md` lists the checks that need a Compute Module 5 and a DSI panel (non-root unit, appliance mode, on-screen keyboard, backlight, idle lock, take control, saved session), all marked not executed.
+
 ## [0.3.1] - Appliance mode with an on-screen keyboard, an inactivity lock with an operator PIN, dimming and a screen saver, a System tab with security and restart, and a home pose that says why it was refused
 
 - **One settings file for the panel:** every tunable lives in `/etc/hydra-umc/dsi.conf` (or the path in `HYDRA_DSI_CONFIG`), documented key by key in `kiosk/dsi.conf.example`; every key is off by default, a line that makes no sense keeps the default of its key, and the installer creates the file once and never overwrites it.
