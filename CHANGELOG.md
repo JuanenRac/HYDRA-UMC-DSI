@@ -4,6 +4,8 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+## [0.3.1] - Appliance mode with an on-screen keyboard, an inactivity lock with an operator PIN, dimming and a screen saver, a System tab with security and restart, and a home pose that says why it was refused
+
 - **One settings file for the panel:** every tunable lives in `/etc/hydra-umc/dsi.conf` (or the path in `HYDRA_DSI_CONFIG`), documented key by key in `kiosk/dsi.conf.example`; every key is off by default, a line that makes no sense keeps the default of its key, and the installer creates the file once and never overwrites it.
 - **Appliance mode and on-screen keyboard:** with `appliance = on` the panel is a screen of its own Compute Module (address `127.0.0.1`, no network scan, the saved session is used at start-up); with `virtual_keyboard = on` the sign-in screen has an on-screen keyboard that types into the field touched last. A panel account issued by the server for an unattended sign-in is not built yet.
 - **Idle lock, operator PIN, dimming and screen saver:** after the configured time without a touch the panel dims, shows a screen saver and locks until the operator types the PIN. The PIN is set by an administrator in Settings, kept only as a salted digest, counted (wrong tries lock the pad for a time that doubles each round) and optional (without it the panel never locks). The global STOP stays on the saver and the lock screen, the touch that wakes the panel is not also a press, and dimming and the saver wait while a robot plays a trajectory or a STOP is unconfirmed. One owner for the backlight keeps the schedule by time of day from undoing the dimming.
