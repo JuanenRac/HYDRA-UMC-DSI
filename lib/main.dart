@@ -23,8 +23,10 @@ import 'package:provider/provider.dart';
 
 import 'l10n/app_localizations.dart';
 import 'state/robot_view_model.dart';
+import 'state/system_model.dart';
 import 'ui/login_screen.dart';
 import 'ui/main_screen.dart';
+import 'ui/widgets/idle_gate.dart';
 
 /// Attached to MaterialApp's scaffoldMessengerKey: the only way an error caught
 /// outside Flutter's build/layout/paint pipeline (no BuildContext of its own)
@@ -136,8 +138,12 @@ class HydraUmcDsiApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => RobotViewModel()..init(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => RobotViewModel()..init()),
+        // The System tab and the safety chip: kept apart so their readings never redraw the control screens.
+        ChangeNotifierProvider(create: (context) => SystemModel(vm: context.read<RobotViewModel>())),
+      ],
       child: Consumer<RobotViewModel>(
         builder: (context, vm, _) => MaterialApp(
           title: 'HYDRA-UMC DSI',
@@ -184,7 +190,9 @@ class _RootGate extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final vm = context.watch<RobotViewModel>();
-    return vm.isLoggedIn ? const MainScreen() : const LoginScreen();
+    // Only whether a session is active decides this, not every change of the model.
+    final loggedIn = context.select<RobotViewModel, bool>((vm) => vm.isLoggedIn);
+    // The idle dimming, saver and lock (settings file; all off by default) wrap the signed-in app only.
+    return loggedIn ? const IdleGate(child: MainScreen()) : const LoginScreen();
   }
 }

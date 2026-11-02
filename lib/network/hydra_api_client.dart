@@ -457,6 +457,41 @@ class HydraApiClient {
     return _expectJson(resp);
   }
 
+  /// The services of the ecosystem and their health (`GET /api/ecosystem/status`).
+  Future<Map<String, dynamic>> getEcosystemStatus() async {
+    final resp = await _client
+        .get(Uri.parse('$baseUrl/api/ecosystem/status'), headers: {..._clientHeaders, ..._authHeaders})
+        .timeout(const Duration(seconds: 8));
+    return _expectJson(resp);
+  }
+
+  /// Starts, stops or restarts the service of one project (`POST /api/ecosystem/service/:unit/:action`). The server
+  /// only lets an administrator do it, only for a unit it knows, and never for its own.
+  Future<Map<String, dynamic>> postEcosystemService(String unit, String action) async {
+    final resp = await _client
+        .post(Uri.parse('$baseUrl/api/ecosystem/service/${Uri.encodeComponent(unit)}/${Uri.encodeComponent(action)}'),
+            headers: {..._clientHeaders, ..._authHeaders})
+        .timeout(const Duration(seconds: 20));
+    return _expectJson(resp);
+  }
+
+  /// Makes the server close so its supervisor starts it again (`POST /api/admin/restart`, administrators only).
+  Future<Map<String, dynamic>> postAdminRestart() async {
+    final resp = await _client
+        .post(Uri.parse('$baseUrl/api/admin/restart'), headers: {..._clientHeaders, ..._authHeaders})
+        .timeout(const Duration(seconds: 8));
+    return _expectJson(resp);
+  }
+
+  /// Restarts the whole Compute Module (`POST /api/system/reboot`). The server only accepts it from the machine
+  /// itself and without a proxy; this app calls it only when the person chose that on purpose.
+  Future<Map<String, dynamic>> postSystemReboot() async {
+    final resp = await _client
+        .post(Uri.parse('$baseUrl/api/system/reboot'), headers: {..._clientHeaders, ..._authHeaders})
+        .timeout(const Duration(seconds: 8));
+    return _expectJson(resp);
+  }
+
   Map<String, dynamic> _expectJson(http.Response resp) {
     _throwForStatus(resp);
     final Object? decoded;

@@ -22,11 +22,19 @@
 # real test of this unit, not a formality - GPU/DRM device permissions,
 # seatd/logind availability, and cage's own exact CLI flags can all differ
 # across Raspberry Pi OS image versions in ways that aren't checkable from
-# here. Runs as root deliberately (see kiosk/install_kiosk.sh's own header
-# comment) to sidestep video/input/seat group-membership questions that
-# can't be verified without the real board either - acceptable for a
-# single-purpose embedded kiosk appliance with no other login use, not a
-# general-purpose desktop.
+# here.
+#
+# NOT ROOT: the app parses JSON and picture streams from the network, so it runs
+# as its own account, hydra-dsi, created by install_kiosk.sh (a system user with
+# no login shell, in the groups video, render and input). The unit is hardened:
+# no new privileges, no capabilities, a private /tmp, read-only /usr and /etc,
+# no access to the homes, no kernel modules or logs, only the address families
+# the app uses (AF_NETLINK stays: the mDNS discovery needs it). The state of the
+# app (its preferences) lives in /var/lib/hydra-dsi. The backlight is written
+# through a udev rule (kiosk/90-hydra-dsi-backlight.rules) that gives the video
+# group the right to write brightness; /sys is therefore NOT made read-only here.
+# Which of these directives the CM5 image accepts is the first thing to check
+# on the board (journalctl -u hydra-umc-dsi.service).
 #
 # LOCAL SCREEN: this unit starts only when the setting HYDRA_LOCAL_SCREEN is dsi
 # (see local_screen.sh). It reads /etc/hydra-umc/local-screen.conf, and
@@ -42,15 +50,50 @@ After=getty@tty1.service
 
 [Service]
 Type=simple
+User=hydra-dsi
+Group=hydra-dsi
+SupplementaryGroups=video render input
+# A login session for cage (seat and runtime directory) without a getty.
+PAMName=login
+UtmpIdentifier=tty1
+UtmpMode=user
 EnvironmentFile=-/etc/hydra-umc/local-screen.conf
 ExecCondition=/bin/sh -c 'test "$${HYDRA_LOCAL_SCREEN:-hdmi}" = dsi'
+# The settings file of the panel (kiosk/dsi.conf.example): every tunable lives there, none in the code.
+Environment=HYDRA_DSI_CONFIG=/etc/hydra-umc/dsi.conf
+Environment=HOME=/var/lib/hydra-dsi
+Environment=XDG_DATA_HOME=/var/lib/hydra-dsi/data
+Environment=XDG_CONFIG_HOME=/var/lib/hydra-dsi/config
+StateDirectory=hydra-dsi
 ExecStart=/usr/bin/cage -- /opt/hydra-umc-dsi/bundle/hydra_umc_dsi
 StandardInput=tty
 StandardOutput=journal
 StandardError=journal
 TTYPath=/dev/tty1
+TTYReset=yes
+TTYVHangup=yes
 Restart=always
 RestartSec=2
+
+# Hardening (see the header). Nothing here asks for more rights than the app has.
+NoNewPrivileges=yes
+CapabilityBoundingSet=
+AmbientCapabilities=
+PrivateTmp=yes
+ProtectSystem=full
+ProtectHome=yes
+ProtectControlGroups=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectClock=yes
+ProtectHostname=yes
+RestrictSUIDSGID=yes
+RestrictRealtime=yes
+RestrictNamespaces=yes
+LockPersonality=yes
+SystemCallArchitectures=native
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6 AF_NETLINK
+UMask=0077
 
 # a real, initial cgroup memory ceiling - conservative defaults, meant to be refined once real telemetry from this service running on the CM5 exists, never removed back to unlimited.
 MemoryHigh=512M

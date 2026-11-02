@@ -22,12 +22,36 @@ import 'package:provider/provider.dart';
 
 import '../app_version.dart';
 import '../l10n/app_localizations.dart';
+import '../models/server_info.dart';
 import '../network/tls_settings.dart';
 import '../state/robot_view_model.dart';
+import 'widgets/pin_dialog.dart';
 import 'widgets/security_dialog.dart';
+
+/// What the settings screen draws, picked out of the view model so a change of anything else (a position, a
+/// reservation, a metrics tick) does not redraw it. Records compare their fields, so an unchanged view is not rebuilt.
+typedef _SettingsView = (
+  ServerInfo?,
+  String,
+  Map<String, dynamic>?,
+  bool,
+  String,
+  String?,
+  bool,
+  bool,
+  bool,
+  bool,
+);
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
+
+  static Future<void> _pinAction(BuildContext context, RobotViewModel vm, Future<String?> Function() action) async {
+    final message = await action();
+    if (message != null && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    }
+  }
 
   static String _connectionStatusLabel(AppLocalizations l10n, String status) {
     switch (status) {
@@ -67,10 +91,31 @@ class SettingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final vm = context.watch<RobotViewModel>();
+    final vm = context.read<RobotViewModel>();
+    final view = context.select<RobotViewModel, _SettingsView>((m) => (
+          m.activeServer,
+          m.connectionStatus,
+          m.hydraInfo,
+          m.confirmPlay,
+          m.tlsSettings.pinnedFingerprint,
+          m.languageOverride?.languageCode,
+          m.homeResetEnabled,
+          m.pin.isSet,
+          m.isAdmin,
+          m.pin.memoryOnly,
+        ));
     final l10n = AppLocalizations.of(context)!;
-    final server = vm.activeServer;
-    final info = vm.hydraInfo;
+    final server = view.$1;
+    final connectionStatus = view.$2;
+    final info = view.$3;
+    final confirmPlay = view.$4;
+    final pinnedFingerprint = view.$5;
+    final languageCode = view.$6;
+    final homeResetEnabled = view.$7;
+    final pinSet = view.$8;
+    final isAdmin = view.$9;
+    final pinMemoryOnly = view.$10;
+    final lockSeconds = vm.panelConfig.idleLockSeconds;
     return ListView(
       padding: const EdgeInsets.all(20),
       children: [
@@ -81,7 +126,7 @@ class SettingsScreen extends StatelessWidget {
         ),
         ListTile(
           leading: const Icon(Icons.wifi_tethering),
-          title: Text(l10n.settingsStatus(_connectionStatusLabel(l10n, vm.connectionStatus))),
+          title: Text(l10n.settingsStatus(_connectionStatusLabel(l10n, connectionStatus))),
         ),
         if (info != null) ...[
           ListTile(leading: const Icon(Icons.dns_outlined), title: Text(l10n.settingsProduct('${info['product'] ?? '?'}'))),
@@ -93,22 +138,65 @@ class SettingsScreen extends StatelessWidget {
           secondary: const Icon(Icons.play_circle_outline),
           title: Text(l10n.settingsConfirmPlay),
           subtitle: Text(l10n.settingsConfirmPlaySubtitle),
-          value: vm.confirmPlay,
+          value: confirmPlay,
           onChanged: (value) => vm.setConfirmPlay(value),
+        ),
+        SwitchListTile(
+          key: const Key('settings-home-reset'),
+          secondary: const Icon(Icons.home_outlined),
+          title: Text(l10n.homeResetSwitchLabel),
+          subtitle: Text(l10n.homeResetSwitchHint),
+          value: homeResetEnabled,
+          onChanged: (value) => vm.setHomeResetEnabled(value),
+        ),
+        const Divider(),
+        // The PIN of the operator: it unlocks the panel after the idle lock. Only an administrator sets or removes it.
+        ListTile(
+          key: const Key('settings-pin'),
+          leading: Icon(pinSet ? Icons.lock_outline : Icons.lock_open_outlined),
+          title: Text(l10n.pinSettingTitle),
+          subtitle: Text([
+            pinSet ? l10n.pinSettingIsSet : l10n.pinSettingNone,
+            lockSeconds > 0 ? l10n.pinLockInfoOn(lockSeconds) : l10n.pinLockInfoOff,
+            if (pinSet && pinMemoryOnly) l10n.pinMemoryOnly,
+            if (!isAdmin) l10n.pinAdminOnly,
+          ].join('\n')),
+          isThreeLine: true,
+          trailing: !isAdmin
+              ? null
+              : Row(mainAxisSize: MainAxisSize.min, children: [
+                  TextButton(
+                    key: const Key('pin-set'),
+                    onPressed: () => _pinAction(context, vm, () async {
+                      if (pinSet && !await confirmCurrentPin(context, vm)) return null;
+                      if (!context.mounted) return null;
+                      return setNewPin(context, vm);
+                    }),
+                    child: Text(pinSet ? l10n.pinChangeButton : l10n.pinSetButton),
+                  ),
+                  if (pinSet)
+                    TextButton(
+                      key: const Key('pin-remove'),
+                      onPressed: () => _pinAction(context, vm, () async {
+                        if (!await confirmCurrentPin(context, vm)) return null;
+                        await vm.clearOperatorPin();
+                        return l10n.pinRemoved;
+                      }),
+                      child: Text(l10n.pinRemoveButton),
+                    ),
+                ]),
         ),
         const Divider(),
         ListTile(
           key: const Key('settings-security'),
           leading: const Icon(Icons.shield_outlined),
           title: Text(l10n.securityTitle),
-          subtitle: Text(vm.tlsSettings.pinnedFingerprint.isNotEmpty
-              ? TlsFingerprint.display(vm.tlsSettings.pinnedFingerprint)
-              : l10n.securityIntro),
+          subtitle: Text(pinnedFingerprint.isNotEmpty ? TlsFingerprint.display(pinnedFingerprint) : l10n.securityIntro),
           onTap: () => showSecurityDialog(
             context,
             vm,
-            host: vm.activeServer?.host ?? '',
-            port: vm.activeServer?.port ?? 3000,
+            host: server?.host ?? '',
+            port: server?.port ?? 3000,
           ),
         ),
         const Divider(),
@@ -116,7 +204,7 @@ class SettingsScreen extends StatelessWidget {
           leading: const Icon(Icons.language),
           title: Text(l10n.settingsLanguage),
           trailing: DropdownButton<String?>(
-            value: vm.languageOverride?.languageCode,
+            value: languageCode,
             underline: const SizedBox.shrink(),
             items: [
               DropdownMenuItem<String?>(value: null, child: Text(l10n.settingsLanguageSystem)),

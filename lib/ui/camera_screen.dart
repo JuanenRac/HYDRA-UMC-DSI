@@ -33,7 +33,10 @@ class _CameraScreenState extends State<CameraScreen> {
   @override
   Widget build(BuildContext context) {
     if (!widget.active) return const SizedBox.shrink();
-    final vm = context.watch<RobotViewModel>();
+    // The list of cameras and the server change this screen; the position of a robot does not.
+    context.select<RobotViewModel, String>((m) => m.robots.map((r) => '${r.id}|${r.name}|${r.hasCamera}').join(';'));
+    context.select<RobotViewModel, Object?>((m) => m.activeServer);
+    final vm = context.read<RobotViewModel>();
     final l10n = AppLocalizations.of(context)!;
     final robots = vm.robots;
     if (robots.isEmpty) {

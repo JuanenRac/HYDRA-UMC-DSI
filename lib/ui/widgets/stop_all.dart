@@ -85,9 +85,12 @@ class StopAllBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final vm = context.watch<RobotViewModel>();
+    // Only the state of the global STOP matters here, not every message of the socket.
+    final shown = context.select<RobotViewModel, (bool, StopAllResult?, String)>(
+        (m) => (m.stopAllUnconfirmed, m.stopAllResult, m.activeServer?.username ?? ''));
+    final vm = context.read<RobotViewModel>();
     final l10n = AppLocalizations.of(context)!;
-    if (vm.stopAllUnconfirmed) {
+    if (shown.$1) {
       return Container(
         key: const Key('stop-all-unconfirmed'),
         width: double.infinity,
@@ -112,9 +115,9 @@ class StopAllBanner extends StatelessWidget {
         ),
       );
     }
-    final result = vm.stopAllResult;
+    final result = shown.$2;
     if (result == null) return const SizedBox.shrink();
-    return _ResultBanner(result: result, me: vm.activeServer?.username ?? '', onClose: vm.dismissStopAllResult);
+    return _ResultBanner(result: result, me: shown.$3, onClose: vm.dismissStopAllResult);
   }
 }
 

@@ -47,6 +47,32 @@ class StaticTests(unittest.TestCase):
         self.assertLess(text.index("# --- local screen begin"), text.index("systemctl daemon-reload"))
         self.assertLess(text.index("# --- local screen end"), text.index('install -m 644 "$SERVICE_SRC"'))
 
+    def test_the_panel_does_not_run_as_root_and_the_unit_is_hardened(self) -> None:
+        text = UNIT.read_text(encoding="utf-8")
+        directives = {line.split("=", 1)[0]: line.split("=", 1)[1] for line in text.splitlines() if re.match(r"^[A-Za-z]+=", line)}
+        self.assertEqual(directives["User"], "hydra-dsi")
+        self.assertNotIn("root", directives["User"])
+        for name in ("NoNewPrivileges", "PrivateTmp", "ProtectHome", "ProtectKernelModules", "ProtectKernelLogs", "RestrictSUIDSGID", "LockPersonality"):
+            self.assertEqual(directives[name], "yes", name)
+        self.assertEqual(directives["CapabilityBoundingSet"], "")
+        self.assertIn("AF_NETLINK", directives["RestrictAddressFamilies"], "the mDNS discovery needs netlink")
+        self.assertIn("video", directives["SupplementaryGroups"])
+        self.assertIn("HYDRA_DSI_CONFIG=/etc/hydra-umc/dsi.conf", text)
+        self.assertEqual(directives["Restart"], "always", "the reboot button of the screen relies on the supervisor starting the app again")
+
+    def test_the_installer_makes_the_account_the_settings_file_and_the_backlight_rule(self) -> None:
+        text = INSTALLER.read_text(encoding="utf-8")
+        self.assertIn('DSI_USER="hydra-dsi"', text)
+        self.assertIn("useradd --system", text)
+        self.assertIn('if [ ! -e "$CONF_DIR/dsi.conf" ]; then', text)
+        self.assertIn("90-hydra-dsi-backlight.rules", text)
+        self.assertLess(text.index("# --- panel account end"), text.index('install -m 644 "$SERVICE_SRC"'))
+        self.assertLess(text.index("# --- local screen end"), text.index("# --- panel account begin"))
+        rule = (ROOT / "kiosk" / "90-hydra-dsi-backlight.rules").read_text(encoding="utf-8")
+        self.assertIn('SUBSYSTEM=="backlight"', rule)
+        self.assertIn("chgrp video", rule)
+        self.assertTrue((ROOT / "kiosk" / "dsi.conf.example").is_file())
+
     @unittest.skipUnless(BASH, "bash is needed")
     def test_the_scripts_have_valid_syntax(self) -> None:
         for script in (INSTALLER, LIBRARY):

@@ -23,6 +23,12 @@
 # once (it saves the choice) or set HYDRA_LOCAL_SCREEN=dsi. When it installs, it
 # also takes back the autologin of the HDMI kiosk on tty1.
 #
+# The app does not run as root: this script creates the account hydra-dsi (a
+# system user with no login shell, in the groups video, render and input), gives
+# it the settings file /etc/hydra-umc/dsi.conf (copied from dsi.conf.example only
+# when there is none, never overwritten, readable by that account only) and the
+# udev rule that lets the video group set the brightness of the backlight.
+#
 # HONESTY NOTE: same as hydra-umc-dsi.service's own header comment - never
 # actually run against a real CM5 or any other Linux box, no Linux machine
 # is available in the environment this was written in. Treat the first
@@ -75,6 +81,37 @@ if ! command -v cage >/dev/null 2>&1; then
   echo "(e.g. 'apt install cage' on Debian/Raspberry Pi OS derivatives) and re-run this script." >&2
   exit 1
 fi
+
+# --- panel account begin
+# The panel is not root: its own account, with only the groups a screen and a touch panel need.
+DSI_USER="hydra-dsi"
+if ! id -u "$DSI_USER" >/dev/null 2>&1; then
+  useradd --system --home-dir /var/lib/hydra-dsi --no-create-home --shell /usr/sbin/nologin "$DSI_USER"
+fi
+for group in video render input; do
+  getent group "$group" >/dev/null 2>&1 && usermod -aG "$group" "$DSI_USER"
+done
+# The bundle belongs to root and is only read by the account.
+chown -R root:root "$(dirname "$BUNDLE_DIR")"
+chmod -R go-w "$(dirname "$BUNDLE_DIR")"
+
+# The settings file: created once, kept on every later run.
+CONF_DIR="${HYDRA_DSI_CONF_DIR:-/etc/hydra-umc}"
+install -d -m 755 "$CONF_DIR"
+if [ ! -e "$CONF_DIR/dsi.conf" ]; then
+  install -m 640 -o root -g "$DSI_USER" "$SCRIPT_DIR/dsi.conf.example" "$CONF_DIR/dsi.conf"
+  echo "Created $CONF_DIR/dsi.conf from dsi.conf.example (edit it, then restart the service)."
+else
+  echo "Kept the existing $CONF_DIR/dsi.conf."
+fi
+
+# The backlight: the video group may write the brightness (dimming by time of day and after a time without a touch).
+UDEV_DIR="${HYDRA_UDEV_DIR:-/etc/udev/rules.d}"
+install -d -m 755 "$UDEV_DIR"
+install -m 644 "$SCRIPT_DIR/90-hydra-dsi-backlight.rules" "$UDEV_DIR/90-hydra-dsi-backlight.rules"
+udevadm control --reload-rules 2>/dev/null || true
+udevadm trigger --subsystem-match=backlight 2>/dev/null || true
+# --- panel account end
 
 install -m 644 "$SERVICE_SRC" "$SYSTEMD_DIR/hydra-umc-dsi.service"
 systemctl daemon-reload

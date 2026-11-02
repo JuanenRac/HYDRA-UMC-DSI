@@ -26,10 +26,11 @@ class MetricsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final vm = context.watch<RobotViewModel>();
+    // Only the readings change this screen: a robot moving or a reservation changing does not redraw it.
+    final shown = context.select<RobotViewModel, (SystemMetrics?, Map<String, dynamic>?)>((m) => (m.metrics, m.hydraInfo));
     final l10n = AppLocalizations.of(context)!;
-    final metrics = vm.metrics;
-    final info = vm.hydraInfo;
+    final metrics = shown.$1;
+    final info = shown.$2;
 
     if (metrics == null) {
       return const Center(child: CircularProgressIndicator());

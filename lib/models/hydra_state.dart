@@ -36,6 +36,23 @@ class RobotView {
   String get tool => raw['tool'] is String ? raw['tool'] as String : 'None';
   bool get hasXYTable => raw['hasXYTable'] == true;
 
+  /// The jog step the server keeps for this robot (shared by every client that shows it), or null when it has none yet.
+  double? get jogStep {
+    final v = raw['jogStep'];
+    return v is num && v.isFinite && v > 0 ? v.toDouble() : null;
+  }
+
+  /// Nearest of the steps offered by [steps] to [jogStep], or [fallback] when the server has none.
+  double jogStepOr(double fallback, List<double> steps) {
+    final v = jogStep;
+    if (v == null || steps.isEmpty) return fallback;
+    var best = steps.first;
+    for (final s in steps) {
+      if ((s - v).abs() < (best - v).abs()) best = s;
+    }
+    return best;
+  }
+
   String get manufacturer {
     final m = model;
     if (m.contains('Parol6') || m.contains('Faze4')) return 'Source Robotics';

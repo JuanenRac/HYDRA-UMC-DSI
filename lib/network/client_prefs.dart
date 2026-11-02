@@ -13,6 +13,7 @@ class ClientPrefs {
   static const _keyControllerId = 'hydra_controller_id';
   static const _keyConditionalMode = 'hydra_conditional_mode';
   static const _keyConfirmPlay = 'hydra_confirm_play';
+  static const _keyHomeReset = 'hydra_home_reset_enabled';
 
   /// Whether PLAY asks first (the robot, its points, the speed, who reserved it). On before any choice: a
   /// safety question, so it is the person who turns it off.
@@ -24,6 +25,17 @@ class ClientPrefs {
   Future<void> saveConfirmPlay(bool value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_keyConfirmPlay, value);
+  }
+
+  /// Whether HOME/RESET is switched on; [defaultValue] (off in the contract) before any choice.
+  Future<bool> loadHomeReset(bool defaultValue) async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_keyHomeReset) ?? defaultValue;
+  }
+
+  Future<void> saveHomeReset(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_keyHomeReset, value);
   }
 
   /// The conditional-writes mode chosen in this app (`off`, `standard`, `strict`); null before any choice.

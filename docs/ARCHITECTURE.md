@@ -199,3 +199,43 @@ served by [HYDRA-UMC STUDIO](https://github.com/JuanenRac/HYDRA-UMC-STUDIO),
 which is the human-facing side of
 [HYDRA-UMC](https://github.com/JuanenRac/HYDRA-UMC) itself - the same
 board this app's own binary runs on.
+
+## 9. The settings file, the idle behaviour and the System tab
+
+Every tunable of the panel lives in one settings file (`/etc/hydra-umc/dsi.conf`,
+or the path in `HYDRA_DSI_CONFIG`), read by `util/panel_config.dart`: `key = value`
+lines, every default is the conservative one (the feature is off), a bad line keeps
+the default of its key. `kiosk/dsi.conf.example` documents every key and a test keeps
+the list of keys and the example in step.
+
+* **Appliance mode** (`appliance`): the panel is a screen of its own Compute Module.
+  The address is `127.0.0.1`, there is no network scan, the saved session is used at
+  start-up. A dedicated panel account issued by the server is not built (it needs a
+  route in the server); the person signs in once.
+* **Idle behaviour** (`ui/widgets/idle_gate.dart` over `util/idle_policy.dart`): after
+  the configured time without a touch the backlight is dimmed, then a screen saver
+  takes over, and the panel locks until the PIN of the operator is typed
+  (`services/operator_pin.dart`). The lock exists only when a PIN was set, never waits
+  for a robot, and leaves the global STOP on the lock screen and on the saver. Dimming
+  and the saver wait while a robot plays a trajectory or a STOP is unconfirmed. The
+  backlight has one owner (`services/panel_backlight.dart`) so the schedule by time of
+  day does not undo the dimming.
+* **System tab** (`ui/system_screen.dart`, state in `state/system_model.dart`, kept
+  apart from the view model so its readings never redraw the control screens): the
+  verdict of HYDRA-UMC-SAFETY-ZONES (`GET /state`, read only; only a current READY is
+  green), the services of `GET /api/ecosystem/status` (an administrator can start, stop
+  or restart one), and the restart buttons. A restart is asked of the role first, then
+  of the person, and is written to an audit trail and to the journal. The screen restart
+  closes the app for the service supervisor to start again; the server restart uses
+  `POST /api/admin/restart` (administrators); the whole Compute Module
+  (`POST /api/system/reboot`, loopback only) needs `reboot_action = host` and
+  `reboot_host_allowed = on` in the file, the panel being the one that runs on it, and
+  two confirmations.
+* **Shared contract with the phone apps**: the command names and limits, the jog step
+  that the server keeps and HOME/RESET come from `docs/robot_command_contract.json`
+  (an identical copy of the one the Android and iOS apps use), turned into
+  `lib/models/robot_command_contract.dart` by `tools/gen_command_contract.py`, which
+  the CI check refuses to see out of date.
+* **Screen listening**: the screens listen to the fields they draw (`context.select`),
+  not to the whole view model; `test/selector_rebuild_test.dart` counts the widgets
+  Flutter rebuilds.

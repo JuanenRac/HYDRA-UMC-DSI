@@ -19,8 +19,9 @@ import '../l10n/app_localizations.dart';
 import '../models/server_info.dart';
 import '../network/discovery.dart';
 import '../state/robot_view_model.dart';
-import 'widgets/security_dialog.dart';
 import '../util/panel_defaults.dart';
+import 'widgets/security_dialog.dart';
+import 'widgets/virtual_keyboard.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -36,6 +37,29 @@ class _LoginScreenState extends State<LoginScreen> {
   final _passCtrl = TextEditingController();
   bool _isSubmitting = false;
 
+  // The on-screen keyboard writes into the field touched last.
+  final _hostFocus = FocusNode();
+  final _portFocus = FocusNode();
+  final _userFocus = FocusNode();
+  final _passFocus = FocusNode();
+  late final Map<FocusNode, TextEditingController> _fields = {
+    _hostFocus: _hostCtrl,
+    _portFocus: _portCtrl,
+    _userFocus: _userCtrl,
+    _passFocus: _passCtrl,
+  };
+  TextEditingController? _lastTouched;
+
+  @override
+  void initState() {
+    super.initState();
+    for (final entry in _fields.entries) {
+      entry.key.addListener(() {
+        if (entry.key.hasFocus) _lastTouched = entry.value;
+      });
+    }
+  }
+
   StreamSubscription<ServerInfo>? _scanSub;
   StreamSubscription<ServerInfo>? _mdnsSub;
 
@@ -43,6 +67,9 @@ class _LoginScreenState extends State<LoginScreen> {
   void dispose() {
     _scanSub?.cancel();
     _mdnsSub?.cancel();
+    for (final node in _fields.keys) {
+      node.dispose();
+    }
     _hostCtrl.dispose();
     _portCtrl.dispose();
     _userCtrl.dispose();
@@ -164,8 +191,10 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _submit() async {
-    final host = _hostCtrl.text.trim();
-    final port = int.tryParse(_portCtrl.text.trim()) ?? panelDefaultPort;
+    // In appliance mode the panel is a screen of this Compute Module: the address is not the person's to choose.
+    final appliance = context.read<RobotViewModel>().panelConfig.appliance;
+    final host = appliance ? panelDefaultHost : _hostCtrl.text.trim();
+    final port = appliance ? panelDefaultPort : int.tryParse(_portCtrl.text.trim()) ?? panelDefaultPort;
     if (host.isEmpty || _userCtrl.text.trim().isEmpty || _passCtrl.text.isEmpty) return;
     setState(() => _isSubmitting = true);
     final server = ServerInfo(host: host, port: port, username: _userCtrl.text.trim(), password: _passCtrl.text);
@@ -177,115 +206,146 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     final vm = context.watch<RobotViewModel>();
     final l10n = AppLocalizations.of(context)!;
+    final appliance = vm.panelConfig.appliance;
+    final keyboard = vm.panelConfig.virtualKeyboard;
+    // With the keyboard on screen the logo goes: 720 pixels have to hold the form and four rows of keys.
+    final compact = keyboard;
+    final gap = compact ? 8.0 : 24.0;
+    // On the touch panel there is no system keyboard: the field must not ask for one.
+    final TextInputType? none = keyboard ? TextInputType.none : null;
     return Scaffold(
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 620),
-          child: Padding(
-            padding: const EdgeInsets.all(32),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.precision_manufacturing, size: 72, color: Color(0xFF00E5FF)),
-                const SizedBox(height: 16),
-                Text(
-                  'HYDRA-UMC DSI',
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w900, letterSpacing: 2),
-                ),
-                const SizedBox(height: 4),
-                Text(l10n.loginSubtitle, style: Theme.of(context).textTheme.bodyMedium),
-                const SizedBox(height: 32),
-                Row(
-                  children: [
-                    Expanded(
-                      flex: 3,
-                      child: TextField(
-                        controller: _hostCtrl,
-                        style: const TextStyle(fontSize: 16),
-                        decoration: InputDecoration(labelText: l10n.loginServerIp, border: const OutlineInputBorder()),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      flex: 1,
-                      child: TextField(
-                        controller: _portCtrl,
-                        keyboardType: TextInputType.number,
-                        style: const TextStyle(fontSize: 16),
-                        decoration: InputDecoration(labelText: l10n.loginPort, border: const OutlineInputBorder()),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: TextButton.icon(
-                    onPressed: _isSubmitting ? null : _openScanDialog,
-                    icon: const Icon(Icons.wifi_find),
-                    label: Text(l10n.loginScanNetwork, style: const TextStyle(fontSize: 15)),
-                    style: TextButton.styleFrom(minimumSize: const Size(0, 48)),
-                  ),
-                ),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: TextButton.icon(
-                    key: const Key('login-security'),
-                    onPressed: _isSubmitting
-                        ? null
-                        : () => showSecurityDialog(
-                              context,
-                              vm,
-                              host: _hostCtrl.text.trim(),
-                              port: int.tryParse(_portCtrl.text.trim()) ?? panelDefaultPort,
+      body: Column(
+        children: [
+          Expanded(
+            child: Center(
+              child: SingleChildScrollView(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 620),
+                  child: Padding(
+                    padding: EdgeInsets.all(compact ? 16 : 32),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (!compact) ...[
+                          const Icon(Icons.precision_manufacturing, size: 72, color: Color(0xFF00E5FF)),
+                          const SizedBox(height: 16),
+                        ],
+                        Text(
+                          'HYDRA-UMC DSI',
+                          style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w900, letterSpacing: 2),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(appliance ? l10n.loginApplianceSubtitle : l10n.loginSubtitle, style: Theme.of(context).textTheme.bodyMedium),
+                        SizedBox(height: gap),
+                        if (!appliance) ...[
+                          Row(
+                            children: [
+                              Expanded(
+                                flex: 3,
+                                child: TextField(
+                                  controller: _hostCtrl,
+                                  focusNode: _hostFocus,
+                                  keyboardType: none,
+                                  style: const TextStyle(fontSize: 16),
+                                  decoration: InputDecoration(labelText: l10n.loginServerIp, border: const OutlineInputBorder()),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                flex: 1,
+                                child: TextField(
+                                  controller: _portCtrl,
+                                  focusNode: _portFocus,
+                                  keyboardType: none ?? TextInputType.number,
+                                  style: const TextStyle(fontSize: 16),
+                                  decoration: InputDecoration(labelText: l10n.loginPort, border: const OutlineInputBorder()),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: TextButton.icon(
+                              onPressed: _isSubmitting ? null : _openScanDialog,
+                              icon: const Icon(Icons.wifi_find),
+                              label: Text(l10n.loginScanNetwork, style: const TextStyle(fontSize: 15)),
+                              style: TextButton.styleFrom(minimumSize: const Size(0, 48)),
                             ),
-                    icon: const Icon(Icons.shield_outlined),
-                    label: Text(l10n.securityOpen, style: const TextStyle(fontSize: 15)),
-                    style: TextButton.styleFrom(minimumSize: const Size(0, 48)),
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: _userCtrl,
-                        style: const TextStyle(fontSize: 16),
-                        decoration: InputDecoration(labelText: l10n.loginUsername, border: const OutlineInputBorder()),
-                      ),
+                          ),
+                        ],
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: TextButton.icon(
+                            key: const Key('login-security'),
+                            onPressed: _isSubmitting
+                                ? null
+                                : () => showSecurityDialog(
+                                      context,
+                                      vm,
+                                      host: appliance ? panelDefaultHost : _hostCtrl.text.trim(),
+                                      port: appliance ? panelDefaultPort : int.tryParse(_portCtrl.text.trim()) ?? panelDefaultPort,
+                                    ),
+                            icon: const Icon(Icons.shield_outlined),
+                            label: Text(l10n.securityOpen, style: const TextStyle(fontSize: 15)),
+                            style: TextButton.styleFrom(minimumSize: const Size(0, 48)),
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: TextField(
+                                controller: _userCtrl,
+                                focusNode: _userFocus,
+                                keyboardType: none,
+                                style: const TextStyle(fontSize: 16),
+                                decoration: InputDecoration(labelText: l10n.loginUsername, border: const OutlineInputBorder()),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: TextField(
+                                controller: _passCtrl,
+                                focusNode: _passFocus,
+                                keyboardType: none,
+                                obscureText: true,
+                                style: const TextStyle(fontSize: 16),
+                                decoration: InputDecoration(labelText: l10n.loginPassword, border: const OutlineInputBorder()),
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: gap),
+                        if (vm.lastError != null)
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 12),
+                            child: Text(vm.lastError!.localize(l10n), style: const TextStyle(color: Colors.redAccent)),
+                          ),
+                        SizedBox(
+                          width: double.infinity,
+                          height: 56,
+                          child: FilledButton.icon(
+                            onPressed: _isSubmitting ? null : _submit,
+                            icon: _isSubmitting
+                                ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                                : const Icon(Icons.login),
+                            label: Text(_isSubmitting ? l10n.loginSigningIn : l10n.loginSignIn, style: const TextStyle(fontSize: 17)),
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: TextField(
-                        controller: _passCtrl,
-                        obscureText: true,
-                        style: const TextStyle(fontSize: 16),
-                        decoration: InputDecoration(labelText: l10n.loginPassword, border: const OutlineInputBorder()),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 24),
-                if (vm.lastError != null)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: Text(vm.lastError!.localize(l10n), style: const TextStyle(color: Colors.redAccent)),
-                  ),
-                SizedBox(
-                  width: double.infinity,
-                  height: 56,
-                  child: FilledButton.icon(
-                    onPressed: _isSubmitting ? null : _submit,
-                    icon: _isSubmitting
-                        ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
-                        : const Icon(Icons.login),
-                    label: Text(_isSubmitting ? l10n.loginSigningIn : l10n.loginSignIn, style: const TextStyle(fontSize: 17)),
                   ),
                 ),
-              ],
+              ),
             ),
           ),
-        ),
+          if (keyboard)
+            VirtualKeyboard(
+              target: () => _lastTouched ?? (appliance ? _userCtrl : _hostCtrl),
+              onEnter: _isSubmitting ? null : _submit,
+            ),
+        ],
       ),
     );
   }

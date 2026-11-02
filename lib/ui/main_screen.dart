@@ -18,14 +18,18 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../l10n/app_localizations.dart';
-import '../services/backlight.dart';
+import '../models/system_status.dart';
+import '../services/panel_backlight.dart';
 import '../state/hydra_error.dart';
 import '../state/robot_view_model.dart';
+import '../state/system_model.dart';
+import '../util/panel_config.dart';
 import 'camera_screen.dart';
 import 'control_screen.dart';
 import 'dashboard_screen.dart';
 import 'metrics_screen.dart';
 import 'settings_screen.dart';
+import 'system_screen.dart';
 import 'three_d_screen.dart';
 import 'widgets/stop_all.dart';
 
@@ -57,16 +61,11 @@ class _MainScreenState extends State<MainScreen> {
   int? _cleanSecondsLeft;
   Timer? _cleanTimer;
 
-  final _backlight = BacklightControl();
   Timer? _backlightTimer;
-  int? _lastAppliedBrightnessPercent;
 
-  void _applyBacklightForCurrentHour() {
-    final target = brightnessPercentForHour(DateTime.now().hour);
-    if (target == _lastAppliedBrightnessPercent) return; // no-op re-check every tick, only a real change writes sysfs
-    _lastAppliedBrightnessPercent = target;
-    _backlight.setBrightnessPercent(target);
-  }
+  // The schedule by time of day goes through the one owner of the backlight, which also holds the idle dimming
+  // (services/panel_backlight.dart): the schedule's own tick must not undo a dimmed or dark screen.
+  void _applyBacklightForCurrentHour() => PanelBacklight.instance.applySchedule(DateTime.now().hour);
 
   void _startScreenClean() {
     _cleanTimer?.cancel();
@@ -90,14 +89,30 @@ class _MainScreenState extends State<MainScreen> {
   // The camera knows whether its tab is the one shown: all tabs stay alive
   // side by side (IndexedStack), and a picture stream nobody is looking at is
   // wasted CPU and memory on a panel that also runs the server.
-  List<_NavEntry> _entries(AppLocalizations l10n) => [
-        _NavEntry(Icons.dashboard, l10n.navDashboard, const DashboardScreen()),
-        _NavEntry(Icons.gamepad, l10n.navControl, const ControlScreen()),
-        _NavEntry(Icons.videocam, l10n.navCamera, CameraScreen(active: _index == 2)),
-        _NavEntry(Icons.view_in_ar, l10n.nav3d, const ThreeDScreen()),
-        _NavEntry(Icons.monitor_heart, l10n.navMetrics, const MetricsScreen()),
-        _NavEntry(Icons.settings, l10n.navSettings, const SettingsScreen()),
-      ];
+  List<_NavEntry> _entries(AppLocalizations l10n, PanelConfig config) {
+    final entries = [
+      _NavEntry(Icons.dashboard, l10n.navDashboard, const DashboardScreen()),
+      _NavEntry(Icons.gamepad, l10n.navControl, const ControlScreen()),
+      _NavEntry(Icons.videocam, l10n.navCamera, CameraScreen(active: _index == 2)),
+      _NavEntry(Icons.view_in_ar, l10n.nav3d, const ThreeDScreen()),
+      _NavEntry(Icons.monitor_heart, l10n.navMetrics, const MetricsScreen()),
+    ];
+    // The System tab exists only when the settings file turns something of it on.
+    if (config.systemTab) {
+      entries.add(_NavEntry(Icons.admin_panel_settings_outlined, l10n.navSystem, const SystemScreen()));
+    }
+    entries.add(_NavEntry(Icons.settings, l10n.navSettings, const SettingsScreen()));
+    return entries;
+  }
+
+  // The tab number of the System tab, or -1 when there is none.
+  int _systemIndex(PanelConfig config) => config.systemTab ? 5 : -1;
+
+  void _select(int i, PanelConfig config) {
+    setState(() => _index = i);
+    // The ecosystem is read only while its tab is the one shown.
+    if (config.systemTab) context.read<SystemModel>().setVisible(i == _systemIndex(config));
+  }
 
   @override
   void initState() {
@@ -159,8 +174,9 @@ class _MainScreenState extends State<MainScreen> {
     // widget when either of those two specific values actually changes.
     final serverName = context.select<RobotViewModel, String?>((vm) => vm.activeServer?.displayName);
     final connectionStatus = context.select<RobotViewModel, String>((vm) => vm.connectionStatus);
+    final config = context.select<RobotViewModel, PanelConfig>((vm) => vm.panelConfig);
     final l10n = AppLocalizations.of(context)!;
-    final entries = _entries(l10n);
+    final entries = _entries(l10n, config);
     return Scaffold(
       body: SafeArea(
         child: Stack(
@@ -172,7 +188,8 @@ class _MainScreenState extends State<MainScreen> {
                   connectionStatus: connectionStatus,
                   entries: entries,
                   selectedIndex: _index,
-                  onSelect: (i) => setState(() => _index = i),
+                  onSelect: (i) => _select(i, config),
+                  showSafety: config.safetyPanel,
                   onCleanTap: _startScreenClean,
                   cleanTooltip: l10n.cleanScreenTooltip(_screenCleanDuration.inSeconds),
                 ),
@@ -286,6 +303,7 @@ class _TopNavBar extends StatelessWidget {
   final ValueChanged<int> onSelect;
   final VoidCallback onCleanTap;
   final String cleanTooltip;
+  final bool showSafety;
 
   const _TopNavBar({
     required this.serverName,
@@ -295,6 +313,7 @@ class _TopNavBar extends StatelessWidget {
     required this.onSelect,
     required this.onCleanTap,
     required this.cleanTooltip,
+    this.showSafety = false,
   });
 
   @override
@@ -342,6 +361,7 @@ class _TopNavBar extends StatelessWidget {
               ],
             ),
           ),
+          if (showSafety) const _SafetyChip(),
           IconButton(
             icon: const Icon(Icons.cleaning_services, color: Colors.white70),
             tooltip: cleanTooltip,
@@ -352,6 +372,25 @@ class _TopNavBar extends StatelessWidget {
           const StopAllButton(),
           const SizedBox(width: 8),
         ],
+      ),
+    );
+  }
+}
+
+/// The state of the safety service at a glance, on every tab: a shield that is green only for a current READY.
+/// Redrawn only when the level changes.
+class _SafetyChip extends StatelessWidget {
+  const _SafetyChip();
+
+  @override
+  Widget build(BuildContext context) {
+    final level = context.select<SystemModel, SafetyLevel>((m) => m.safetyLevel);
+    final l10n = AppLocalizations.of(context)!;
+    return Tooltip(
+      message: '${l10n.systemSafetyTitle}: ${safetyLevelText(l10n, level)}',
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        child: Icon(level == SafetyLevel.ready ? Icons.verified_user : Icons.gpp_maybe, key: const Key('safety-chip'), color: safetyColor(level)),
       ),
     );
   }

@@ -23,7 +23,9 @@ import 'package:provider/provider.dart';
 import '../l10n/app_localizations.dart';
 import '../models/access.dart';
 import '../models/hydra_state.dart';
+import '../models/robot_command_contract.dart';
 import '../state/robot_view_model.dart';
+import '../util/home_reset.dart';
 import '../util/play_confirmation.dart';
 import 'widgets/access_panel.dart';
 import 'widgets/digital_readout.dart';
@@ -39,7 +41,11 @@ class ControlScreen extends StatefulWidget {
 
 class _ControlScreenState extends State<ControlScreen> {
   String _jogTarget = 'robot';
-  double _jogStep = 10.0;
+
+  // The jog step is the one the server keeps for the robot, so every client that shows it uses the same (the `jogStep`
+  // command); this is only the list the dropdown offers and the step used before the server has told one.
+  static const List<double> _jogSteps = [0.1, 1.0, 5.0, 10.0, 25.0, 50.0, 90.0, 100.0];
+  static const double _defaultJogStep = 10.0;
 
   // Reservations and the safety limits of the selected robot's model are read
   // from the server when this screen opens, when the robot changes and every
@@ -53,7 +59,11 @@ class _ControlScreenState extends State<ControlScreen> {
   void initState() {
     super.initState();
     _clockTimer = Timer.periodic(const Duration(seconds: 1), (_) {
-      if (mounted) setState(() => _now = DateTime.now());
+      // Only a countdown needs the clock (the arming of the jog, a reservation about to run out): with none under
+      // way, redrawing the whole screen every second is wasted work on a panel that also runs the server.
+      if (!mounted) return;
+      final vm = context.read<RobotViewModel>();
+      if (vm.jogArmedUntil.isNotEmpty || vm.claims.isNotEmpty) setState(() => _now = DateTime.now());
     });
     _accessTimer = Timer.periodic(const Duration(seconds: 15), (_) {
       // The server pushes the reservations when they change: while a push is recent the poll does not ask for them.
@@ -116,7 +126,7 @@ class _ControlScreenState extends State<ControlScreen> {
                       const SizedBox(height: 8),
                       if (robot.hasXYTable) _targetSelector(l10n),
                       const SizedBox(height: 8),
-                      _jogStepSelector(l10n),
+                      _jogStepSelector(vm, robot, l10n),
                       const SizedBox(height: 12),
                       JoystickPad(
                         // Not while a trajectory is running: the server's
@@ -126,7 +136,7 @@ class _ControlScreenState extends State<ControlScreen> {
                         enabled: robot.online && !(robot.isPlaying && !robot.isPaused) && !vm.jogNeedsArming(robot.id, _now),
                         onJog: (dx, dy, dz) {
                           HapticFeedback.selectionClick();
-                          vm.jogXYZ(_jogTarget, dx, dy, dz, _jogStep);
+                          vm.jogXYZ(_jogTarget, dx, dy, dz, robot.jogStepOr(_defaultJogStep, _jogSteps));
                         },
                       ),
                     ],
@@ -183,16 +193,18 @@ class _ControlScreenState extends State<ControlScreen> {
     );
   }
 
-  Widget _jogStepSelector(AppLocalizations l10n) {
-    const steps = [0.1, 1.0, 5.0, 10.0, 25.0, 50.0, 90.0, 100.0];
+  Widget _jogStepSelector(RobotViewModel vm, RobotView robot, AppLocalizations l10n) {
+    const steps = _jogSteps;
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(l10n.controlStepLabel, style: const TextStyle(color: Colors.grey)),
         DropdownButton<double>(
-          value: _jogStep,
+          value: robot.jogStepOr(_defaultJogStep, steps),
           items: steps.map((s) => DropdownMenuItem(value: s, child: Text(s.toString()))).toList(),
-          onChanged: (v) => setState(() => _jogStep = v ?? _jogStep),
+          onChanged: (v) {
+            if (v != null) vm.setJogStep(v);
+          },
         ),
       ],
     );
@@ -334,9 +346,76 @@ class _ControlScreenState extends State<ControlScreen> {
               vm.sendCommand('stop');
             },
           ),
+          // HOME/RESET: drawn only when the person switched it on in the settings; two confirmations.
+          if (vm.homeResetEnabled && robot != null) ...[
+            const SizedBox(width: 40),
+            _homeResetButton(vm, robot, l10n),
+          ],
         ],
       ),
     );
+  }
+
+  /// HOME/RESET: a reason not to send (safe mode, playing, no permission...) is shown as a phrase instead of opening
+  /// anything; otherwise the first confirmation opens, then the second, and only the second one sends the command.
+  Widget _homeResetButton(RobotViewModel vm, RobotView robot, AppLocalizations l10n) {
+    final block = vm.homeResetBlock(robot.id, _now);
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        OutlinedButton.icon(
+          key: const Key('home-reset-button'),
+          onPressed: () => _homeReset(vm, robot, l10n),
+          icon: const Icon(Icons.home),
+          label: Text(l10n.homeResetButton),
+          style: OutlinedButton.styleFrom(minimumSize: const Size(140, 56)),
+        ),
+        if (block != HomeResetBlock.none)
+          SizedBox(
+            width: 220,
+            child: Text(homeResetBlockText(l10n, block),
+                textAlign: TextAlign.center, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.grey, fontSize: 11)),
+          ),
+      ],
+    );
+  }
+
+  Future<void> _homeReset(RobotViewModel vm, RobotView robot, AppLocalizations l10n) async {
+    final block = vm.homeResetBlock(robot.id, _now);
+    if (block != HomeResetBlock.none) {
+      vm.homeReset(); // says why it is not sent
+      return;
+    }
+    final confirmation = vm.homeResetConfirmation..cancel();
+    var step = 1;
+    while (mounted) {
+      final last = step >= RobotCommandContract.homeResetConfirmSteps;
+      final go = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: Text(last ? l10n.homeResetStep2Title : l10n.homeResetStep1Title(robot.name)),
+          content: Text(last ? l10n.homeResetStep2Message(robot.name) : l10n.homeResetStep1Message),
+          actions: [
+            TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: Text(l10n.playConfirmCancel)),
+            FilledButton(
+              key: Key(last ? 'home-reset-confirm-last' : 'home-reset-confirm-first'),
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              child: Text(last ? l10n.homeResetStep2Button : l10n.homeResetStep1Button),
+            ),
+          ],
+        ),
+      );
+      if (go != true) {
+        confirmation.cancel();
+        return;
+      }
+      final progress = confirmation.advance();
+      if (progress.isDone) {
+        if (mounted) vm.homeReset();
+        return;
+      }
+      step = progress.next!;
+    }
   }
 }
 

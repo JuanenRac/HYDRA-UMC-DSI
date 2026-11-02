@@ -1,0 +1,33 @@
+{
+  "contract": "robot-commands",
+  "protocolVersion": 1,
+  "note": "The control commands of POST /api/robot/{id}/command that this app sends, with the limits the server enforces. HYDRA-UMC-IOS-CONTROL keeps an identical copy; a change starts here, in both. tools/gen_command_contract.py writes app/src/main/java/com/hydraumc/control/network/RobotCommandContract.kt from this file and the validation fails when they differ.",
+  "commands": [
+    {"name": "stop", "constant": "STOP", "numbered": true, "continuous": false},
+    {"name": "play", "constant": "PLAY", "numbered": false, "continuous": false},
+    {"name": "pause", "constant": "PAUSE", "numbered": false, "continuous": false},
+    {"name": "jog", "constant": "JOG", "numbered": true, "continuous": true},
+    {"name": "table", "constant": "TABLE", "numbered": true, "continuous": false},
+    {"name": "reset", "constant": "RESET", "numbered": true, "continuous": false},
+    {"name": "jogStep", "constant": "JOG_STEP", "numbered": false, "continuous": true},
+    {"name": "tool", "constant": "TOOL", "numbered": false, "continuous": false},
+    {"name": "valve", "constant": "VALVE", "numbered": false, "continuous": false},
+    {"name": "pump", "constant": "PUMP", "numbered": false, "continuous": false},
+    {"name": "speed", "constant": "SPEED", "numbered": false, "continuous": true},
+    {"name": "vision", "constant": "VISION", "numbered": false, "continuous": false},
+    {"name": "disable", "constant": "DISABLE", "numbered": false, "continuous": false},
+    {"name": "enable", "constant": "ENABLE", "numbered": false, "continuous": false}
+  ],
+  "limits": {
+    "speedMin": 10,
+    "speedMax": 500,
+    "jogMaxAmount": 1000,
+    "jogStepMax": 1000,
+    "outputIndexMax": 7
+  },
+  "homeReset": {
+    "enabledByDefault": false,
+    "confirmSteps": 2,
+    "confirmWindowMs": 20000
+  }
+}

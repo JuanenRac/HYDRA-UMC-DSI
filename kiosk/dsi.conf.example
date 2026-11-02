@@ -1,0 +1,74 @@
+# =============================================================================
+# HYDRA-UMC DSI (Flutter) - kiosk/dsi.conf.example
+# Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
+# GPL-3.0-or-later - see LICENSE
+#
+# The settings of the panel. install_kiosk.sh copies this file to
+# /etc/hydra-umc/dsi.conf (readable by the panel account only) when there is
+# none yet and never overwrites an existing one. One `key = value` per line,
+# `#` starts a comment, on/off/yes/no/true/false/1/0 for switches. A key that is
+# missing or has a value that makes no sense keeps its default, and every
+# default is the conservative one: the feature is off.
+#
+# The panel reads this file at start-up: restart the service after a change
+# (systemctl restart hydra-umc-dsi.service).
+# =============================================================================
+
+# --- appliance ---------------------------------------------------------------
+# The panel is a fixed screen of this Compute Module: the server is this machine
+# (127.0.0.1), there is no network scan and no address to type.
+appliance = on
+
+# An on-screen keyboard under the fields of the sign-in screen. A touch panel
+# with no USB keyboard cannot be signed in without it.
+virtual_keyboard = on
+
+# --- idle: lock, dim, screen saver --------------------------------------------
+# Seconds without a touch before the panel locks and asks for the PIN of the
+# operator (set by an administrator in Settings). 0 = never. Without a PIN the
+# panel never locks. The global STOP stays on the lock screen.
+idle_lock_seconds = 0
+
+# Seconds without a touch before the backlight is dimmed, and how far (percent).
+dim_after_seconds = 0
+dim_percent = 20
+
+# Seconds without a touch before the screen saver (dark screen, small moving
+# clock) takes over, and the backlight it leaves (percent).
+saver_after_seconds = 0
+saver_percent = 10
+
+# Dimming and the saver wait while a robot plays a trajectory or a STOP has not
+# been confirmed. (The lock never waits.)
+idle_waits_while_busy = on
+
+# Wrong PINs in a row before the lock refuses more (the refusal doubles each
+# round), the first refusal in seconds, and the shortest PIN that may be set.
+pin_max_attempts = 5
+pin_lockout_seconds = 30
+pin_min_length = 4
+
+# --- System tab ---------------------------------------------------------------
+# The reboot buttons. reboot_action = screen (only this screen closes and the
+# service starts it again) | services (the server restarts itself) | host (the
+# whole Compute Module). The whole Compute Module is restarted only when
+# reboot_action = host AND reboot_host_allowed = on, and only from this panel.
+reboot_button = off
+reboot_action = screen
+reboot_host_allowed = off
+
+# The safety panel: the verdict of HYDRA-UMC-SAFETY-ZONES (read only). A verdict
+# older than safety_stale_seconds is shown as not confirmed. The token is only
+# needed when the safety service was started with one; this file is then
+# readable by the panel account only.
+safety_panel = off
+safety_host = 127.0.0.1
+safety_port = 8108
+safety_token =
+safety_poll_seconds = 2
+safety_stale_seconds = 10
+
+# The ecosystem view: the services of HYDRA-UMC and whether they run. An
+# administrator can start, stop or restart one.
+ecosystem_view = off
+ecosystem_poll_seconds = 10

@@ -1,0 +1,15 @@
+# =============================================================================
+# HYDRA-UMC DSI (Flutter) - kiosk/90-hydra-dsi-backlight.rules
+# Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
+# GPL-3.0-or-later - see LICENSE
+#
+# Lets the dedicated account of the panel (group video) set the brightness of
+# the backlight, which is how the app dims the screen by time of day and after
+# a time without a touch (/sys/class/backlight/<name>/brightness). Without it
+# only root can write there and the app, which is no longer root, would leave
+# the backlight alone (it logs once and goes on).
+#
+# Installed by install_kiosk.sh as /etc/udev/rules.d/90-hydra-dsi-backlight.rules.
+# Not run on a CM5 yet: check with `ls -l /sys/class/backlight/*/brightness`.
+# =============================================================================
+ACTION=="add|change", SUBSYSTEM=="backlight", RUN+="/bin/chgrp video /sys/class/backlight/%k/brightness", RUN+="/bin/chmod g+w /sys/class/backlight/%k/brightness"

@@ -14,6 +14,7 @@
 // =============================================================================
 
 import '../l10n/app_localizations.dart';
+import '../util/home_reset.dart';
 
 enum HydraErrorKind {
   loginFailed,
@@ -63,6 +64,10 @@ enum HydraErrorKind {
   robotDisabled,
   enableNotAllowed,
   adminRequired,
+  // HOME/RESET was not sent, or was refused: the reason (a HomeResetBlock name) is in the `block` parameter.
+  homeResetBlocked,
+  // A system action of the System tab failed (restart of a service or of the screen): `what` names it.
+  systemActionFailed,
 }
 
 class HydraError {
@@ -122,6 +127,10 @@ class HydraError {
         return l10n.errEnableNotAllowed;
       case HydraErrorKind.adminRequired:
         return l10n.errAdminRequired;
+      case HydraErrorKind.homeResetBlocked:
+        return homeResetBlockText(l10n, HomeResetBlock.values.asNameMap()[params['block']] ?? HomeResetBlock.notSupported);
+      case HydraErrorKind.systemActionFailed:
+        return l10n.errSystemActionFailed(params['what'] ?? '', params['reason'] ?? '');
     }
   }
 }

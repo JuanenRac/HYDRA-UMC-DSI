@@ -38,6 +38,8 @@
 
 import 'dart:math' as math;
 
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -50,7 +52,10 @@ class ThreeDScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final vm = context.watch<RobotViewModel>();
+    // Redrawn when the SELECTED robot changes (its raw state is edited in place, so the signature is its content),
+    // not for the metrics, the other robots or the reservations.
+    context.select<RobotViewModel, String>((m) => m.selectedRobot == null ? '' : jsonEncode(m.selectedRobot!.raw));
+    final vm = context.read<RobotViewModel>();
     final l10n = AppLocalizations.of(context)!;
     final robot = vm.selectedRobot;
 

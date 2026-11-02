@@ -17,6 +17,7 @@ from pathlib import Path
 CHECKS = (
     ("make_architecture.py", ["--check"]),
     ("make_structure.py", ["--check", "--readmes"]),
+    ("gen_command_contract.py", ["--check"]),
 )
 
 
@@ -24,7 +25,8 @@ def check(root: Path) -> list[str]:
     problems: list[str] = []
     for script, arguments in CHECKS:
         path = root / "tools" / script
-        if not path.is_file() or not (root / "docs" / ("architecture.json" if "architecture" in script else "structure.json")).is_file():
+        guard = {"make_architecture.py": "architecture.json", "make_structure.py": "structure.json", "gen_command_contract.py": "robot_command_contract.json"}[script]
+        if not path.is_file() or not (root / "docs" / guard).is_file():
             continue
         result = subprocess.run([sys.executable, "-I", str(path), *arguments],
                                 cwd=root, text=True, encoding="utf-8", errors="replace", capture_output=True, check=False)
