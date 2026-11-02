@@ -273,7 +273,7 @@
   "connectionsActionSessionEnded": "Sitzung beendet",
   "connectionsActionSessionExpired": "Sitzung abgelaufen",
   "connectionsFailureUnavailable": "Dieser Server bietet den Verbindungsverlauf noch nicht an.",
-  "connectionsFailureSession": "Ihre Sitzung ist beendet. Bitte melden Sie sich neu an.",
+  "connectionsFailureSession": "Ihre Sitzung ist beendet. Melden Sie sich erneut an.",
   "connectionsFailureNetwork": "Der Server ist nicht erreichbar.",
   "connectionsFailureOther": "Der Server hat den Verbindungsverlauf nicht geliefert.",
   "serverOptionsTitle": "Zugriffsoptionen des Servers",

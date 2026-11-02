@@ -6,7 +6,7 @@
   "navCamera": "Caméra",
   "nav3d": "Vue 3D",
   "navMetrics": "Métriques",
-  "navSettings": "Réglages",
+  "navSettings": "Paramètres",
 
   "loginSubtitle": "Connectez-vous à un serveur HYDRA-UMC STUDIO",
   "loginServerIp": "IP du serveur",
@@ -282,7 +282,7 @@
   "serverOptionsSaved": "Options du serveur enregistrées.",
   "serverOptionsNone": "Ce serveur ne propose pas encore ces options.",
   "serverOptionsFailureUnavailable": "Ce serveur ne propose pas encore les options d'accès.",
-  "serverOptionsFailureSession": "Votre session a pris fin. Reconnectez-vous.",
+  "serverOptionsFailureSession": "Votre session est terminée. Reconnectez-vous.",
   "serverOptionsFailureForbidden": "Seul un administrateur peut lire ou modifier ces options.",
   "serverOptionsFailureNetwork": "Le serveur est injoignable.",
   "serverOptionsFailureOther": "Le serveur n'a pas accepté la requête.",
