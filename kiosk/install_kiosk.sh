@@ -4,7 +4,7 @@
 # Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 # GPL-3.0-or-later - see LICENSE
 #
-# Installs and enables hydra-umc-dsi.service (this directory) on a real
+# Installs and enables hydra-umc-dsi.service (../systemd/) on a real
 # Linux machine - the CM5 itself. Run ON that machine, as root, AFTER
 # build_linux.sh has produced build/linux/*/release/bundle/ and that
 # bundle/ directory has been copied to /opt/hydra-umc-dsi/bundle/ (see
@@ -38,7 +38,7 @@ set -euo pipefail
 
 BUNDLE_DIR="/opt/hydra-umc-dsi/bundle"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-SERVICE_SRC="$SCRIPT_DIR/hydra-umc-dsi.service"
+SERVICE_SRC="$SCRIPT_DIR/../systemd/hydra-umc-dsi.service"
 SYSTEMD_DIR="${HYDRA_SYSTEMD_DIR:-/etc/systemd/system}"
 SCREEN_REQUEST=""
 case "${1:-}" in

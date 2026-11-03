@@ -173,7 +173,7 @@ path has now actually been compiled and run, not just read.
 the CM5's real aarch64 Raspberry Pi OS - a successful WSL2 build confirms
 the Dart/Flutter side and the CMake+GTK runner code are sound against a
 real Linux toolchain, but it is not the same as an actual CM5 run.
-Whoever runs `build_linux.sh` and the `kiosk/hydra-umc-dsi.service`
+Whoever runs `build_linux.sh` and the `systemd/hydra-umc-dsi.service`
 autostart unit for the first time on the real CM5 (or any other aarch64
 Linux box) should still treat that as the real first hardware validation
 of this platform target, not a formality - see the root README's own

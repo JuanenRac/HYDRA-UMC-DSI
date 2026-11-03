@@ -4,6 +4,7 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+- **The kiosk unit is declared:** `hydra-umc-dsi.service` moved to `systemd/` and the manifest names it as the `systemd_unit` of the app (no port: the app serves no HTTP), so the registry of services knows the unit that the HDMI kiosk installer of HYDRA-UMC-OS mentions. The unit now restarts with a limit (5 starts in 5 minutes), and the program it starts is read from `HYDRA_DSI_APP`, which the optional file `/etc/hydra-umc/dsi.env` can change. New `docs/KIOSK_INSTALL.md` explains the installation; not run on a Compute Module yet.
 - **Bench test script:** `docs/BENCH_TESTS.md` lists the checks that need a Compute Module 5 and a DSI panel (non-root unit, appliance mode, on-screen keyboard, backlight, idle lock, take control, saved session), all marked not executed.
 
 ## [0.3.1] - Appliance mode with an on-screen keyboard, an inactivity lock with an operator PIN, dimming and a screen saver, a System tab with security and restart, and a home pose that says why it was refused

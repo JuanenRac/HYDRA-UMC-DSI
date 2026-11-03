@@ -1,5 +1,5 @@
 # =============================================================================
-# HYDRA-UMC DSI (Flutter) - kiosk/hydra-umc-dsi.service
+# HYDRA-UMC DSI (Flutter) - systemd/hydra-umc-dsi.service
 # Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 # GPL-3.0-or-later - see LICENSE
 #
@@ -36,6 +36,11 @@
 # Which of these directives the CM5 image accepts is the first thing to check
 # on the board (journalctl -u hydra-umc-dsi.service).
 #
+# APP PATH: the program that cage starts is HYDRA_DSI_APP (default below). To run another
+# build, put HYDRA_DSI_APP=/path/to/hydra_umc_dsi in /etc/hydra-umc/dsi.env (optional file,
+# no secrets in it); the file wins over the default. install_kiosk.sh installs this unit
+# from this folder.
+#
 # LOCAL SCREEN: this unit starts only when the setting HYDRA_LOCAL_SCREEN is dsi
 # (see local_screen.sh). It reads /etc/hydra-umc/local-screen.conf, and
 # ExecCondition skips the start, without a failure, for hdmi (the default) and
@@ -47,6 +52,9 @@ Description=HYDRA-UMC DSI kiosk (cage + flutter build linux bundle)
 After=systemd-user-sessions.service
 Conflicts=getty@tty1.service
 After=getty@tty1.service
+# Restart limit: at most 5 starts in 5 minutes, then the unit stays failed (a crash loop does not spin forever).
+StartLimitIntervalSec=300
+StartLimitBurst=5
 
 [Service]
 Type=simple
@@ -61,11 +69,13 @@ EnvironmentFile=-/etc/hydra-umc/local-screen.conf
 ExecCondition=/bin/sh -c 'test "$${HYDRA_LOCAL_SCREEN:-hdmi}" = dsi'
 # The settings file of the panel (kiosk/dsi.conf.example): every tunable lives there, none in the code.
 Environment=HYDRA_DSI_CONFIG=/etc/hydra-umc/dsi.conf
+Environment=HYDRA_DSI_APP=/opt/hydra-umc-dsi/bundle/hydra_umc_dsi
+EnvironmentFile=-/etc/hydra-umc/dsi.env
 Environment=HOME=/var/lib/hydra-dsi
 Environment=XDG_DATA_HOME=/var/lib/hydra-dsi/data
 Environment=XDG_CONFIG_HOME=/var/lib/hydra-dsi/config
 StateDirectory=hydra-dsi
-ExecStart=/usr/bin/cage -- /opt/hydra-umc-dsi/bundle/hydra_umc_dsi
+ExecStart=/usr/bin/cage -- ${HYDRA_DSI_APP}
 StandardInput=tty
 StandardOutput=journal
 StandardError=journal

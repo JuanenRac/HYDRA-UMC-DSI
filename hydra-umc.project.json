@@ -19,5 +19,8 @@
   "native_version": {
     "file": "pubspec.yaml",
     "pattern": "^version:\\s*(\\d+)\\.(\\d+)\\.(\\d+)\\+\\d+"
+  },
+  "service": {
+    "systemd_unit": "hydra-umc-dsi.service"
   }
 }

@@ -21,7 +21,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 INSTALLER = ROOT / "kiosk" / "install_kiosk.sh"
-UNIT = ROOT / "kiosk" / "hydra-umc-dsi.service"
+UNIT = ROOT / "systemd" / "hydra-umc-dsi.service"
 LIBRARY = ROOT / "kiosk" / "local_screen.sh"
 BASH = shutil.which("bash")
 
@@ -59,6 +59,16 @@ class StaticTests(unittest.TestCase):
         self.assertIn("video", directives["SupplementaryGroups"])
         self.assertIn("HYDRA_DSI_CONFIG=/etc/hydra-umc/dsi.conf", text)
         self.assertEqual(directives["Restart"], "always", "the reboot button of the screen relies on the supervisor starting the app again")
+        self.assertIn("StartLimitBurst=", text, "a crash loop must stop after a few starts")
+        self.assertIn("StartLimitIntervalSec=", text)
+        self.assertIn("EnvironmentFile=-/etc/hydra-umc/dsi.env", text, "the path of the app is set from a file")
+        self.assertIn("ExecStart=/usr/bin/cage -- ${HYDRA_DSI_APP}", text)
+        self.assertNotIn("Password", text, "no secret in the unit")
+
+    def test_the_manifest_declares_the_unit_without_a_port(self) -> None:
+        import json
+        manifest = json.loads((ROOT / "hydra-umc.project.json").read_text(encoding="utf-8"))
+        self.assertEqual(manifest["service"], {"systemd_unit": "hydra-umc-dsi.service"}, "the app serves no HTTP: no port, no health path")
 
     def test_the_installer_makes_the_account_the_settings_file_and_the_backlight_rule(self) -> None:
         text = INSTALLER.read_text(encoding="utf-8")

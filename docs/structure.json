@@ -267,24 +267,47 @@
         {
           "name": "kiosk/",
           "desc": {
-            "en": "kiosk unit and its installer",
-            "es": "unidad de quiosco y su instalador",
-            "de": "Kiosk-Unit und ihr Installationsskript",
-            "fr": "unité kiosque et son installateur",
-            "it": "unità kiosk e il suo installatore",
-            "ja": "キオスクのユニットとインストーラー",
-            "zh": "展台单元及其安装脚本",
-            "pt": "unidade de quiosque e o seu instalador"
+            "en": "kiosk installer, settings example and backlight rule",
+            "es": "instalador del quiosco, ejemplo de ajustes y regla del brillo",
+            "de": "Kiosk-Installer, Einstellungsbeispiel und Helligkeitsregel",
+            "fr": "installateur du kiosque, exemple de réglages et règle du rétroéclairage",
+            "it": "installer del kiosk, esempio di impostazioni e regola della retroilluminazione",
+            "ja": "キオスクのインストーラー、設定例、バックライトのルール",
+            "zh": "展台安装脚本、设置示例和背光规则",
+            "pt": "instalador do quiosque, exemplo de definições e regra da luz de fundo"
           },
           "tree_desc": {
-            "en": "kiosk unit and its installer",
-            "es": "unidad de quiosco y su instalador",
-            "de": "Kiosk-Unit und ihr Installationsskript",
-            "fr": "unité kiosque et son installateur",
-            "it": "unità kiosk e il suo installatore",
-            "ja": "キオスクのユニットとインストーラー",
-            "zh": "展台单元及其安装脚本",
-            "pt": "unidade de quiosque e o seu instalador"
+            "en": "kiosk installer, settings example and backlight rule",
+            "es": "instalador del quiosco, ejemplo de ajustes y regla del brillo",
+            "de": "Kiosk-Installer, Einstellungsbeispiel und Helligkeitsregel",
+            "fr": "installateur du kiosque, exemple de réglages et règle du rétroéclairage",
+            "it": "installer del kiosk, esempio di impostazioni e regola della retroilluminazione",
+            "ja": "キオスクのインストーラー、設定例、バックライトのルール",
+            "zh": "展台安装脚本、设置示例和背光规则",
+            "pt": "instalador do quiosque, exemplo de definições e regra da luz de fundo"
+          }
+        },
+        {
+          "name": "systemd/",
+          "desc": {
+            "en": "systemd unit of the kiosk",
+            "es": "unidad systemd del quiosco",
+            "de": "systemd-Unit des Kiosks",
+            "fr": "unité systemd du kiosque",
+            "it": "unità systemd del kiosk",
+            "ja": "キオスクの systemd ユニット",
+            "zh": "展台的 systemd 单元",
+            "pt": "unidade systemd do quiosque"
+          },
+          "tree_desc": {
+            "en": "systemd unit of the kiosk",
+            "es": "unidad systemd del quiosco",
+            "de": "systemd-Unit des Kiosks",
+            "fr": "unité systemd du kiosque",
+            "it": "unità systemd del kiosk",
+            "ja": "キオスクの systemd ユニット",
+            "zh": "展台的 systemd 单元",
+            "pt": "unidade systemd do quiosque"
           }
         },
         {
