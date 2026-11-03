@@ -21,7 +21,7 @@ dependencies:
   # server - no reason to pick different ones here.
   http: ^1.6.0
   web_socket_channel: ^3.0.3
-  shared_preferences: ^2.5.5
+  shared_preferences: ^2.5.6
   provider: ^6.1.5+1
 
   # Real mDNS/Bonjour discovery of server.ts's "_hydra._tcp" service -
@@ -39,7 +39,7 @@ dependencies:
   # Keystore-backed storage on Android/Windows. See network/auth_prefs.dart
   # for the real, no-regression fallback this app uses when no such
   # backend is running.
-  flutter_secure_storage: ^11.0.0
+  flutter_secure_storage: ^11.2.0
 
   # NOTE: no cupertino_icons (this app never renders iOS-style widgets) and
   # no webview_flutter - that package ships no Linux desktop implementation
