@@ -1,0 +1,26 @@
+version: 2
+updates:
+  - package-ecosystem: "pub"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "friday"
+    open-pull-requests-limit: 3
+    labels:
+      - "dependencies"
+    groups:
+      pub_updates:
+        patterns:
+          - "*"
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "friday"
+    open-pull-requests-limit: 3
+    labels:
+      - "dependencies"
+    groups:
+      github_actions_updates:
+        patterns:
+          - "*"
