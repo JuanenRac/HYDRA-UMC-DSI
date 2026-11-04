@@ -19,6 +19,7 @@ CHECKS = (
     ("make_structure.py", ["--check", "--readmes"]),
     ("gen_command_contract.py", ["--check"]),
     ("check_rest_routes.py", []),
+    ("sync_sdk_answers.py", ["--check"]),
 )
 
 
@@ -26,7 +27,7 @@ def check(root: Path) -> list[str]:
     problems: list[str] = []
     for script, arguments in CHECKS:
         path = root / "tools" / script
-        guard = {"make_architecture.py": "architecture.json", "make_structure.py": "structure.json", "gen_command_contract.py": "robot_command_contract.json", "check_rest_routes.py": "rest_routes.json"}[script]
+        guard = {"make_architecture.py": "architecture.json", "make_structure.py": "structure.json", "gen_command_contract.py": "robot_command_contract.json", "check_rest_routes.py": "rest_routes.json", "sync_sdk_answers.py": "rest_routes.json"}[script]
         if not path.is_file() or not (root / "docs" / guard).is_file():
             continue
         result = subprocess.run([sys.executable, "-I", str(path), *arguments],
