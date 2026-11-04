@@ -4,6 +4,8 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+- **The code the two Flutter apps copied by hand comes from one package:** the SHA-256 of the audit chain, the result of the global STOP and the rules of the PLAY confirmation are read from `hydra_umc_app_common` (in the SDK, pinned to a commit) through the same file paths as before; a workflow now analyzes and tests the app on every push.
+
 ## [0.3.2] - The models are tested with the answers the SDK generates from the server inventory: test/serveranswerstest.dart replays a minimal and a full body of the server-information, stop-all, ecosystem-status and sign-in routes and a... (and 4 more changes)
 
 - **The models are tested with the answers the SDK generates from the server inventory:** `test/server_answers_test.dart` replays a minimal and a full body of the server-information, stop-all, ecosystem-status and sign-in routes and a refusal of the sign-in against the app's models; the vendored `test/fixtures/server-answers.json` is kept identical to the SDK file by `tools/sync_sdk_answers.py --check`, which the CI validator runs.
