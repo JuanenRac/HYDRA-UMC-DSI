@@ -22,5 +22,8 @@
   },
   "service": {
     "systemd_unit": "hydra-umc-dsi.service"
-  }
+  },
+  "depends_on": [
+    "HYDRA-UMC-SERVER"
+  ]
 }
