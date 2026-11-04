@@ -422,5 +422,9 @@
   "rebootHostNotLocal": "只能从运行在该 Compute Module 上的面板（地址 127.0.0.1）重启它。",
   "rebootFailed": "重启未成功。请查看服务器日志。",
   "errSystemActionFailed": "{what} 失败：{reason}",
-  "@errSystemActionFailed": {"placeholders": {"what": {"type": "String"}, "reason": {"type": "String"}}}
+  "@errSystemActionFailed": {"placeholders": {"what": {"type": "String"}, "reason": {"type": "String"}}},
+  "safetyBreachDanger": "危险区 {zone}：{object}",
+  "safetyBreachWarning": "警告区 {zone}：{object}",
+  "safetyStopsAsked": "停止请求：{count}",
+  "safetyBreachMore": "另有 {count} 项"
 }

@@ -422,5 +422,9 @@
   "rebootHostNotLocal": "Das Compute Module lässt sich nur vom Panel aus neu starten, das darauf läuft (Adresse 127.0.0.1).",
   "rebootFailed": "Der Neustart ist nicht durchgegangen. Siehe das Protokoll des Servers.",
   "errSystemActionFailed": "{what} fehlgeschlagen: {reason}",
-  "@errSystemActionFailed": {"placeholders": {"what": {"type": "String"}, "reason": {"type": "String"}}}
+  "@errSystemActionFailed": {"placeholders": {"what": {"type": "String"}, "reason": {"type": "String"}}},
+  "safetyBreachDanger": "Gefahrenzone {zone}: {object}",
+  "safetyBreachWarning": "Warnzone {zone}: {object}",
+  "safetyStopsAsked": "Stoppanforderungen: {count}",
+  "safetyBreachMore": "und {count} weitere"
 }

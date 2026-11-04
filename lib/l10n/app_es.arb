@@ -422,5 +422,9 @@
   "rebootHostNotLocal": "El Compute Module solo se puede reiniciar desde el panel que corre en él (dirección 127.0.0.1).",
   "rebootFailed": "El reinicio no se llevó a cabo. Mira el registro del servidor.",
   "errSystemActionFailed": "Falló {what}: {reason}",
-  "@errSystemActionFailed": {"placeholders": {"what": {"type": "String"}, "reason": {"type": "String"}}}
+  "@errSystemActionFailed": {"placeholders": {"what": {"type": "String"}, "reason": {"type": "String"}}},
+  "safetyBreachDanger": "Zona de peligro {zone}: {object}",
+  "safetyBreachWarning": "Zona de aviso {zone}: {object}",
+  "safetyStopsAsked": "Peticiones de paro: {count}",
+  "safetyBreachMore": "y {count} más"
 }

@@ -31,6 +31,16 @@ SafetyLevel _levelOf(Object? raw) {
   }
 }
 
+/// One object found inside one zone, as the safety service lists it (no position: the panel shows where, not how far).
+class SafetyBreach {
+  final String zoneId;
+
+  /// `danger` or `warning`; anything else the service might send is shown as a warning, never as less than that.
+  final bool danger;
+  final String objectId;
+  const SafetyBreach({required this.zoneId, required this.danger, required this.objectId});
+}
+
 /// The last verdict of the safety service (GET /state), with the moment it was read.
 class SafetyStatus {
   final SafetyLevel level;
@@ -50,6 +60,13 @@ class SafetyStatus {
   /// The verdict carries a signature of the service (not checked here: shown so the person knows).
   final bool signed;
 
+  /// The breached zones the service lists (at most as many as it sends), and how many there are in all.
+  final List<SafetyBreach> breaches;
+  final int breachCount;
+
+  /// How many stop requests the service made for the verdict, or null when it does not say.
+  final int? estopRequestCount;
+
   const SafetyStatus({
     required this.level,
     required this.reason,
@@ -57,6 +74,9 @@ class SafetyStatus {
     required this.readAt,
     this.noVerdictYet = false,
     this.signed = false,
+    this.breaches = const [],
+    this.breachCount = 0,
+    this.estopRequestCount,
   });
 
   /// A verdict that was reached more than [staleAfter] ago (by the service's clock, or else by ours) is not current.
@@ -75,12 +95,27 @@ class SafetyStatus {
     final ts = stateMap['timestamp_utc'];
     if (ts is String) reached = DateTime.tryParse(ts);
     final reason = json['reason'];
+    final listed = <SafetyBreach>[];
+    final rawBreaches = json['breaches'];
+    if (rawBreaches is List) {
+      for (final b in rawBreaches) {
+        if (b is! Map) continue;
+        final zone = b['zone_id'];
+        final object = b['object_id'];
+        listed.add(SafetyBreach(zoneId: zone is String ? zone : '', danger: b['level'] == 'danger', objectId: object is String ? object : ''));
+      }
+    }
+    final count = json['breachCount'];
+    final stops = json['estopRequestCount'];
     return SafetyStatus(
       level: _levelOf(stateMap['state']),
       reason: reason is String ? reason : '',
       reachedAt: reached,
       readAt: readAt,
       signed: json['sdkSafetyStateSignature'] is Map,
+      breaches: listed,
+      breachCount: count is int && count >= listed.length ? count : listed.length,
+      estopRequestCount: stops is int && stops >= 0 ? stops : null,
     );
   }
 

@@ -422,5 +422,9 @@
   "rebootHostNotLocal": "Le Compute Module ne peut être redémarré que depuis le panneau qui tourne dessus (adresse 127.0.0.1).",
   "rebootFailed": "Le redémarrage n'a pas abouti. Consulte le journal du serveur.",
   "errSystemActionFailed": "{what} a échoué : {reason}",
-  "@errSystemActionFailed": {"placeholders": {"what": {"type": "String"}, "reason": {"type": "String"}}}
+  "@errSystemActionFailed": {"placeholders": {"what": {"type": "String"}, "reason": {"type": "String"}}},
+  "safetyBreachDanger": "Zone de danger {zone} : {object}",
+  "safetyBreachWarning": "Zone d'avertissement {zone} : {object}",
+  "safetyStopsAsked": "Demandes d'arrêt : {count}",
+  "safetyBreachMore": "et {count} de plus"
 }

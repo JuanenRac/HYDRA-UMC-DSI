@@ -422,5 +422,9 @@
   "rebootHostNotLocal": "Compute Moduleは、その上で動作するパネル（アドレス127.0.0.1）からのみ再起動できます。",
   "rebootFailed": "再起動できませんでした。サーバーのログを確認してください。",
   "errSystemActionFailed": "{what}に失敗しました：{reason}",
-  "@errSystemActionFailed": {"placeholders": {"what": {"type": "String"}, "reason": {"type": "String"}}}
+  "@errSystemActionFailed": {"placeholders": {"what": {"type": "String"}, "reason": {"type": "String"}}},
+  "safetyBreachDanger": "危険ゾーン {zone}：{object}",
+  "safetyBreachWarning": "警告ゾーン {zone}：{object}",
+  "safetyStopsAsked": "停止要求：{count}",
+  "safetyBreachMore": "ほか {count} 件"
 }

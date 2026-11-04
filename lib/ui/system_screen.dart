@@ -158,6 +158,23 @@ class _SafetyCard extends StatelessWidget {
               const SizedBox(height: 8),
               Text(l10n.safetyReason(safety.reason)),
             ],
+            if (safety != null && !safety.noVerdictYet && safety.breachCount > 0) ...[
+              const SizedBox(height: 8),
+              for (var i = 0; i < safety.breaches.length; i++)
+                Text(
+                  safety.breaches[i].danger
+                      ? l10n.safetyBreachDanger(safety.breaches[i].zoneId, safety.breaches[i].objectId)
+                      : l10n.safetyBreachWarning(safety.breaches[i].zoneId, safety.breaches[i].objectId),
+                  key: Key('safety-breach-$i'),
+                  style: TextStyle(color: safety.breaches[i].danger ? Colors.redAccent : Colors.amber),
+                ),
+              if (safety.breachCount > safety.breaches.length)
+                Text(l10n.safetyBreachMore(safety.breachCount - safety.breaches.length), style: const TextStyle(color: Colors.grey, fontSize: 12)),
+            ],
+            if (safety != null && !safety.noVerdictYet && (safety.estopRequestCount ?? 0) > 0) ...[
+              const SizedBox(height: 4),
+              Text(l10n.safetyStopsAsked(safety.estopRequestCount!), key: const Key('safety-stops'), style: const TextStyle(color: Colors.redAccent)),
+            ],
             if (safety != null && safety.reachedAt != null) ...[
               const SizedBox(height: 8),
               Text(l10n.safetyReachedAt(_clock(safety.reachedAt!.toLocal())), style: const TextStyle(color: Colors.grey, fontSize: 12)),

@@ -422,5 +422,9 @@
   "rebootHostNotLocal": "Il Compute Module può essere riavviato solo dal pannello che gira su di esso (indirizzo 127.0.0.1).",
   "rebootFailed": "Il riavvio non è andato a buon fine. Consulta il registro del server.",
   "errSystemActionFailed": "{what} non riuscito: {reason}",
-  "@errSystemActionFailed": {"placeholders": {"what": {"type": "String"}, "reason": {"type": "String"}}}
+  "@errSystemActionFailed": {"placeholders": {"what": {"type": "String"}, "reason": {"type": "String"}}},
+  "safetyBreachDanger": "Zona di pericolo {zone}: {object}",
+  "safetyBreachWarning": "Zona di avviso {zone}: {object}",
+  "safetyStopsAsked": "Richieste di arresto: {count}",
+  "safetyBreachMore": "e altre {count}"
 }

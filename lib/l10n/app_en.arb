@@ -442,5 +442,13 @@
   "rebootHostNotLocal": "The Compute Module can only be restarted from the panel that runs on it (address 127.0.0.1).",
   "rebootFailed": "The restart did not go through. See the log of the server.",
   "errSystemActionFailed": "{what} failed: {reason}",
-  "@errSystemActionFailed": {"placeholders": {"what": {"type": "String"}, "reason": {"type": "String"}}}
+  "@errSystemActionFailed": {"placeholders": {"what": {"type": "String"}, "reason": {"type": "String"}}},
+  "safetyBreachDanger": "Danger zone {zone}: {object}",
+  "@safetyBreachDanger": {"placeholders": {"zone": {"type": "String"}, "object": {"type": "String"}}},
+  "safetyBreachWarning": "Warning zone {zone}: {object}",
+  "@safetyBreachWarning": {"placeholders": {"zone": {"type": "String"}, "object": {"type": "String"}}},
+  "safetyStopsAsked": "Stop requests: {count}",
+  "@safetyStopsAsked": {"placeholders": {"count": {"type": "int"}}},
+  "safetyBreachMore": "and {count} more",
+  "@safetyBreachMore": {"placeholders": {"count": {"type": "int"}}}
 }

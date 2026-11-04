@@ -160,6 +160,39 @@ void main() {
     rig.dispose();
   });
 
+  testWidgets('the breached zones and the stop requests of the service are listed, a danger first as danger', (tester) async {
+    final body = jsonEncode({
+      'sdkSafetyState': {'state': 'DANGER', 'timestamp_utc': DateTime.now().toUtc().toIso8601String()},
+      'reason': 'danger zone breached',
+      'breaches': [
+        {'zone_id': 'cell-1', 'level': 'danger', 'object_id': 'person-3'},
+        {'zone_id': 'aisle', 'level': 'warning', 'object_id': 'cart'},
+      ],
+      'breachCount': 5,
+      'estopRequestCount': 1,
+    });
+    final rig = _rig(const PanelConfig(safetyPanel: true), safetyBody: body);
+    await _show(tester, rig);
+    expect(find.byKey(const Key('safety-breach-0')), findsOneWidget);
+    expect(find.byKey(const Key('safety-breach-1')), findsOneWidget);
+    expect(find.byKey(const Key('safety-breach-2')), findsNothing);
+    expect(find.textContaining('cell-1'), findsOneWidget);
+    expect(find.textContaining('person-3'), findsOneWidget);
+    expect(find.textContaining('3'), findsWidgets, reason: 'three more are not listed');
+    expect(find.byKey(const Key('safety-stops')), findsOneWidget);
+    await tester.pumpWidget(const SizedBox());
+    rig.dispose();
+  });
+
+  testWidgets('a verdict without the lists shows none and is read as before', (tester) async {
+    final rig = _rig(const PanelConfig(safetyPanel: true), safetyBody: _verdict('DANGER', DateTime.now(), reason: 'x'));
+    await _show(tester, rig);
+    expect(find.byKey(const Key('safety-breach-0')), findsNothing);
+    expect(find.byKey(const Key('safety-stops')), findsNothing);
+    await tester.pumpWidget(const SizedBox());
+    rig.dispose();
+  });
+
   testWidgets('an old READY, a silent service and a service with no verdict are all "unknown"', (tester) async {
     for (final (body, status) in [
       (_verdict('READY', DateTime.now().subtract(const Duration(minutes: 5))), 200),

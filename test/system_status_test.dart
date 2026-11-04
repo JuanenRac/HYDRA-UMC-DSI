@@ -146,4 +146,32 @@ void main() {
       expect(EcosystemStatus.parse(const {}).scannedAt, isNull);
     });
   });
+
+  group('SafetyStatus breaches', () {
+    test('the listed zones, their total and the stop requests are read; junk entries are skipped', () {
+      final st = SafetyStatus.parse({
+        'sdkSafetyState': {'state': 'DANGER'},
+        'breaches': [
+          {'zone_id': 'a', 'level': 'danger', 'object_id': 'o1'},
+          'junk',
+          {'zone_id': 'b', 'level': 'whatever', 'object_id': 'o2'},
+        ],
+        'breachCount': 7,
+        'estopRequestCount': 2,
+      }, DateTime(2000));
+      expect(st.breaches.length, 2);
+      expect(st.breaches[0].danger, isTrue);
+      expect(st.breaches[1].danger, isFalse, reason: 'an unknown level is shown as a warning');
+      expect(st.breachCount, 7);
+      expect(st.estopRequestCount, 2);
+    });
+
+    test('a total below what is listed, or no lists at all, never hides what the service sent', () {
+      final low = SafetyStatus.parse({'sdkSafetyState': {'state': 'DANGER'}, 'breaches': [{'zone_id': 'a', 'level': 'danger', 'object_id': 'o'}], 'breachCount': 0}, DateTime(2000));
+      expect(low.breachCount, 1);
+      final none = SafetyStatus.parse({'sdkSafetyState': {'state': 'READY'}}, DateTime(2000));
+      expect(none.breaches, isEmpty);
+      expect(none.estopRequestCount, isNull);
+    });
+  });
 }
