@@ -4,6 +4,8 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+## [0.3.2] - The models are tested with the answers the SDK generates from the server inventory: test/serveranswerstest.dart replays a minimal and a full body of the server-information, stop-all, ecosystem-status and sign-in routes and a... (and 4 more changes)
+
 - **The models are tested with the answers the SDK generates from the server inventory:** `test/server_answers_test.dart` replays a minimal and a full body of the server-information, stop-all, ecosystem-status and sign-in routes and a refusal of the sign-in against the app's models; the vendored `test/fixtures/server-answers.json` is kept identical to the SDK file by `tools/sync_sdk_answers.py --check`, which the CI validator runs.
 
 - **The System tab lists the breached zones:** next to the safety verdict the panel shows each zone an object is in (danger in red, warning in amber, with the object), how many more there are, and how many stop requests the service made, from the new `breaches`, `breachCount` and `estopRequestCount` of its `GET /state` (a service without them shows the verdict as before). 8 languages, 4 new tests.
