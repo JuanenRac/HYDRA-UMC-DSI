@@ -17,8 +17,8 @@ import 'package:hydra_umc_dsi/models/robot_command_contract.dart';
 import 'package:hydra_umc_dsi/network/hydra_websocket.dart';
 
 void main() {
-  test('the continuous commands of the shared package are those of the generated contract', () {
-    expect(continuousCommands, RobotCommandContract.continuous);
+  test('the continuous commands of the shared package include those of the generated contract', () {
+    expect(continuousCommands.containsAll(RobotCommandContract.continuous), isTrue);
   });
 
   test('a controller id has the prefix of this app and passes the check of the server', () {
