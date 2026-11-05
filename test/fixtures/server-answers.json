@@ -767,6 +767,28 @@
         }
       }
     },
+    "GET /api/connector-hub/gate/audit": {
+      "200": {
+        "minimal": {},
+        "full": {}
+      }
+    },
+    "POST /api/connector-hub/gate/evaluate": {
+      "200": {
+        "minimal": {},
+        "full": {}
+      }
+    },
+    "POST /api/connector-hub/gate/settings": {
+      "400": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      }
+    },
     "GET /api/ecosystem/health": {
       "200": {
         "minimal": {
@@ -1585,6 +1607,16 @@
         }
       },
       "409": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      }
+    },
+    "POST /api/semantic-planner/settings": {
+      "400": {
         "minimal": {
           "error": "sample"
         },
