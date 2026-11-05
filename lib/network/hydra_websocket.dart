@@ -8,8 +8,6 @@
 // sockets open through the TLS choices of this app (network/tls_settings.dart).
 // =============================================================================
 
-import 'dart:io';
-
 import 'package:hydra_umc_app_common/hydra_umc_app_common.dart' as common;
 
 import '../state/hydra_error.dart';
