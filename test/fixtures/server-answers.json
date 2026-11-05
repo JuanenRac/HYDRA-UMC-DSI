@@ -255,6 +255,35 @@
         }
       }
     },
+    "GET /api/admin/service-identity": {
+      "200": {
+        "minimal": {
+          "enabled": false,
+          "source": "env",
+          "locked": false,
+          "key": "usable",
+          "state": "presenting",
+          "services": [],
+          "order": []
+        },
+        "full": {
+          "enabled": false,
+          "source": "env",
+          "locked": false,
+          "key": "usable",
+          "state": "presenting",
+          "services": [
+            {
+              "name": "sample",
+              "support": "accepts"
+            }
+          ],
+          "order": [
+            "server_first"
+          ]
+        }
+      }
+    },
     "GET /api/audit": {
       "404": {
         "minimal": {
@@ -992,6 +1021,16 @@
         }
       }
     },
+    "POST /api/hil-bridge/settings": {
+      "400": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      }
+    },
     "GET /api/hydra-info": {
       "200": {
         "minimal": {
@@ -1254,6 +1293,16 @@
         }
       },
       "403": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      }
+    },
+    "POST /api/ops-agent/proposals/decide": {
+      "400": {
         "minimal": {
           "error": "sample"
         },
