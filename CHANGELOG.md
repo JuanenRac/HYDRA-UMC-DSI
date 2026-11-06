@@ -4,6 +4,8 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+## [0.3.5] - The stored session follows the rules shared with the other mobile apps: AuthPrefs keeps the host, the port, the scheme and its other flags, and hands the token, the user name and the refresh token to SessionStore of the shared... (and 1 more changes)
+
 - **The stored session follows the rules shared with the other mobile apps:** `AuthPrefs` keeps the host, the port, the scheme and its other flags, and hands the token, the user name and the refresh token to `SessionStore` of the shared Dart package, so a fix to the handling of the session lands in every app. A save that fails half way now reverts the user name as well as the token, and a save without a refresh token no longer drops the one kept in memory. The SDK is pinned to the commit that carries it.
 
 - **The server entry and the views over the settings tree come from the shared package of the SDK:** `ServerInfo`, `HydraState`, `ControllerView` and `RobotView` are no longer kept as a copy in the app (the file re-exports them), so the two Flutter apps cannot drift apart on them; no change in behaviour.
