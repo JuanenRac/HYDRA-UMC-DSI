@@ -20,6 +20,7 @@ import '../models/server_info.dart';
 import '../network/discovery.dart';
 import '../state/robot_view_model.dart';
 import '../util/panel_defaults.dart';
+import '../state/hydra_error.dart';
 import 'widgets/pairing_widgets.dart';
 import 'widgets/security_dialog.dart';
 import 'widgets/virtual_keyboard.dart';
