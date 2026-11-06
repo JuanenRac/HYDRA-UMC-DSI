@@ -85,7 +85,7 @@ extension HydraErrorText on HydraError {
         return pairingProblemText(l10n, PairingProblem.values.asNameMap()[params['problem']] ?? PairingProblem.notAPairingLink);
       // Kinds only the other app builds: never produced here, so they fall back to the text the caller gave.
       default:
-        return params['message'] ?? params['error'] ?? '';
+        return params['message'] ?? params['error'] ?? kind.name;
     }
   }
 }
