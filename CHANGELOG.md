@@ -4,6 +4,8 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+- **The server entry and the views over the settings tree come from the shared package of the SDK:** `ServerInfo`, `HydraState`, `ControllerView` and `RobotView` are no longer kept as a copy in the app (the file re-exports them), so the two Flutter apps cannot drift apart on them; no change in behaviour.
+
 ## [0.3.4] - The whole app no longer redraws on every message of the model: the root of the app listens only to the language the person chose (it used to redraw the application shell with every robot state and metric that arrived).... (and 1 more changes)
 
 - **The whole app no longer redraws on every message of the model:** the root of the app listens only to the language the person chose (it used to redraw the application shell with every robot state and metric that arrived). Together with the screens that already listened to their own fields, only the control screen still listens to the whole model.

@@ -201,8 +201,8 @@ packages:
     dependency: "direct main"
     description:
       path: "clients/dart_app_common"
-      ref: v0.5.5
-      resolved-ref: c87c0ae3557e989543cd8f3e2e35c8b8765acbb6
+      ref: "97abe76b7555291c3a81a1fd98dbb8113caaef0c"
+      resolved-ref: 97abe76b7555291c3a81a1fd98dbb8113caaef0c
       url: "https://github.com/JuanenRac/HYDRA-UMC-SDK.git"
     source: git
     version: "0.2.0"
