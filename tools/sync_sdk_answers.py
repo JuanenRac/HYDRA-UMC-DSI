@@ -19,6 +19,10 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 VENDORED = ROOT / "test" / "fixtures" / "server-answers.json"
 SOURCE = ROOT.parent / "HYDRA-UMC-SDK" / "conformance" / "app-fixtures" / "v1" / "server-answers.json"
+# The one stand-in server of the SDK, which test/fake_server_session_test.dart starts as a process
+FAKE_VENDORED = ROOT / "test" / "fixtures" / "fake-server" / "hydra_fake_server.py"
+FAKE_SOURCE = ROOT.parent / "HYDRA-UMC-SDK" / "conformance" / "fake-server" / "hydra_fake_server.py"
+PAIRS = ((VENDORED, SOURCE), (FAKE_VENDORED, FAKE_SOURCE))
 
 
 def _text(path: Path) -> bytes:
@@ -30,14 +34,19 @@ def main(argv: list[str]) -> int:
         print("SKIP: HYDRA-UMC-SDK is not next to this repository (or has no app-fixtures yet)")
         return 0
     if "--check" in argv:
-        if not VENDORED.is_file() or _text(VENDORED) != _text(SOURCE):
-            print("FAIL: test/fixtures/server-answers.json differs from the SDK file; run python tools/sync_sdk_answers.py", file=sys.stderr)
-            return 1
-        print("PASS: the vendored server answers equal the SDK file")
+        for vendored, source in PAIRS:
+            if not source.is_file():
+                continue
+            if not vendored.is_file() or _text(vendored) != _text(source):
+                print(f"FAIL: {vendored.relative_to(ROOT).as_posix()} differs from the SDK file; run python tools/sync_sdk_answers.py", file=sys.stderr)
+                return 1
+        print("PASS: the vendored server answers and stand-in server equal the SDK files")
         return 0
-    VENDORED.parent.mkdir(parents=True, exist_ok=True)
-    VENDORED.write_bytes(SOURCE.read_bytes())
-    print("copied the SDK server answers")
+    for vendored, source in PAIRS:
+        if source.is_file():
+            vendored.parent.mkdir(parents=True, exist_ok=True)
+            vendored.write_bytes(source.read_bytes())
+    print("copied the SDK server answers and stand-in server")
     return 0
 
 

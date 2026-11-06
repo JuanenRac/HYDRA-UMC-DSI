@@ -284,6 +284,16 @@
         }
       }
     },
+    "GET /api/anomaly/verdicts": {
+      "400": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      }
+    },
     "GET /api/audit": {
       "404": {
         "minimal": {
@@ -1075,6 +1085,42 @@
         }
       },
       "404": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      }
+    },
+    "POST /api/ingest/developer-node/status": {
+      "400": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "503": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      }
+    },
+    "POST /api/ingest/scenario-outcome": {
+      "400": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "503": {
         "minimal": {
           "error": "sample"
         },
@@ -2063,6 +2109,24 @@
         "full": {
           "enabled": false,
           "recoveryLeft": 0
+        }
+      }
+    },
+    "POST /api/trajectory/proposals/verify": {
+      "400": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "503": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
         }
       }
     },
