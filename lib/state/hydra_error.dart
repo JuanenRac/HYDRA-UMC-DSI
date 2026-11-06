@@ -13,72 +13,16 @@
 // needs to show one - see ui/login_screen.dart and ui/main_screen.dart.
 // =============================================================================
 
+import 'package:hydra_umc_app_common/hydra_umc_app_common.dart' show HydraError, HydraErrorKind;
+
 import '../l10n/app_localizations.dart';
 import '../util/home_reset.dart';
 import '../util/pairing_link.dart';
 
-enum HydraErrorKind {
-  loginFailed,
-  loginError,
-  fetchFailed,
-  robotNotFound,
-  notConnected,
-  txError,
-  unknownCommand,
-  wsConnectionLost,
-  wsConnectFailed,
-  // The server closed the WebSocket upgrade with RFC 6455 code 1008
-  // (server.ts's own signal for a missing/invalid/expired token) - no
-  // server message frame ever arrives for this case (the connection is
-  // rejected before any data can flow), so it needs its own kind rather
-  // than reusing serverMessage below.
-  wsAuthRejected,
-  // Raw text relayed verbatim from the server's own {"error": "..."} WS
-  // frame (network/hydra_websocket.dart's _handleMessage()) - already
-  // resolved server-side, in whatever language the shared backend emits
-  // it in, so it is shown as-is rather than run through a template.
-  serverMessage,
-  // The server refused a command, and why: a robot reserved by another
-  // account (409), a command it does not know or a value it cannot take (400),
-  // a role without the permission (403), a 200 that carried warnings (nothing
-  // applied), and a STOP that never got an answer.
-  robotReserved,
-  permissionDenied,
-  commandRejected,
-  commandNotApplied,
-  stopNotConfirmed,
-  // Reservations and the jog (contract v2): the same account holds the robot
-  // from another controller, the reservation names a controller and the request
-  // named none, the jog is not armed, and a jog above the limit of the model
-  // that was never sent.
-  claimOtherController,
-  claimControllerRequired,
-  jogNotArmed,
-  jogOverLimit,
-  // A conditional write was refused (412): the robot changed since this app read it.
-  revisionChanged,
-  // No secure connection could be made (certificate not trusted, or the server
-  // does not speak TLS): the person is pointed to the security settings.
-  tlsFailed,
-  // Safe mode of a robot: it is disabled (every command but STOP is refused), the server option that allows enabling is
-  // off, or the account is not an administrator.
-  robotDisabled,
-  enableNotAllowed,
-  adminRequired,
-  // HOME/RESET was not sent, or was refused: the reason (a HomeResetBlock name) is in the `block` parameter.
-  homeResetBlocked,
-  // A system action of the System tab failed (restart of a service or of the screen): `what` names it.
-  systemActionFailed,
-  // A pairing link was read while the pairing switch is off, or it was not valid (a PairingProblem name in `problem`).
-  pairingOff,
-  pairingProblem,
-}
+/// The typed error (kind and raw parameters) is shared with the other app; the wording below is this app's own.
+export 'package:hydra_umc_app_common/hydra_umc_app_common.dart' show HydraError, HydraErrorKind;
 
-class HydraError {
-  final HydraErrorKind kind;
-  final Map<String, String> params;
-  const HydraError(this.kind, [this.params = const {}]);
-
+extension HydraErrorText on HydraError {
   String localize(AppLocalizations l10n) {
     switch (kind) {
       case HydraErrorKind.loginFailed:
@@ -139,6 +83,9 @@ class HydraError {
         return l10n.pairingOff;
       case HydraErrorKind.pairingProblem:
         return pairingProblemText(l10n, PairingProblem.values.asNameMap()[params['problem']] ?? PairingProblem.notAPairingLink);
+      // Kinds only the other app builds: never produced here, so they fall back to the text the caller gave.
+      default:
+        return params['message'] ?? params['error'] ?? '';
     }
   }
 }

@@ -4,6 +4,8 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+- **The HTTP client talks through the shared package of the SDK:** `HydraApiClient` extends the shared `HydraApiCore` over a small `PackageHttpTransport` adapter and keeps its public API; it now numbers its motion commands and renews an expired session like the iOS app (the renewal needs an owner that sets `tokenRenewer`). The error type (`HydraError`), the connection history (times are milliseconds with `DateTime` views; `ConnectionHistory.agoDates` replaces the date form of `ago`), the server access options and the preferences (`ClientPrefs`, `AuthPrefs`) come from the same package, with this app's own wording and storage adapters.
+
 ## [0.3.5] - The stored session follows the rules shared with the other mobile apps: AuthPrefs keeps the host, the port, the scheme and its other flags, and hands the token, the user name and the refresh token to SessionStore of the shared... (and 1 more changes)
 
 - **The stored session follows the rules shared with the other mobile apps:** `AuthPrefs` keeps the host, the port, the scheme and its other flags, and hands the token, the user name and the refresh token to `SessionStore` of the shared Dart package, so a fix to the handling of the session lands in every app. A save that fails half way now reverts the user name as well as the token, and a save without a refresh token no longer drops the one kept in memory. The SDK is pinned to the commit that carries it.

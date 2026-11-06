@@ -47,7 +47,7 @@ String connectionFailureText(AppLocalizations l10n, ConnectionsFailure failure) 
     };
 
 String connectionAgoText(AppLocalizations l10n, DateTime then, DateTime now) {
-  final (amount, unit) = ConnectionHistory.ago(then, now);
+  final (amount, unit) = ConnectionHistory.agoDates(then, now);
   return switch (unit) {
     's' => l10n.connectionsAgoSeconds(amount),
     'min' => l10n.connectionsAgoMinutes(amount),

@@ -177,11 +177,11 @@ void main() {
 
     test('how long ago is short', () {
       final now = DateTime.utc(2026, 1, 10);
-      expect(ConnectionHistory.ago(now.subtract(const Duration(seconds: 30)), now), (30, 's'));
-      expect(ConnectionHistory.ago(now.subtract(const Duration(minutes: 12)), now), (12, 'min'));
-      expect(ConnectionHistory.ago(now.subtract(const Duration(hours: 3)), now), (3, 'h'));
-      expect(ConnectionHistory.ago(now.subtract(const Duration(days: 3)), now), (3, 'd'));
-      expect(ConnectionHistory.ago(now.add(const Duration(seconds: 5)), now), (0, 's'));
+      expect(ConnectionHistory.agoDates(now.subtract(const Duration(seconds: 30)), now), (30, 's'));
+      expect(ConnectionHistory.agoDates(now.subtract(const Duration(minutes: 12)), now), (12, 'min'));
+      expect(ConnectionHistory.agoDates(now.subtract(const Duration(hours: 3)), now), (3, 'h'));
+      expect(ConnectionHistory.agoDates(now.subtract(const Duration(days: 3)), now), (3, 'd'));
+      expect(ConnectionHistory.agoDates(now.add(const Duration(seconds: 5)), now), (0, 's'));
     });
   });
 

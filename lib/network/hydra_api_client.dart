@@ -18,92 +18,29 @@
 //   - GET  /api/system/metrics      - host CPU/memory/temp/uptime/network.
 // =============================================================================
 
-import 'dart:async';
+
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
+import 'package:hydra_umc_app_common/hydra_umc_app_common.dart' show CommandSequence, HydraApiCore, HydraApiException;
 
 import '../app_version.dart';
 import '../models/access.dart';
 import '../models/contract_v2.dart';
+import 'package_http_transport.dart';
 import 'tls_settings.dart';
 
-class HydraApiException implements Exception {
-  final String message;
-  /// HTTP status of the server's answer; null when there was no answer.
-  final int? statusCode;
-  /// The stable `code` field of the server's JSON error body
-  /// (TOKEN_EXPIRED, TOKEN_INVALID, SESSION_REVOKED, ...), when it sent one.
-  final String? code;
-  /// The server's own `error` text, when it sent one.
-  final String? serverMessage;
-  /// The revision the server put in a 412 answer: the one the robot is at now.
-  final String? revision;
-  HydraApiException(this.message, {this.statusCode, this.code, this.serverMessage, this.revision});
+// The refused-answer type, the numbering of motion commands, the renewal of an
+// expired session and the headers live in the shared package of the SDK
+// (clients/dart_app_common); this class adds the choice between http and https
+// (the TLS policy of the app) and the endpoints that answer with the app's own models.
+export 'package:hydra_umc_app_common/hydra_umc_app_common.dart' show HydraApiException, TokenRenewer;
 
-  /// 412 `revision-mismatch`: the robot changed since this app read it, so a conditional write was refused and
-  /// nothing was applied.
-  bool get isRevisionMismatch => statusCode == 412 || code == 'revision-mismatch';
-
-  /// A 401, or a 403 that says the token expired or is invalid: a refresh or
-  /// a new login can cure it. (A plain 403 is a missing role permission.)
-  bool get isSessionProblem =>
-      statusCode == 401 || (statusCode == 403 && (code == 'TOKEN_EXPIRED' || code == 'TOKEN_INVALID'));
-
-  /// A 403 about the account's role, not about the session (a jog that is not armed is its own case).
-  bool get isPermissionDenied => statusCode == 403 && !isSessionProblem && !isJogNotArmed && !isEnableNotAllowed && !isAdminRequired;
-
-  /// The robot is reserved and the server refused this client (409): another
-  /// account, another controller, or no controller id.
-  bool get isReservedByAnother => statusCode == 409;
-
-  /// 409 `other-account`: another account holds the reservation.
-  bool get isOtherAccount => statusCode == 409 && code == 'other-account';
-
-  /// 409 `other-controller`: this account holds it from another controller
-  /// (another phone, window or tab).
-  bool get isOtherController => statusCode == 409 && code == 'other-controller';
-
-  /// `controller-id-required`: the reservation names a controller and the
-  /// request named none (409), or the server requires one to reserve (400).
-  bool get isControllerIdRequired => code == 'controller-id-required';
-
-  /// 403 `jog-not-armed`: the administrator requires the jog to be armed first
-  /// and it is not.
-  bool get isJogNotArmed => statusCode == 403 && code == 'jog-not-armed';
-
-  /// 423 `robot-disabled`: the robot is in safe mode; only STOP, disable and enable work on it.
-  bool get isRobotDisabled => statusCode == 423 || code == 'robot-disabled';
-
-  /// 403 `enable-not-allowed`: the server option that lets a client enable a robot is off (its default).
-  bool get isEnableNotAllowed => statusCode == 403 && code == 'enable-not-allowed';
-
-  /// 403 `admin-required`: only an administrator may enable a robot.
-  bool get isAdminRequired => statusCode == 403 && code == 'admin-required';
-
-  /// The server refused the command itself (unknown command, a value it cannot take).
-  bool get isRejectedCommand => statusCode == 400;
-
-  /// Over the server's rate limit (429).
-  bool get isRateLimited => statusCode == 429;
-
-  /// The server does not have the route (an older server).
-  bool get isNotFound => statusCode == 404;
-
-  @override
-  String toString() => message;
-}
-
-class HydraApiClient {
-  // Starts as plain HTTP (or HTTPS when [useTls] says the server was already
-  // seen on it) - getHydraInfo()/login() switch it to HTTPS the first time a
+class HydraApiClient extends HydraApiCore {
+  // Starts as plain HTTP: getHydraInfo() below switches it to HTTPS the first time a
   // plain-HTTP probe gets no answer at all and an HTTPS one does (the server's
   // optional TLS_CERT_PATH/TLS_KEY_PATH switches it to HTTPS/WSS-only, with no
   // HTTP fallback of its own). It never goes back to http by itself.
-  String baseUrl;
-  bool get usesTls => baseUrl.startsWith('https://');
-  String? authToken;
-  final http.Client _client;
 
   /// True once this server was seen answering over TLS (or was saved so).
   bool _tlsSeen;
@@ -114,96 +51,26 @@ class HydraApiClient {
   /// reservation made from this device can still be released after a restart.
   static String controllerId = generateControllerId();
 
+  /// The counter that numbers the motion commands of this run, shared by every client of the app.
+  static final CommandSequence sharedSequence = CommandSequence();
+
   /// [useTls] starts the client on https:// - for a server that was already
   /// seen answering TLS. It never goes back to plain http by itself: a server
   /// that once spoke TLS and now answers over http is not trusted with a
   /// password or a token in the clear.
   HydraApiClient(String host, int port, {http.Client? client, bool useTls = false})
-      : baseUrl = '${useTls || !TlsPolicy.isLoopback(host) ? 'https' : 'http'}://$host:$port',
-        _tlsSeen = useTls,
-        _client = client ?? createClient();
-
-  Map<String, String> get _authHeaders =>
-      authToken != null ? {'Authorization': 'Bearer $authToken'} : const {};
-
-  /// Headers for requests made outside this class (the live camera stream):
-  /// the client identity and the bearer token. A server started with
-  /// HYDRA_UMC_CAMERA_AUTH=required refuses the picture without a signed-in
-  /// client; the token goes in a header, never in the address.
-  Map<String, String> get mediaHeaders => {..._clientHeaders, ..._authHeaders};
-
-  /// Self-identifies this client to server.ts's own per-client remote-access
-  /// toggles (Config > Remote Access): HYDRA-UMC-SERVER's serverPolicy.ts
-  /// recognizes "suite", "android", "ios", "watch" and "dsi", so this app's
-  /// access can be switched off on its own. A request with no header, or an
-  /// unrecognized value, is never gated.
-  ///
-  /// The value is the type and, after a slash, the version of this build
-  /// ("dsi/0.2.8"). The server compares the type only (the version goes to
-  /// its history of connections), so the version never opens or closes
-  /// access.
-  static final Map<String, String> _clientHeaders = {'X-Hydra-Client': clientHeaderValue(kAppVersion)};
+      : _tlsSeen = useTls,
+        super(
+          baseUrl: '${useTls || !TlsPolicy.isLoopback(host) ? 'https' : 'http'}://$host:$port',
+          transport: PackageHttpTransport(client ?? createClient()),
+          clientHeader: clientHeaderValue(kAppVersion),
+          controllerIdOf: () => controllerId,
+          sequence: sharedSequence,
+        );
 
   /// `dsi/<version>`, or just `dsi` when the version is not one the server
   /// takes (1 to 24 of 0-9 A-Z a-z . _ -).
-  static String clientHeaderValue(String version) =>
-      RegExp(r'^[0-9A-Za-z._-]{1,24}$').hasMatch(version) ? 'dsi/$version' : 'dsi';
-
-  Future<Map<String, dynamic>> login(String username, String password) async {
-    // A direct "add server, log in" flow never gets a chance to learn the
-    // scheme first: resolve it here, before spending the login on a scheme a
-    // TLS-only server will not answer.
-    await _resolveScheme();
-    final resp = await _client
-        .post(
-          Uri.parse('$baseUrl/api/login'),
-          headers: {'Content-Type': 'application/json', ..._clientHeaders},
-          body: jsonEncode({'username': username, 'password': password}),
-        )
-        // Longer than the other calls: login is the first request against a
-        // host, so it also pays for DNS and connection set-up.
-        .timeout(const Duration(seconds: 15));
-    return _expectJson(resp);
-  }
-
-  /// exchanges a still-valid refresh token (returned alongside the
-  /// access token by login() above, see HYDRA-UMC-SERVER's own
-  /// REMOTE_API.md section 2a / refresh_tokens.ts) for a fresh access
-  /// token, no password involved - this app never stores one (see
-  /// auth_prefs.dart's own header comment on why only the token itself,
-  /// never a password, lives in secure storage here). Throws
-  /// [HydraApiException] on a 401 (session genuinely revoked, or the
-  /// refresh token itself expired/unknown) - the caller's job, not this
-  /// method's, to decide that means falling back to a real logout.
-  Future<Map<String, dynamic>> refresh(String refreshToken) async {
-    final resp = await _client
-        .post(
-          Uri.parse('$baseUrl/api/refresh'),
-          headers: {'Content-Type': 'application/json', ..._clientHeaders},
-          body: jsonEncode({'refreshToken': refreshToken}),
-        )
-        .timeout(const Duration(seconds: 5));
-    return _expectJson(resp);
-  }
-
-  /// revokes a refresh token server-side on a real, intentional
-  /// logout - best-effort by design (the caller clears its own local
-  /// state regardless of whether this succeeds; see robot_view_model.dart's
-  /// own logout()). Never throws - a network error here must not block a
-  /// local sign-out the user is actively waiting on.
-  Future<void> logoutRemote(String refreshToken) async {
-    try {
-      await _client
-          .post(
-            Uri.parse('$baseUrl/api/logout'),
-            headers: {'Content-Type': 'application/json', ..._clientHeaders},
-            body: jsonEncode({'refreshToken': refreshToken}),
-          )
-          .timeout(const Duration(seconds: 5));
-    } catch (_) {
-      // Best-effort - see this method's own doc comment.
-    }
-  }
+  static String clientHeaderValue(String version) => HydraApiCore.clientHeaderValue('dsi', version);
 
   Future<Map<String, dynamic>?> getHydraInfo() async {
     final direct = await _probeHydraInfo(baseUrl);
@@ -230,7 +97,8 @@ class HydraApiClient {
   // Same scheme resolution getHydraInfo() does, for login() and getSettings():
   // a harmless GET /api/hydra-info (it needs no credentials), only to learn the
   // scheme this host answers on.
-  Future<void> _resolveScheme() async {
+  @override
+  Future<void> resolveScheme() async {
     if (usesTls && _tlsSeen) return;
     _httpsProbeError = null;
     if (await _probeHydraInfo(baseUrl) != null) {
@@ -267,9 +135,7 @@ class HydraApiClient {
 
   Future<Map<String, dynamic>?> _probeHydraInfo(String base) async {
     try {
-      final resp = await _client
-          .get(Uri.parse('$base/api/hydra-info'), headers: _clientHeaders)
-          .timeout(const Duration(seconds: 3));
+      final resp = await call('GET', '$base/api/hydra-info', headers: clientHeaders, timeout: const Duration(seconds: 3));
       if (resp.statusCode != 200) return null;
       final json = jsonDecode(resp.body) as Map<String, dynamic>;
       if (!json.containsKey('remoteApiVersion')) return null;
@@ -280,83 +146,12 @@ class HydraApiClient {
     }
   }
 
-  Future<Map<String, dynamic>> getSettings() async {
-    await _resolveScheme(); // a restored session never ran login(), so the scheme is learned here
-    final resp = await _client
-        .get(Uri.parse('$baseUrl/api/settings'), headers: {..._clientHeaders, ..._authHeaders})
-        .timeout(const Duration(seconds: 5));
-    return _expectJson(resp);
-  }
+  Future<List<ClaimInfo>> getClaims() async =>
+      ClaimInfo.listFromJson(await getJson('/api/claims', const Duration(seconds: 5)));
 
-  /// [timeout] is 5 s for an ordinary command; a STOP uses a shorter one so a
-  /// stuck connection is given up and retried quickly.
-  Future<Map<String, dynamic>> postRobotCommand(
-    dynamic robotId,
-    Map<String, dynamic> payload, {
-    Duration timeout = const Duration(seconds: 5),
-    String? ifMatch,
-  }) async {
-    final resp = await _client
-        .post(
-          Uri.parse('$baseUrl/api/robot/$robotId/command'),
-          headers: {
-            'Content-Type': 'application/json',
-            ..._clientHeaders,
-            ..._controllerHeaders,
-            ..._authHeaders,
-            'If-Match': ?ifMatch,
-          },
-          body: jsonEncode({...payload, 'controllerId': controllerId}),
-        )
-        .timeout(timeout);
-    return _expectJson(resp);
-  }
-
-  static Map<String, String> get _controllerHeaders => {'X-Controller-Id': controllerId};
-
-  Future<Map<String, dynamic>> _postControl(String path, Map<String, dynamic> body, {String? ifMatch}) async {
-    final resp = await _client
-        .post(
-          Uri.parse('$baseUrl$path'),
-          headers: {
-            'Content-Type': 'application/json',
-            ..._clientHeaders,
-            ..._controllerHeaders,
-            ..._authHeaders,
-            'If-Match': ?ifMatch,
-          },
-          body: jsonEncode({...body, 'controllerId': controllerId}),
-        )
-        .timeout(const Duration(seconds: 5));
-    return _expectJson(resp);
-  }
-
-  /// Every active reservation (GET /api/claims): who controls which robot.
-  Future<List<ClaimInfo>> getClaims() async {
-    final resp = await _client
-        .get(Uri.parse('$baseUrl/api/claims'), headers: {..._clientHeaders, ..._authHeaders})
-        .timeout(const Duration(seconds: 5));
-    return ClaimInfo.listFromJson(_expectJson(resp));
-  }
-
-  /// Reserves a robot for this account on this controller. [ttlMs] null lets
-  /// the server pick its default; [force] (administrators only) takes over a
-  /// reservation held by someone else.
-  Future<Map<String, dynamic>> postClaim(dynamic robotId, {int? ttlMs, bool force = false, String? ifMatch}) =>
-      _postControl('/api/robot/$robotId/claim', {'ttlMs': ?ttlMs, if (force) 'force': true}, ifMatch: ifMatch);
-
-  /// Releases the reservation of a robot held by this account on this
-  /// controller (idempotent on the server).
-  Future<Map<String, dynamic>> postRelease(dynamic robotId, {String? ifMatch}) =>
-      _postControl('/api/robot/$robotId/release', {}, ifMatch: ifMatch);
-
-  /// One robot with its revision (GET /api/robot/:id); null from an older server without the route.
   Future<RobotRead?> getRobot(dynamic robotId) async {
-    final resp = await _client
-        .get(Uri.parse('$baseUrl/api/robot/$robotId'), headers: {..._clientHeaders, ..._authHeaders})
-        .timeout(const Duration(seconds: 5));
     try {
-      final answer = _expectJson(resp);
+      final answer = await getJson('/api/robot/$robotId', const Duration(seconds: 5));
       final robot = answer['robot'];
       if (robot is! Map<String, dynamic>) return null;
       return RobotRead(robot, revisionOf(answer));
@@ -366,175 +161,40 @@ class HydraApiClient {
     }
   }
 
-  /// The audit record as the server sent it (GET /api/audit, administrators only), as text: the hash of each line
-  /// is the SHA-256 of its exact text, so the answer is not parsed here. [query] comes from [AuditRecord.query].
-  Future<String> getAuditBody(String query) async {
-    final resp = await _client
-        .get(Uri.parse('$baseUrl/api/audit$query'), headers: {..._clientHeaders, ..._authHeaders})
-        .timeout(const Duration(seconds: 10));
-    _throwForStatus(resp);
-    return resp.body;
-  }
+  /// The audit lines of the server ([query] is the part after `/api/audit`).
+  Future<String> getAuditBody(String query) => getText('/api/audit$query', const Duration(seconds: 10));
 
-  /// The clients the server has seen (GET /api/connections/clients) as text, for [ConnectionHistory.parseClients]. An account that
-  /// is not an administrator is given only its own entries.
-  Future<String> getConnectionClientsBody() async {
-    final resp = await _client
-        .get(Uri.parse('$baseUrl/api/connections/clients'), headers: {..._clientHeaders, ..._authHeaders})
-        .timeout(const Duration(seconds: 10));
-    _throwForStatus(resp);
-    return resp.body;
-  }
+  Future<String> getConnectionClientsBody() => getText('/api/connections/clients', const Duration(seconds: 10));
 
-  /// The latest lines of the history of sign-ins (GET /api/connections/events), newest first, as text for [ConnectionHistory.parseEvents].
-  Future<String> getConnectionEventsBody(int limit) async {
-    final resp = await _client
-        .get(Uri.parse('$baseUrl/api/connections/events?limit=${limit.clamp(1, 500)}'), headers: {..._clientHeaders, ..._authHeaders})
-        .timeout(const Duration(seconds: 10));
-    _throwForStatus(resp);
-    return resp.body;
-  }
+  Future<String> getConnectionEventsBody(int limit) =>
+      getText('/api/connections/events?limit=${limit.clamp(1, 500)}', const Duration(seconds: 10));
 
-  /// The access options of the server (GET /api/admin/server-config, administrators only) as text, for [ServerSecurityOptions.parse].
-  Future<String> getServerConfigBody() async {
-    final resp = await _client
-        .get(Uri.parse('$baseUrl/api/admin/server-config'), headers: {..._clientHeaders, ..._authHeaders})
-        .timeout(const Duration(seconds: 10));
-    _throwForStatus(resp);
-    return resp.body;
-  }
+  Future<String> getServerConfigBody() => getText('/api/admin/server-config', const Duration(seconds: 10));
 
-  /// Changes access options of the server (PUT /api/admin/server-config, administrators only); the answer is the options as they are now.
   Future<String> putServerConfigBody(Map<String, dynamic> body) async {
-    final resp = await _client
-        .put(
-          Uri.parse('$baseUrl/api/admin/server-config'),
-          headers: {'Content-Type': 'application/json', ..._clientHeaders, ..._authHeaders},
-          body: jsonEncode(body),
-        )
-        .timeout(const Duration(seconds: 10));
-    _throwForStatus(resp);
+    final resp = await call('PUT', '$baseUrl/api/admin/server-config',
+        headers: {'Content-Type': 'application/json', ...clientHeaders, ...authHeaders},
+        body: jsonEncode(body),
+        timeout: const Duration(seconds: 10));
+    throwForStatus(resp);
     return resp.body;
   }
 
-  /// Arms (true) or disarms (false) the jog of one robot; only demanded by the
-  /// server when the administrator turned it on.
-  Future<Map<String, dynamic>> postJogArm(dynamic robotId, bool armed) =>
-      _postControl('/api/robot/$robotId/jog-arm', {'armed': armed});
-
-  /// The safety limits the server holds for one robot's model
-  /// (GET /api/safety-limits?robotId=); null from an older server without the route.
   Future<RobotSafety?> getRobotSafety(dynamic robotId) async {
-    final resp = await _client
-        .get(Uri.parse('$baseUrl/api/safety-limits?robotId=$robotId'), headers: {..._clientHeaders, ..._authHeaders})
-        .timeout(const Duration(seconds: 5));
     try {
-      return RobotSafety.fromJson(_expectJson(resp));
+      return RobotSafety.fromJson(await getJson('/api/safety-limits?robotId=$robotId', const Duration(seconds: 5)));
     } on HydraApiException catch (e) {
       if (e.isNotFound) return null;
       rethrow;
     }
   }
 
-  /// POST /api/stop-all: the global stop. No body, no confirmation; any
-  /// signed-in account may call it and a reservation held by another account
-  /// never blocks it. Answers `{success, stoppedCount, failedCount, persisted,
-  /// robots: [...]}`. A short [timeout] so a stuck connection is given up and
-  /// the caller can try again at once. A server that does not have the route
-  /// answers 404 and one over its rate limit answers 429 (both are
-  /// [HydraApiException]s the caller turns into the per-robot stop).
-  Future<Map<String, dynamic>> postStopAll({Duration timeout = const Duration(seconds: 2)}) async {
-    final resp = await _client
-        .post(Uri.parse('$baseUrl/api/stop-all'), headers: {..._clientHeaders, ..._authHeaders})
-        .timeout(timeout);
-    return _expectJson(resp);
-  }
+  Future<Map<String, dynamic>> getEcosystemStatus() => getJson('/api/ecosystem/status', const Duration(seconds: 8));
 
-  Future<Map<String, dynamic>> getSystemMetrics() async {
-    final resp = await _client
-        .get(Uri.parse('$baseUrl/api/system/metrics'), headers: {..._clientHeaders, ..._authHeaders})
-        .timeout(const Duration(seconds: 5));
-    return _expectJson(resp);
-  }
+  Future<Map<String, dynamic>> postEcosystemService(String unit, String action) => postJson(
+      '/api/ecosystem/service/${Uri.encodeComponent(unit)}/${Uri.encodeComponent(action)}', const Duration(seconds: 20));
 
-  /// The services of the ecosystem and their health (`GET /api/ecosystem/status`).
-  Future<Map<String, dynamic>> getEcosystemStatus() async {
-    final resp = await _client
-        .get(Uri.parse('$baseUrl/api/ecosystem/status'), headers: {..._clientHeaders, ..._authHeaders})
-        .timeout(const Duration(seconds: 8));
-    return _expectJson(resp);
-  }
+  Future<Map<String, dynamic>> postAdminRestart() => postJson('/api/admin/restart', const Duration(seconds: 8));
 
-  /// Starts, stops or restarts the service of one project (`POST /api/ecosystem/service/:unit/:action`). The server
-  /// only lets an administrator do it, only for a unit it knows, and never for its own.
-  Future<Map<String, dynamic>> postEcosystemService(String unit, String action) async {
-    final resp = await _client
-        .post(Uri.parse('$baseUrl/api/ecosystem/service/${Uri.encodeComponent(unit)}/${Uri.encodeComponent(action)}'),
-            headers: {..._clientHeaders, ..._authHeaders})
-        .timeout(const Duration(seconds: 20));
-    return _expectJson(resp);
-  }
-
-  /// Makes the server close so its supervisor starts it again (`POST /api/admin/restart`, administrators only).
-  Future<Map<String, dynamic>> postAdminRestart() async {
-    final resp = await _client
-        .post(Uri.parse('$baseUrl/api/admin/restart'), headers: {..._clientHeaders, ..._authHeaders})
-        .timeout(const Duration(seconds: 8));
-    return _expectJson(resp);
-  }
-
-  /// Restarts the whole Compute Module (`POST /api/system/reboot`). The server only accepts it from the machine
-  /// itself and without a proxy; this app calls it only when the person chose that on purpose.
-  Future<Map<String, dynamic>> postSystemReboot() async {
-    final resp = await _client
-        .post(Uri.parse('$baseUrl/api/system/reboot'), headers: {..._clientHeaders, ..._authHeaders})
-        .timeout(const Duration(seconds: 8));
-    return _expectJson(resp);
-  }
-
-  Map<String, dynamic> _expectJson(http.Response resp) {
-    _throwForStatus(resp);
-    final Object? decoded;
-    try {
-      decoded = jsonDecode(resp.body);
-    } on FormatException catch (e) {
-      throw HydraApiException('Response is not valid JSON: ${e.message}');
-    }
-    if (decoded is! Map<String, dynamic>) {
-      throw HydraApiException('Response is not a JSON object');
-    }
-    return decoded;
-  }
-
-  /// Throws the [HydraApiException] of an answer that is not a success.
-  void _throwForStatus(http.Response resp) {
-    if (resp.statusCode < 200 || resp.statusCode >= 300) {
-      // The server's error body carries a reason (`error`) and, for the auth
-      // middleware, a stable `code`: keep both so the caller can tell an
-      // expired session from a missing permission, an unknown command (400)
-      // or a robot reserved by someone else (409).
-      String? code;
-      String? serverMessage;
-      String? revision;
-      try {
-        final body = jsonDecode(resp.body);
-        if (body is Map) {
-          if (body['code'] is String) code = body['code'] as String;
-          if (body['error'] is String) serverMessage = body['error'] as String;
-          revision = revisionOf(body);
-        }
-      } catch (_) {
-        // Not JSON (a proxy's HTML page, say): the status alone has to do.
-      }
-      throw HydraApiException(
-        'HTTP ${resp.statusCode} from ${resp.request?.url.path}',
-        statusCode: resp.statusCode,
-        code: code,
-        serverMessage: serverMessage,
-        revision: revision,
-      );
-    }
-  }
-
-  void close() => _client.close();
+  Future<Map<String, dynamic>> postSystemReboot() => postJson('/api/system/reboot', const Duration(seconds: 8));
 }

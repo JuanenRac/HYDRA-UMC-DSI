@@ -7,37 +7,15 @@
 // of this installation (see models/access.dart).
 // =============================================================================
 
+import 'package:hydra_umc_app_common/hydra_umc_app_common.dart' show ClientPrefsCore;
 import 'package:shared_preferences/shared_preferences.dart';
 
-class ClientPrefs {
-  static const _keyControllerId = 'hydra_controller_id';
-  static const _keyConditionalMode = 'hydra_conditional_mode';
-  static const _keyConfirmPlay = 'hydra_confirm_play';
-  static const _keyHomeReset = 'hydra_home_reset_enabled';
+import 'shared_preferences_store.dart';
+
+class ClientPrefs extends ClientPrefsCore {
+  ClientPrefs() : super(SharedPreferencesPrefsStore());
+
   static const _keyPairing = 'hydra_pairing_enabled';
-
-  /// Whether PLAY asks first (the robot, its points, the speed, who reserved it). On before any choice: a
-  /// safety question, so it is the person who turns it off.
-  Future<bool> loadConfirmPlay() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getBool(_keyConfirmPlay) ?? true;
-  }
-
-  Future<void> saveConfirmPlay(bool value) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_keyConfirmPlay, value);
-  }
-
-  /// Whether HOME/RESET is switched on; [defaultValue] (off in the contract) before any choice.
-  Future<bool> loadHomeReset(bool defaultValue) async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getBool(_keyHomeReset) ?? defaultValue;
-  }
-
-  Future<void> saveHomeReset(bool value) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_keyHomeReset, value);
-  }
 
   /// Whether pairing by link is switched on; [defaultValue] (off) before any choice.
   Future<bool> loadPairing(bool defaultValue) async {
@@ -48,29 +26,5 @@ class ClientPrefs {
   Future<void> savePairing(bool value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_keyPairing, value);
-  }
-
-  /// The conditional-writes mode chosen in this app (`off`, `standard`, `strict`); null before any choice.
-  Future<String?> loadConditionalMode() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_keyConditionalMode);
-  }
-
-  Future<void> saveConditionalMode(String mode) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_keyConditionalMode, mode);
-  }
-
-  /// The controller id kept for this installation, or null before the first one was saved.
-  Future<String?> loadControllerId() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_keyControllerId);
-  }
-
-  /// Keeps the controller id, so a reservation made from this device can still
-  /// be released after the app restarts.
-  Future<void> saveControllerId(String id) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_keyControllerId, id);
   }
 }
