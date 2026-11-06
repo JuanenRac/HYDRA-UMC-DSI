@@ -17,6 +17,7 @@ must exist in the server contract, so an app cannot call a route the server does
 from __future__ import annotations
 
 import json
+import os
 import re
 import sys
 from pathlib import Path
@@ -25,7 +26,8 @@ ROOT = Path(__file__).resolve().parents[1]
 RECORDED = ROOT / "docs" / "rest_routes.json"
 SOURCE_DIRS = ("app/src/main", "lib")
 SOURCE_SUFFIXES = (".kt", ".dart", ".swift")
-CONTRACT = ROOT.parent / "HYDRA-UMC-SDK" / "contracts" / "openapi" / "v1" / "server.full.openapi.json"
+SDK_ROOT = Path(os.environ["HYDRA_UMC_SDK_DIR"]) if os.environ.get("HYDRA_UMC_SDK_DIR") else ROOT.parent / "HYDRA-UMC-SDK"
+CONTRACT = SDK_ROOT / "contracts" / "openapi" / "v1" / "server.full.openapi.json"
 STRING = re.compile(r'"([^"]*)"' + "|" + r"'([^']*)'")
 INSIDE = re.compile(r"(/api/\S*)")
 
@@ -60,7 +62,8 @@ def called_routes() -> list[str]:
 
 def contract_problems(routes: list[str]) -> list[str]:
     if not CONTRACT.is_file():
-        return []
+        # a release check sets HYDRA_UMC_REQUIRE_WORKSPACE=1: a missing contract is then a failure, not a skip
+        return ["the server contract is not available (HYDRA_UMC_SDK_DIR, or the SDK next to this repository)"] if os.environ.get("HYDRA_UMC_REQUIRE_WORKSPACE") == "1" else []
     paths = list(json.loads(CONTRACT.read_text(encoding="utf-8")).get("paths", {}))
 
     def matches(route: str, path: str) -> bool:
