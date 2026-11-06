@@ -24,7 +24,7 @@ dependencies:
   hydra_umc_app_common:
     git:
       url: https://github.com/JuanenRac/HYDRA-UMC-SDK.git
-      ref: c8a5fdd7d3d23d7b2d7c969f0391b2f7445314f6
+      ref: v0.5.8
       path: clients/dart_app_common
   web_socket_channel: ^3.0.3
   shared_preferences: ^2.5.6
