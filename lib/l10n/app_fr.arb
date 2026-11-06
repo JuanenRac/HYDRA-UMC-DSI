@@ -426,5 +426,22 @@
   "safetyBreachDanger": "Zone de danger {zone} : {object}",
   "safetyBreachWarning": "Zone d'avertissement {zone} : {object}",
   "safetyStopsAsked": "Demandes d'arrêt : {count}",
-  "safetyBreachMore": "et {count} de plus"
+  "safetyBreachMore": "et {count} de plus",
+  "pairingSwitchLabel": "Autoriser l'association par code QR ou lien",
+  "pairingSwitchHint": "La page d'administration du serveur affiche un code QR avec son adresse et l'empreinte du certificat. Saisissez ou collez le lien ici avec le clavier à l'écran. Le panneau montre ce qu'il a lu et demande avant d'enregistrer quoi que ce soit. Désactivé par défaut.",
+  "pairingPasteLabel": "Lien d'association",
+  "pairingPasteButton": "Lire le lien",
+  "pairingDialogTitle": "Associer avec ce serveur ?",
+  "pairingDialogMessage": "{name} à {host}, port {port}.",
+  "pairingDialogFingerprint": "Empreinte du certificat (SHA-256) :\n{fingerprint}",
+  "pairingDialogPinReplace": "En acceptant, la connexion exige TLS et épingle ce certificat, en remplaçant l'empreinte conservée auparavant.",
+  "pairingDialogConfirm": "Associer et se connecter",
+  "pairingProblemNotLink": "Ce n'est pas un lien d'association.",
+  "pairingProblemHost": "Le lien d'association ne contient pas d'adresse de serveur valide.",
+  "pairingProblemPort": "Le lien d'association ne contient pas de port valide.",
+  "pairingProblemFingerprint": "L'empreinte du certificat du lien n'est pas valide.",
+  "pairingProblemNoFingerprint": "Le lien d'association ne contient pas l'empreinte du certificat : il ne peut pas être utilisé. Générez un nouveau lien sur la page d'administration du serveur.",
+  "pairingProblemName": "Le nom du lien d'association n'est pas valide.",
+  "pairingProblemGeneric": "Le lien d'association n'est pas valide.",
+  "pairingOff": "L'appairage est désactivé. Activez-le dans les Réglages."
 }

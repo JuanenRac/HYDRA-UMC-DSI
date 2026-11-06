@@ -27,12 +27,16 @@ import 'state/system_model.dart';
 import 'ui/login_screen.dart';
 import 'ui/main_screen.dart';
 import 'ui/widgets/idle_gate.dart';
+import 'ui/widgets/pairing_widgets.dart';
 
 /// Attached to MaterialApp's scaffoldMessengerKey: the only way an error caught
 /// outside Flutter's build/layout/paint pipeline (no BuildContext of its own)
 /// can still put something on screen. debugPrint alone is invisible in a
 /// release build, and a panel next to a robot has no debugger attached.
 final GlobalKey<ScaffoldMessengerState> _rootMessengerKey = GlobalKey<ScaffoldMessengerState>();
+
+/// The navigator of the app, so the question of a pairing link can open over any screen.
+final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
 
 void _surfaceAsyncError(Object error) {
   final context = _rootMessengerKey.currentContext;
@@ -144,10 +148,14 @@ class HydraUmcDsiApp extends StatelessWidget {
         // The System tab and the safety chip: kept apart so their readings never redraw the control screens.
         ChangeNotifierProvider(create: (context) => SystemModel(vm: context.read<RobotViewModel>())),
       ],
-      child: Consumer<RobotViewModel>(
-        builder: (context, vm, _) => MaterialApp(
+      // Only the language the person chose rebuilds the whole app: a state or a socket message never does.
+      child: Selector<RobotViewModel, Locale?>(
+        selector: (_, vm) => vm.languageOverride,
+        builder: (context, languageOverride, _) => MaterialApp(
           title: 'HYDRA-UMC DSI',
           scaffoldMessengerKey: _rootMessengerKey,
+          navigatorKey: _rootNavigatorKey,
+          builder: (context, child) => PairingDialogHost(vm: context.read<RobotViewModel>(), navigatorKey: _rootNavigatorKey, child: child ?? const SizedBox.shrink()),
           debugShowCheckedModeBanner: false,
           localizationsDelegates: const [
             AppLocalizations.delegate,
@@ -160,7 +168,7 @@ class HydraUmcDsiApp extends StatelessWidget {
           // supportedLocales (falling back to English) - only set once the
           // user has made an explicit choice in ui/settings_screen.dart,
           // see state/robot_view_model.dart's own languageOverride.
-          locale: vm.languageOverride,
+          locale: languageOverride,
           theme: ThemeData(
             brightness: Brightness.dark,
             scaffoldBackgroundColor: const Color(0xFF07090C),

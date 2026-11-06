@@ -426,5 +426,22 @@
   "safetyBreachDanger": "危険ゾーン {zone}：{object}",
   "safetyBreachWarning": "警告ゾーン {zone}：{object}",
   "safetyStopsAsked": "停止要求：{count}",
-  "safetyBreachMore": "ほか {count} 件"
+  "safetyBreachMore": "ほか {count} 件",
+  "pairingSwitchLabel": "QRコードまたはリンクでのペアリングを許可",
+  "pairingSwitchHint": "サーバーの管理ページには、アドレスと証明書のフィンガープリントを含むQRコードが表示されます。ここに画面キーボードでリンクを入力するか貼り付けてください。パネルは読み取った内容を表示し、何かを保存する前に確認します。初期設定ではオフです。",
+  "pairingPasteLabel": "ペアリングリンク",
+  "pairingPasteButton": "リンクを読み取る",
+  "pairingDialogTitle": "このサーバーとペアリングしますか?",
+  "pairingDialogMessage": "{name}({host}、ポート {port})",
+  "pairingDialogFingerprint": "証明書フィンガープリント(SHA-256):\n{fingerprint}",
+  "pairingDialogPinReplace": "承諾すると、接続はTLSを必須とし、この証明書を固定します。以前のフィンガープリントは置き換えられます。",
+  "pairingDialogConfirm": "ペアリングして接続",
+  "pairingProblemNotLink": "ペアリングリンクではありません。",
+  "pairingProblemHost": "ペアリングリンクに有効なサーバーアドレスがありません。",
+  "pairingProblemPort": "ペアリングリンクに有効なポートがありません。",
+  "pairingProblemFingerprint": "リンク内の証明書フィンガープリントが無効です。",
+  "pairingProblemNoFingerprint": "ペアリングリンクに証明書フィンガープリントがないため使用できません。サーバーの管理ページで新しいリンクを作成してください。",
+  "pairingProblemName": "ペアリングリンクの名前が無効です。",
+  "pairingProblemGeneric": "ペアリングリンクが無効です。",
+  "pairingOff": "ペアリングはオフです。設定でオンにしてください。"
 }

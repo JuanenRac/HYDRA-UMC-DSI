@@ -426,5 +426,22 @@
   "safetyBreachDanger": "危险区 {zone}：{object}",
   "safetyBreachWarning": "警告区 {zone}：{object}",
   "safetyStopsAsked": "停止请求：{count}",
-  "safetyBreachMore": "另有 {count} 项"
+  "safetyBreachMore": "另有 {count} 项",
+  "pairingSwitchLabel": "允许通过二维码或链接配对",
+  "pairingSwitchHint": "服务器的管理页面会显示包含其地址和证书指纹的二维码。请使用屏幕键盘在此输入或粘贴链接。面板会显示读取到的内容，并在保存任何内容之前先询问。默认关闭。",
+  "pairingPasteLabel": "配对链接",
+  "pairingPasteButton": "读取链接",
+  "pairingDialogTitle": "与此服务器配对?",
+  "pairingDialogMessage": "{name},地址 {host},端口 {port}。",
+  "pairingDialogFingerprint": "证书指纹(SHA-256):\n{fingerprint}",
+  "pairingDialogPinReplace": "接受后,连接将要求使用 TLS 并固定此证书,取代之前保存的指纹。",
+  "pairingDialogConfirm": "配对并连接",
+  "pairingProblemNotLink": "这不是配对链接。",
+  "pairingProblemHost": "配对链接中没有有效的服务器地址。",
+  "pairingProblemPort": "配对链接中没有有效的端口。",
+  "pairingProblemFingerprint": "链接中的证书指纹无效。",
+  "pairingProblemNoFingerprint": "配对链接不包含证书指纹，无法使用。请在服务器的管理页面生成新的链接。",
+  "pairingProblemName": "配对链接中的名称无效。",
+  "pairingProblemGeneric": "配对链接无效。",
+  "pairingOff": "配对已关闭。请在“设置”中开启。"
 }

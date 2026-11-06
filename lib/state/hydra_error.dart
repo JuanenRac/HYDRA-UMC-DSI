@@ -15,6 +15,7 @@
 
 import '../l10n/app_localizations.dart';
 import '../util/home_reset.dart';
+import '../util/pairing_link.dart';
 
 enum HydraErrorKind {
   loginFailed,
@@ -68,6 +69,9 @@ enum HydraErrorKind {
   homeResetBlocked,
   // A system action of the System tab failed (restart of a service or of the screen): `what` names it.
   systemActionFailed,
+  // A pairing link was read while the pairing switch is off, or it was not valid (a PairingProblem name in `problem`).
+  pairingOff,
+  pairingProblem,
 }
 
 class HydraError {
@@ -131,6 +135,21 @@ class HydraError {
         return homeResetBlockText(l10n, HomeResetBlock.values.asNameMap()[params['block']] ?? HomeResetBlock.notSupported);
       case HydraErrorKind.systemActionFailed:
         return l10n.errSystemActionFailed(params['what'] ?? '', params['reason'] ?? '');
+      case HydraErrorKind.pairingOff:
+        return l10n.pairingOff;
+      case HydraErrorKind.pairingProblem:
+        return pairingProblemText(l10n, PairingProblem.values.asNameMap()[params['problem']] ?? PairingProblem.notAPairingLink);
     }
   }
 }
+
+/// The phrase for a pairing link that was refused.
+String pairingProblemText(AppLocalizations l10n, PairingProblem problem) => switch (problem) {
+      PairingProblem.badHost || PairingProblem.missingHost => l10n.pairingProblemHost,
+      PairingProblem.badPort => l10n.pairingProblemPort,
+      PairingProblem.badFingerprint => l10n.pairingProblemFingerprint,
+      PairingProblem.missingFingerprint => l10n.pairingProblemNoFingerprint,
+      PairingProblem.badName => l10n.pairingProblemName,
+      PairingProblem.notAPairingLink || PairingProblem.empty => l10n.pairingProblemNotLink,
+      _ => l10n.pairingProblemGeneric,
+    };

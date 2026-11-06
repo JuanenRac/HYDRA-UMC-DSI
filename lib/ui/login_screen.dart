@@ -20,6 +20,7 @@ import '../models/server_info.dart';
 import '../network/discovery.dart';
 import '../state/robot_view_model.dart';
 import '../util/panel_defaults.dart';
+import 'widgets/pairing_widgets.dart';
 import 'widgets/security_dialog.dart';
 import 'widgets/virtual_keyboard.dart';
 
@@ -35,18 +36,22 @@ class _LoginScreenState extends State<LoginScreen> {
   final _portCtrl = TextEditingController(text: '$panelDefaultPort');
   final _userCtrl = TextEditingController();
   final _passCtrl = TextEditingController();
+  final _pairingCtrl = TextEditingController();
   bool _isSubmitting = false;
+  int _pairedStamp = 0;
 
   // The on-screen keyboard writes into the field touched last.
   final _hostFocus = FocusNode();
   final _portFocus = FocusNode();
   final _userFocus = FocusNode();
   final _passFocus = FocusNode();
+  final _pairingFocus = FocusNode();
   late final Map<FocusNode, TextEditingController> _fields = {
     _hostFocus: _hostCtrl,
     _portFocus: _portCtrl,
     _userFocus: _userCtrl,
     _passFocus: _passCtrl,
+    _pairingFocus: _pairingCtrl,
   };
   TextEditingController? _lastTouched;
 
@@ -74,6 +79,7 @@ class _LoginScreenState extends State<LoginScreen> {
     _portCtrl.dispose();
     _userCtrl.dispose();
     _passCtrl.dispose();
+    _pairingCtrl.dispose();
     super.dispose();
   }
 
@@ -213,6 +219,14 @@ class _LoginScreenState extends State<LoginScreen> {
     final gap = compact ? 8.0 : 24.0;
     // On the touch panel there is no system keyboard: the field must not ask for one.
     final TextInputType? none = keyboard ? TextInputType.none : null;
+    // A pairing the person confirmed gives the address of the server: show it in the fields.
+    if (vm.pairedStamp != _pairedStamp) {
+      _pairedStamp = vm.pairedStamp;
+      if (vm.pairedHost != null && vm.pairedPort != null) {
+        _hostCtrl.text = vm.pairedHost!;
+        _portCtrl.text = '${vm.pairedPort}';
+      }
+    }
     return Scaffold(
       body: Column(
         children: [
@@ -316,6 +330,10 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                           ],
                         ),
+                        SizedBox(height: compact ? 4 : 12),
+                        // Pairing by the link of the admin page of the server: off until switched on, asks before it keeps anything.
+                        // On an appliance panel the address is fixed, so there is nothing to pair.
+                        if (!appliance) PairingSection(vm: vm, controller: _pairingCtrl, focus: _pairingFocus, keyboardType: none),
                         SizedBox(height: gap),
                         if (vm.lastError != null)
                           Padding(

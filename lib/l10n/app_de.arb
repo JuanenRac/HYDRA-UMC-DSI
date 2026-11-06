@@ -426,5 +426,22 @@
   "safetyBreachDanger": "Gefahrenzone {zone}: {object}",
   "safetyBreachWarning": "Warnzone {zone}: {object}",
   "safetyStopsAsked": "Stoppanforderungen: {count}",
-  "safetyBreachMore": "und {count} weitere"
+  "safetyBreachMore": "und {count} weitere",
+  "pairingSwitchLabel": "Kopplung per QR-Code oder Link erlauben",
+  "pairingSwitchHint": "Die Admin-Seite des Servers zeigt einen QR-Code mit Adresse und Zertifikat-Fingerabdruck. Den Link hier mit der Bildschirmtastatur eingeben oder einfügen. Das Panel zeigt, was es gelesen hat, und fragt nach, bevor es etwas speichert. Standardmäßig aus.",
+  "pairingPasteLabel": "Kopplungslink",
+  "pairingPasteButton": "Link lesen",
+  "pairingDialogTitle": "Mit diesem Server koppeln?",
+  "pairingDialogMessage": "{name} unter {host}, Port {port}.",
+  "pairingDialogFingerprint": "Zertifikat-Fingerabdruck (SHA-256):\n{fingerprint}",
+  "pairingDialogPinReplace": "Mit „Koppeln“ verlangt die Verbindung TLS und merkt sich dieses Zertifikat; der bisher gespeicherte Fingerabdruck wird ersetzt.",
+  "pairingDialogConfirm": "Koppeln und verbinden",
+  "pairingProblemNotLink": "Das ist kein Kopplungslink.",
+  "pairingProblemHost": "Der Kopplungslink enthält keine gültige Serveradresse.",
+  "pairingProblemPort": "Der Kopplungslink enthält keinen gültigen Port.",
+  "pairingProblemFingerprint": "Der Zertifikat-Fingerabdruck im Link ist ungültig.",
+  "pairingProblemNoFingerprint": "Der Kopplungslink enthält keinen Zertifikat-Fingerabdruck und kann nicht verwendet werden. Erzeuge einen neuen Link auf der Admin-Seite des Servers.",
+  "pairingProblemName": "Der Name im Kopplungslink ist ungültig.",
+  "pairingProblemGeneric": "Der Kopplungslink ist ungültig.",
+  "pairingOff": "Die Kopplung ist ausgeschaltet. Schalten Sie sie in den Einstellungen ein."
 }

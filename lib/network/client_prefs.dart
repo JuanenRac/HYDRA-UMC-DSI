@@ -14,6 +14,7 @@ class ClientPrefs {
   static const _keyConditionalMode = 'hydra_conditional_mode';
   static const _keyConfirmPlay = 'hydra_confirm_play';
   static const _keyHomeReset = 'hydra_home_reset_enabled';
+  static const _keyPairing = 'hydra_pairing_enabled';
 
   /// Whether PLAY asks first (the robot, its points, the speed, who reserved it). On before any choice: a
   /// safety question, so it is the person who turns it off.
@@ -36,6 +37,17 @@ class ClientPrefs {
   Future<void> saveHomeReset(bool value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_keyHomeReset, value);
+  }
+
+  /// Whether pairing by link is switched on; [defaultValue] (off) before any choice.
+  Future<bool> loadPairing(bool defaultValue) async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_keyPairing) ?? defaultValue;
+  }
+
+  Future<void> savePairing(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_keyPairing, value);
   }
 
   /// The conditional-writes mode chosen in this app (`off`, `standard`, `strict`); null before any choice.

@@ -426,5 +426,22 @@
   "safetyBreachDanger": "Zona de perigo {zone}: {object}",
   "safetyBreachWarning": "Zona de aviso {zone}: {object}",
   "safetyStopsAsked": "Pedidos de paragem: {count}",
-  "safetyBreachMore": "e mais {count}"
+  "safetyBreachMore": "e mais {count}",
+  "pairingSwitchLabel": "Permitir o emparelhamento por código QR ou ligação",
+  "pairingSwitchHint": "A página de administração do servidor mostra um código QR com o endereço e a impressão digital do certificado. Escreva ou cole aqui a ligação com o teclado do ecrã. O painel mostra o que leu e pergunta antes de guardar seja o que for. Desativado por predefinição.",
+  "pairingPasteLabel": "Ligação de emparelhamento",
+  "pairingPasteButton": "Ler ligação",
+  "pairingDialogTitle": "Emparelhar com este servidor?",
+  "pairingDialogMessage": "{name} em {host}, porta {port}.",
+  "pairingDialogFingerprint": "Impressão digital do certificado (SHA-256):\n{fingerprint}",
+  "pairingDialogPinReplace": "Ao aceitar, a ligação passa a exigir TLS e fixa este certificado, substituindo a impressão digital guardada antes.",
+  "pairingDialogConfirm": "Emparelhar e ligar",
+  "pairingProblemNotLink": "Isso não é uma ligação de emparelhamento.",
+  "pairingProblemHost": "A ligação de emparelhamento não tem um endereço de servidor válido.",
+  "pairingProblemPort": "A ligação de emparelhamento não tem uma porta válida.",
+  "pairingProblemFingerprint": "A impressão digital do certificado da ligação não é válida.",
+  "pairingProblemNoFingerprint": "A ligação de emparelhamento não traz a impressão digital do certificado, por isso não pode ser usada. Gere uma nova ligação na página de administração do servidor.",
+  "pairingProblemName": "O nome na ligação de emparelhamento não é válido.",
+  "pairingProblemGeneric": "A ligação de emparelhamento não é válida.",
+  "pairingOff": "O emparelhamento está desativado. Ative-o nas Definições."
 }

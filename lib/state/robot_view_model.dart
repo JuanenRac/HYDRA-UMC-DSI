@@ -42,6 +42,7 @@ import '../network/hydra_websocket.dart';
 import '../network/tls_settings.dart';
 import '../services/operator_pin.dart';
 import '../util/home_reset.dart';
+import '../util/pairing_link.dart';
 import '../util/panel_config.dart';
 import 'hydra_error.dart';
 
@@ -175,6 +176,7 @@ class RobotViewModel extends ChangeNotifier {
       ..lockoutSeconds = panelConfig.pinLockoutSeconds;
     await pin.load();
     homeResetEnabled = await _clientPrefs.loadHomeReset(RobotCommandContract.homeResetEnabledByDefault);
+    pairingEnabled = await _clientPrefs.loadPairing(false);
     languageOverride = await _languagePrefs.loadLocale();
     tlsSettings = await _tlsPrefs.load();
     TlsSettingsStore.current = tlsSettings;
@@ -810,6 +812,73 @@ class RobotViewModel extends ChangeNotifier {
     if (!value) homeResetConfirmation.cancel();
     notifyListeners();
     await _clientPrefs.saveHomeReset(value);
+  }
+
+  // ---- pairing by link ----
+
+  /// Pairing by link: off until the person turns it on (see util/pairing_link.dart). [pairingOffer] waits for the answer.
+  bool pairingEnabled = false;
+  PairingOffer? pairingOffer;
+
+  /// The address the last accepted pairing gave, for the sign-in screen to show; [pairedStamp] changes with every one.
+  String? pairedHost;
+  int? pairedPort;
+  int pairedStamp = 0;
+
+  Future<void> setPairingEnabled(bool value) async {
+    pairingEnabled = value;
+    if (!value) pairingOffer = null;
+    notifyListeners();
+    await _clientPrefs.savePairing(value);
+  }
+
+  /// A text that may be a pairing link (typed or pasted). False when it is not a pairing link at all. While pairing is off
+  /// nothing is read: the person is told. A valid offer is only SHOWN ([pairingOffer]); nothing is kept before [confirmPairing].
+  Future<bool> receivePairing(String? text) async {
+    if (!PairingLink.looksLikePairing(text)) return false;
+    if (!pairingEnabled) {
+      lastError = const HydraError(HydraErrorKind.pairingOff);
+      notifyListeners();
+      return true;
+    }
+    final result = PairingLink.parse(text);
+    if (result.isOk) {
+      pairingOffer = result.offer;
+    } else {
+      lastError = HydraError(HydraErrorKind.pairingProblem, {'problem': result.problem!.name});
+    }
+    notifyListeners();
+    return true;
+  }
+
+  /// The text the person typed or pasted: false (and a phrase on screen) when it is not a pairing link at all.
+  Future<bool> readPastedPairing(String text) async {
+    final taken = await receivePairing(text);
+    if (!taken) {
+      lastError = HydraError(HydraErrorKind.pairingProblem, {'problem': PairingProblem.notAPairingLink.name});
+      notifyListeners();
+    }
+    return taken;
+  }
+
+  /// The person accepted the offer on screen: the address is handed to the sign-in screen and the link always carries the
+  /// fingerprint of the certificate, so the connection is set to require TLS and that certificate is pinned (replacing the
+  /// one kept before).
+  Future<void> confirmPairing() async {
+    final offer = pairingOffer;
+    if (offer == null) return;
+    pairingOffer = null;
+    await setTlsSettings(tlsSettings.copyWith(allowPlainHttp: false, allowPlainRemote: false, pinnedFingerprint: offer.fingerprint));
+    pairedHost = offer.host;
+    pairedPort = offer.port;
+    pairedStamp++;
+    notifyListeners();
+  }
+
+  void dismissPairing() {
+    if (pairingOffer == null) return;
+    pairingOffer = null;
+    notifyListeners();
   }
 
   /// What stops HOME/RESET of [robotId] right now, from this app's view; [HomeResetBlock.none] when it may go on.

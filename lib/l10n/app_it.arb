@@ -426,5 +426,22 @@
   "safetyBreachDanger": "Zona di pericolo {zone}: {object}",
   "safetyBreachWarning": "Zona di avviso {zone}: {object}",
   "safetyStopsAsked": "Richieste di arresto: {count}",
-  "safetyBreachMore": "e altre {count}"
+  "safetyBreachMore": "e altre {count}",
+  "pairingSwitchLabel": "Consenti l'abbinamento tramite codice QR o link",
+  "pairingSwitchHint": "La pagina di amministrazione del server mostra un codice QR con indirizzo e impronta del certificato. Digita o incolla qui il link con la tastiera su schermo. Il pannello mostra ciò che ha letto e chiede conferma prima di salvare qualsiasi cosa. Disattivato per impostazione predefinita.",
+  "pairingPasteLabel": "Link di abbinamento",
+  "pairingPasteButton": "Leggi il link",
+  "pairingDialogTitle": "Abbinare a questo server?",
+  "pairingDialogMessage": "{name} a {host}, porta {port}.",
+  "pairingDialogFingerprint": "Impronta del certificato (SHA-256):\n{fingerprint}",
+  "pairingDialogPinReplace": "Accettando, la connessione richiede TLS e fissa questo certificato, sostituendo l'impronta salvata prima.",
+  "pairingDialogConfirm": "Abbina e connetti",
+  "pairingProblemNotLink": "Questo non è un link di abbinamento.",
+  "pairingProblemHost": "Il link di abbinamento non ha un indirizzo server valido.",
+  "pairingProblemPort": "Il link di abbinamento non ha una porta valida.",
+  "pairingProblemFingerprint": "L'impronta del certificato nel link non è valida.",
+  "pairingProblemNoFingerprint": "Il link di abbinamento non contiene l'impronta del certificato e non può essere usato. Genera un nuovo link nella pagina di amministrazione del server.",
+  "pairingProblemName": "Il nome nel link di abbinamento non è valido.",
+  "pairingProblemGeneric": "Il link di abbinamento non è valido.",
+  "pairingOff": "L'abbinamento è disattivato. Attivalo nelle Impostazioni."
 }

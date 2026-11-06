@@ -426,5 +426,22 @@
   "safetyBreachDanger": "Zona de peligro {zone}: {object}",
   "safetyBreachWarning": "Zona de aviso {zone}: {object}",
   "safetyStopsAsked": "Peticiones de paro: {count}",
-  "safetyBreachMore": "y {count} más"
+  "safetyBreachMore": "y {count} más",
+  "pairingSwitchLabel": "Permitir el emparejamiento por código QR o enlace",
+  "pairingSwitchHint": "La página de administración del servidor muestra un código QR con su dirección y la huella del certificado. Escribe o pega aquí el enlace con el teclado en pantalla. El panel muestra lo que ha leído y pregunta antes de guardar nada. Desactivado por defecto.",
+  "pairingPasteLabel": "Enlace de emparejamiento",
+  "pairingPasteButton": "Leer enlace",
+  "pairingDialogTitle": "¿Emparejar con este servidor?",
+  "pairingDialogMessage": "{name} en {host}, puerto {port}.",
+  "pairingDialogFingerprint": "Huella del certificado (SHA-256):\n{fingerprint}",
+  "pairingDialogPinReplace": "Al aceptar, la conexión pasa a exigir TLS y fija este certificado, sustituyendo la huella guardada antes.",
+  "pairingDialogConfirm": "Emparejar y conectar",
+  "pairingProblemNotLink": "Eso no es un enlace de emparejamiento.",
+  "pairingProblemHost": "El enlace de emparejamiento no tiene una dirección de servidor válida.",
+  "pairingProblemPort": "El enlace de emparejamiento no tiene un puerto válido.",
+  "pairingProblemFingerprint": "La huella del certificado del enlace no es válida.",
+  "pairingProblemNoFingerprint": "El enlace de emparejamiento no trae la huella del certificado, así que no se puede usar. Genera un enlace nuevo en la página de administración del servidor.",
+  "pairingProblemName": "El nombre del enlace de emparejamiento no es válido.",
+  "pairingProblemGeneric": "El enlace de emparejamiento no es válido.",
+  "pairingOff": "El emparejamiento está desactivado. Actívelo en Ajustes."
 }
