@@ -4,6 +4,8 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+- **The stored session follows the rules shared with the other mobile apps:** `AuthPrefs` keeps the host, the port, the scheme and its other flags, and hands the token, the user name and the refresh token to `SessionStore` of the shared Dart package, so a fix to the handling of the session lands in every app. A save that fails half way now reverts the user name as well as the token, and a save without a refresh token no longer drops the one kept in memory. The SDK is pinned to the commit that carries it.
+
 - **The server entry and the views over the settings tree come from the shared package of the SDK:** `ServerInfo`, `HydraState`, `ControllerView` and `RobotView` are no longer kept as a copy in the app (the file re-exports them), so the two Flutter apps cannot drift apart on them; no change in behaviour.
 
 ## [0.3.4] - The whole app no longer redraws on every message of the model: the root of the app listens only to the language the person chose (it used to redraw the application shell with every robot state and metric that arrived).... (and 1 more changes)
