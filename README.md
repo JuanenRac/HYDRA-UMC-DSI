@@ -20,7 +20,7 @@ GPL-3.0-or-later - see LICENSE
   <img src="https://img.shields.io/badge/Language-Dart-0175C2.svg" alt="Language">
   <img src="https://img.shields.io/badge/Platform-Linux%20%7C%20CM5-E34F26.svg" alt="Platform">
   <img src="https://img.shields.io/badge/Tests-306%20passing-2ea44f.svg" alt="Tests">
-  <img src="https://img.shields.io/badge/Version-0.3.2-0f6cbd.svg" alt="Version">
+  <img src="https://img.shields.io/badge/Version-0.3.3-0f6cbd.svg" alt="Version">
   <img src="https://img.shields.io/badge/Maturity-functional-0F6CBD.svg" alt="Maturity">
 </p>
 
@@ -42,7 +42,7 @@ A native Flutter touch UI (Dart, real Linux desktop target) for HYDRA-UMC's own 
 
 | | |
 |---|---|
-| Version | `0.3.2` |
+| Version | `0.3.3` |
 | Maturity | Functional |
 | Tests | 306 (`flutter test`) |
 | Stack | Flutter 3.x / Dart |

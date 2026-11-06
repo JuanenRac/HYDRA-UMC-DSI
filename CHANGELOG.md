@@ -4,6 +4,8 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+## [0.3.3] - A test signs in against the one stand-in server of the SDK: fakeserversessiontest.dart starts the vendored hydrafakeserver.py as a process (skipped without Python) and drives the real client through sign-in, a refused password... (and 3 more changes)
+
 - **A test signs in against the one stand-in server of the SDK:** `fake_server_session_test.dart` starts the vendored `hydra_fake_server.py` as a process (skipped without Python) and drives the real client through sign-in, a refused password and the global STOP; `tools/sync_sdk_answers.py` keeps the copy identical to the SDK.
 
 - **The second contract, the HOME/RESET rules and the WebSocket client come from the shared package of the SDK:** the conditional writes, the `table` command, the audit chain, the reservations and safety limits, the rules of HOME/RESET and the live-sync socket moved to `clients/dart_app_common` (pinned to a commit of the SDK), which the iOS app and the panel app now share instead of keeping a copy each; what stays here is the prefix of the controller id, the phrase for each HOME/RESET reason (it needs the localizations of this app) and the mapping of the socket errors to the errors this app shows. A new test checks the contract of the continuous commands, the prefix and the address of the socket, and the vendored server answers follow the SDK file again.
