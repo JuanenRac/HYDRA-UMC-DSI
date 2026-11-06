@@ -19,7 +19,7 @@ GPL-3.0-or-later - see LICENSE
   <img src="https://img.shields.io/badge/Framework-Flutter%203.x-02569B.svg" alt="Framework">
   <img src="https://img.shields.io/badge/Language-Dart-0175C2.svg" alt="Language">
   <img src="https://img.shields.io/badge/Platform-Linux%20%7C%20CM5-E34F26.svg" alt="Platform">
-  <img src="https://img.shields.io/badge/Tests-306%20passing-2ea44f.svg" alt="Tests">
+  <img src="https://img.shields.io/badge/Tests-331%20passing-2ea44f.svg" alt="Tests">
   <img src="https://img.shields.io/badge/Version-0.3.4-0f6cbd.svg" alt="Version">
   <img src="https://img.shields.io/badge/Maturity-functional-0F6CBD.svg" alt="Maturity">
 </p>
@@ -32,7 +32,7 @@ A native Flutter touch UI (Dart, real Linux desktop target) for HYDRA-UMC's own 
 
 ---
 
-**Honesty check - what actually runs today:** the networking layer (`lib/network/hydra_api_client.dart`, `hydra_websocket.dart`, `discovery.dart`, `auth_prefs.dart`) and the state layer (`lib/state/robot_view_model.dart`, `hydra_error.dart`) are real and tested (306 tests passing across `test/*.dart`, including a real WebSocket connect/reconnect/auth-rejection round trip against a genuine local server, not a mock), and `flutter analyze` reports no issues. All 6 catalog screens are real, wired UI, not placeholders. What is genuinely not built: the **3D View** screen is a small native isometric X/Y/Z indicator, not a real 3D renderer - it does not embed STUDIO's Three.js scene (no Linux `webview_flutter` implementation exists). What is real but unverified on target hardware: `flutter build linux --release` has been run and produces a binary confirmed to launch, but only under Ubuntu 24.04 WSL2 (x86_64) - never on the CM5's real aarch64 Raspberry Pi OS - and the `systemd/hydra-umc-dsi.service` autostart unit has never run on any real Linux machine at all. See "Known Follow-ups" below and `CHANGELOG.md` for exactly what has shipped so far.
+**Honesty check - what actually runs today:** the networking layer (`lib/network/hydra_api_client.dart`, `hydra_websocket.dart`, `discovery.dart`, `auth_prefs.dart`) and the state layer (`lib/state/robot_view_model.dart`, `hydra_error.dart`) are real and tested (331 tests passing across `test/*.dart`, including a real WebSocket connect/reconnect/auth-rejection round trip against a genuine local server, not a mock), and `flutter analyze` reports no issues. All 6 catalog screens are real, wired UI, not placeholders. What is genuinely not built: the **3D View** screen is a small native isometric X/Y/Z indicator, not a real 3D renderer - it does not embed STUDIO's Three.js scene (no Linux `webview_flutter` implementation exists). What is real but unverified on target hardware: `flutter build linux --release` has been run and produces a binary confirmed to launch, but only under Ubuntu 24.04 WSL2 (x86_64) - never on the CM5's real aarch64 Raspberry Pi OS - and the `systemd/hydra-umc-dsi.service` autostart unit has never run on any real Linux machine at all. See "Known Follow-ups" below and `CHANGELOG.md` for exactly what has shipped so far.
 
 > **Safety and security status:** this ecosystem is not a certified safety system. There is no hardware E-STOP path, no firmware-enforced limits or interlocks and no verified motion command yet; firmware images are checked with CRC-32 and an Ed25519 signature, and a release build refuses the published development keys (the tool heads and expansion boards behind the relay still run URTC bootloaders, which take a shared-key HMAC-SHA256 instead of a signature); TLS and mutual TLS are optional and off by default; no custom board has been populated or tested yet. Read the [security baseline](https://github.com/JuanenRac/HYDRA-UMC-DOCS/blob/main/docs/SECURITY_BASELINE.md) and the [threat model](https://github.com/JuanenRac/HYDRA-UMC-DOCS/blob/main/docs/THREAT_MODEL.md) before relying on any statement here for the safety of a person.
 
@@ -44,7 +44,7 @@ A native Flutter touch UI (Dart, real Linux desktop target) for HYDRA-UMC's own 
 |---|---|
 | Version | `0.3.4` |
 | Maturity | Functional |
-| Tests | 306 (`flutter test`) |
+| Tests | 331 (`flutter test`) |
 | Stack | Flutter 3.x / Dart |
 | Target | The Raspberry Pi CM5 of a HYDRA-UMC cell |
 | On real hardware | Not yet: no run on real hardware is recorded for this version |
@@ -60,7 +60,7 @@ Each line is one part of this repository and the light says how far it is today.
 | Area | State | What it means here |
 |---|---|---|
 | Software | 🟡 | Works for its main purpose; the honesty check above lists what is still missing |
-| Tests | 🟢 | 306 automated tests, run on every change |
+| Tests | 🟢 | 331 automated tests, run on every change |
 | Real hardware | 🔴 | Not yet: no run on real hardware is recorded for this version |
 | Interface and protocols | 🟡 | The routes or messages it offers are documented and tested with a client; not every client has used them yet |
 | Integration | 🟠 | Its messages and routes are checked against the shared contracts of the SDK; it has not run together with the real equipment |
@@ -89,6 +89,7 @@ Each line is one part of this repository and the light says how far it is today.
 - **Idle lock, operator PIN, dimming and screen saver** (`lib/ui/widgets/idle_gate.dart`, `lib/services/operator_pin.dart`, `lib/util/idle_policy.dart`) - After the configured time without a touch the panel dims, shows a screen saver (a dark screen with a small moving clock) and locks until the operator types the PIN. The PIN is set by an administrator in Settings, kept only as a salted digest in the secure storage, counted (wrong tries lock the pad for a time that doubles each round) and optional: without a PIN the panel never locks. The global STOP stays on the saver and on the lock screen, the touch that wakes the panel is not also a press, and dimming and the saver wait while a robot plays a trajectory or a STOP is unconfirmed. Every time is in the settings file and off by default.
 - **System tab** (`lib/ui/system_screen.dart`, `lib/state/system_model.dart`, `lib/network/safety_zones_client.dart`) - Shown only when the settings file turns something of it on. The **safety panel** reads the verdict of `HYDRA-UMC-SAFETY-ZONES` (`GET /state`, read only): only a current READY is drawn green, a stale, missing or unreadable verdict reads "not confirmed", and a shield on the top bar shows the same on every tab. Under the verdict the panel lists the zones the service reports as breached (danger in red, warning in amber, with the object, and how many more there are) and how many stop requests it made. The **ecosystem view** lists the services of `GET /api/ecosystem/status` and lets an administrator start, stop or restart one after confirming (`POST /api/ecosystem/service/:unit/:action`; the server checks again). The **restart buttons** (operators and administrators, each after a confirmation, each written to an audit trail and to the journal) restart this screen (the app closes and the service supervisor starts it again) or the HYDRA-UMC server (`POST /api/admin/restart`, administrators); the whole Compute Module is restarted (`POST /api/system/reboot`, only from the panel that runs on it, asking twice) only when the settings file chose it on purpose. The server writes them to its own audit record (`power-reboot`, `power-shutdown`, `server-restart`).
 - **HOME/RESET and the jog step of the server** (`lib/util/home_reset.dart`, `lib/models/robot_command_contract.dart`) - As in the Android and iOS apps and from the same contract (`docs/robot_command_contract.json`): the jog step is the one the server keeps for the robot, so every client shows the same one; HOME/RESET takes the selected robot to its zero position through the `reset` command, is off until it is turned on in Settings, asks twice and is refused with a plain sentence while the robot is offline, in safe mode, playing a trajectory or not armed for the jog.
+- **Pairing by link** (`lib/util/pairing_link.dart`, `lib/ui/widgets/pairing_widgets.dart`) - As in the iOS app, from the same shared package: the admin page of the server shows a QR code with its address and the fingerprint of its certificate; on the panel the link is typed or pasted on the sign-in screen (the on-screen keyboard writes into the box). The panel shows what it read and asks before it keeps anything; accepting requires TLS and pins that certificate. It is off until the switch on the sign-in screen is turned on, and nothing is read while it is off. *(Not tried on a real panel.)*
 - **Kiosk autostart** (`systemd/hydra-umc-dsi.service`, `kiosk/install_kiosk.sh`) - systemd unit launching the app fullscreen on `tty1` via `cage`, `Restart=always`. See "Running on the real CM5" below. One local screen at a time: the installer installs the app only when the setting `HYDRA_LOCAL_SCREEN` is `dsi` (`sudo kiosk/install_kiosk.sh --screen dsi` saves it in `/etc/hydra-umc/local-screen.conf`); the default is `hdmi`, the HDMI kiosk of HYDRA-UMC-OS, and `none` leaves `tty1` to nobody, so the two kiosks never claim `tty1` together. Not run on a real CM5 yet. The app does not run as root: the installer creates the account `hydra-dsi` (groups `video`, `render`, `input`), the unit is hardened (no new privileges, no capabilities, private `/tmp`, read-only system, restricted address families), the settings file `/etc/hydra-umc/dsi.conf` is created once from `kiosk/dsi.conf.example`, and a udev rule lets the `video` group set the backlight. Still never run on a real CM5.
 - **8-language UI** (`lib/l10n/`, standard `flutter gen-l10n` pipeline) - English, Spanish, French, German, Italian, Japanese, Chinese and Portuguese, matching every other client in this ecosystem. A persisted `Settings > Language` override defaults to the OS locale; `RobotViewModel.lastError` is a typed `HydraError` rather than pre-formatted English text, so business-logic error messages localize correctly too, not just static screen chrome.
 
@@ -118,7 +119,7 @@ flutter pub get
 
 ## 🧪 Testing
 
-306 automated tests run with `flutter test`. They need no hardware and nothing outside this machine.
+331 automated tests run with `flutter test`. They need no hardware and nothing outside this machine.
 
 The CI runs `HYDRA_UMC_CI=1 python tools/ci_validate.py`, which checks the manifest, the documents, the eight READMEs and the pictures.
 

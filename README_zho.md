@@ -19,7 +19,7 @@ GPL-3.0-or-later - see LICENSE
   <img src="https://img.shields.io/badge/Framework-Flutter%203.x-02569B.svg" alt="Framework">
   <img src="https://img.shields.io/badge/Language-Dart-0175C2.svg" alt="Language">
   <img src="https://img.shields.io/badge/Platform-Linux%20%7C%20CM5-E34F26.svg" alt="Platform">
-  <img src="https://img.shields.io/badge/Tests-306%20passing-2ea44f.svg" alt="Tests">
+  <img src="https://img.shields.io/badge/Tests-331%20passing-2ea44f.svg" alt="Tests">
   <img src="https://img.shields.io/badge/Version-0.3.4-0f6cbd.svg" alt="Version">
   <img src="https://img.shields.io/badge/Maturity-functional-0F6CBD.svg" alt="Maturity">
 </p>
@@ -32,7 +32,7 @@ GPL-3.0-or-later - see LICENSE
 
 ---
 
-**诚实核查 - 今天真正能运行的部分：** 网络层(`lib/network/hydra_api_client.dart`、`hydra_websocket.dart`、`discovery.dart`、`auth_prefs.dart`)和状态层(`lib/state/robot_view_model.dart`、`hydra_error.dart`)都是真实的并经过测试(`test/*.dart` 中 306 个测试全部通过，其中包括针对一个真实本地服务器、而非模拟对象的真实 WebSocket 连接/重连/认证拒绝往返测试),且 `flutter analyze` 没有报告任何问题。目录中的全部 6 个界面都是真实接线好的 UI，而非占位符。真正尚未构建的部分：**3D View** 界面只是一个小型的原生等距 X/Y/Z 指示器，并非真正的 3D 渲染器 - 它并未嵌入 STUDIO 的真实 Three.js 场景(因为不存在 Linux 版本的 `webview_flutter` 实现)。真实但尚未在目标硬件上验证的部分：`flutter build linux --release` 已经运行过，并生成了一个确认可以启动的二进制文件，但仅在 Ubuntu 24.04 WSL2(x86_64)环境下验证过 - 从未在 CM5 真实的 aarch64 Raspberry Pi OS 上运行过；`systemd/hydra-umc-dsi.service` 自启动单元也从未在任何真实 Linux 机器上运行过。具体已交付的内容请见下方的 "Known Follow-ups" 和 `CHANGELOG.md`。
+**诚实核查 - 今天真正能运行的部分：** 网络层(`lib/network/hydra_api_client.dart`、`hydra_websocket.dart`、`discovery.dart`、`auth_prefs.dart`)和状态层(`lib/state/robot_view_model.dart`、`hydra_error.dart`)都是真实的并经过测试(`test/*.dart` 中 331 个测试全部通过，其中包括针对一个真实本地服务器、而非模拟对象的真实 WebSocket 连接/重连/认证拒绝往返测试),且 `flutter analyze` 没有报告任何问题。目录中的全部 6 个界面都是真实接线好的 UI，而非占位符。真正尚未构建的部分：**3D View** 界面只是一个小型的原生等距 X/Y/Z 指示器，并非真正的 3D 渲染器 - 它并未嵌入 STUDIO 的真实 Three.js 场景(因为不存在 Linux 版本的 `webview_flutter` 实现)。真实但尚未在目标硬件上验证的部分：`flutter build linux --release` 已经运行过，并生成了一个确认可以启动的二进制文件，但仅在 Ubuntu 24.04 WSL2(x86_64)环境下验证过 - 从未在 CM5 真实的 aarch64 Raspberry Pi OS 上运行过；`systemd/hydra-umc-dsi.service` 自启动单元也从未在任何真实 Linux 机器上运行过。具体已交付的内容请见下方的 "Known Follow-ups" 和 `CHANGELOG.md`。
 
 > **安全与安防现状:**本生态系统不是经认证的安全系统。目前尚无硬件 E-STOP 通路,没有由固件强制执行的限位或联锁,也没有经过验证的运动指令;固件映像使用 CRC-32 和 Ed25519 签名校验,发布构建会拒绝已公开的开发密钥(中继之后的工具头和扩展板仍运行 URTC 的引导程序,它们使用共享密钥的 HMAC-SHA256 而不是签名);TLS 与双向 TLS 均为可选项,默认关闭;自制电路板尚未组装或测试。在依赖此处任何说法来保障人身安全之前,请先阅读[安全基线](https://github.com/JuanenRac/HYDRA-UMC-DOCS/blob/main/docs/SECURITY_BASELINE.md)和[威胁模型](https://github.com/JuanenRac/HYDRA-UMC-DOCS/blob/main/docs/THREAT_MODEL.md)。
 
@@ -44,7 +44,7 @@ GPL-3.0-or-later - see LICENSE
 |---|---|
 | 版本 | `0.3.4` |
 | 成熟度 | 可用 |
-| 测试 | 306 (`flutter test`) |
+| 测试 | 331 (`flutter test`) |
 | 技术栈 | Flutter 3.x / Dart |
 | 目标 | HYDRA-UMC 工作单元的 Raspberry Pi CM5 |
 | 真实硬件 | 尚未：此版本没有在真实硬件上运行的记录 |
@@ -60,7 +60,7 @@ GPL-3.0-or-later - see LICENSE
 | 领域 | 状态 | 在这里的含义 |
 |---|---|---|
 | 软件 | 🟡 | 主要用途可用；上面的诚实性检查列出了仍然缺少的内容 |
-| 测试 | 🟢 | 306 项自动测试，每次变更都会运行 |
+| 测试 | 🟢 | 331 项自动测试，每次变更都会运行 |
 | 真实硬件 | 🔴 | 尚未：此版本没有在真实硬件上运行的记录 |
 | 接口与协议 | 🟡 | 提供的路由或消息已有文档，并用客户端测试过；尚未被所有客户端使用 |
 | 集成 | 🟠 | 其消息和路由已对照 SDK 的共享契约检查；尚未与真实设备一起运行 |
@@ -89,6 +89,7 @@ GPL-3.0-or-later - see LICENSE
 - **空闲锁定、操作员 PIN、调暗与屏幕保护**（`lib/ui/widgets/idle_gate.dart`、`lib/services/operator_pin.dart`、`lib/util/idle_policy.dart`）—— 超过配置的无触摸时间后，面板会调暗、显示屏幕保护（带有缓慢移动的小时钟的黑屏），并锁定直到操作员输入 PIN。PIN 由管理员在设置中设定，仅以加盐摘要的形式保存在安全存储中，错误会被计数（输错会让数字键盘锁定一段时间，每一轮翻倍），并且是可选的：没有 PIN 时面板永不锁定。全局急停 STOP 始终保留在屏保和锁定界面上，唤醒面板的那一次触摸不会同时算作一次按键，而当机器人正在播放轨迹或有未确认的 STOP 时，调暗和屏保会等待。所有时间都在配置文件中，默认关闭。
 - **系统标签页**（`lib/ui/system_screen.dart`、`lib/state/system_model.dart`、`lib/network/safety_zones_client.dart`）—— 仅当配置文件开启其中某项时才显示。**安全面板**读取 `HYDRA-UMC-SAFETY-ZONES` 的判定（`GET /state`，只读）：只有当前有效的 READY 才画成绿色，过期、缺失或无法读取的判定都显示为“未确认”，顶栏的盾牌图标在每个标签页上显示同样的状态。判定下方，面板会列出服务报告为被侵入的区域（危险为红色，警告为琥珀色，附带对象及其余数量）以及它发出的停止请求数量。**生态系统视图**列出 `GET /api/ecosystem/status` 返回的服务，管理员确认后可启动、停止或重启其中之一（`POST /api/ecosystem/service/:unit/:action`，服务器会再次检查）。**重启按钮**（操作员和管理员，每次都先确认，每次都写入审计记录和日志）可重启本屏幕（应用关闭，由服务管理器重新启动）或 HYDRA-UMC 服务器（`POST /api/admin/restart`，管理员）；只有配置文件特意选择时，才会重启整个 Compute Module（`POST /api/system/reboot`，仅限运行在其上的面板，需确认两次）。服务器会把这些操作记入自身的审计记录（`power-reboot`、`power-shutdown`、`server-restart`）。
 - **HOME/RESET 与服务器保存的点动步长**（`lib/util/home_reset.dart`、`lib/models/robot_command_contract.dart`）—— 与 Android、iOS 应用一致，并来自同一份契约（`docs/robot_command_contract.json`）：点动步长就是服务器为该机器人保存的值，因此各客户端显示相同的数值；HOME/RESET 通过 `reset` 命令把所选机器人移到零位，在设置中开启之前一直是关闭的，会确认两次，并且当机器人离线、处于安全模式、正在播放轨迹或点动未解锁时，会以清楚的一句话拒绝。
+- **通过链接配对** (`lib/util/pairing_link.dart`, `lib/ui/widgets/pairing_widgets.dart`) - 与 iOS 应用相同，使用同一个共享包：服务器的管理页面会显示包含其地址和证书指纹的二维码；在面板上，于登录界面输入或粘贴链接（屏幕键盘会写入输入框）。面板会显示读取到的内容，并在保存任何内容之前先询问；接受后将要求 TLS 并固定该证书。在登录界面的开关打开之前默认关闭，关闭期间不会读取任何内容。*（尚未在真实面板上试过。）*
 - **看板自启动**（`systemd/hydra-umc-dsi.service`、`kiosk/install_kiosk.sh`）—— 一个 systemd 单元,通过 `cage` 在 `tty1` 上全屏启动本应用,`Restart=always`。详见下文”在真实 CM5 上运行”。同一时间只使用一块本地屏幕：只有当设置 `HYDRA_LOCAL_SCREEN` 为 `dsi` 时安装程序才会安装本应用（`sudo kiosk/install_kiosk.sh --screen dsi` 会将其保存到 `/etc/hydra-umc/local-screen.conf`）；默认值为 `hdmi`，即 HYDRA-UMC-OS 的 HDMI 看板，`none` 则不把 `tty1` 交给任何一方，因此两个看板不会同时占用 `tty1`。尚未在真实的 CM5 上运行。 应用不以 root 运行：安装程序会创建账户 `hydra-dsi`（属于 `video`、`render`、`input` 组），单元已加固（不得获取新权限、无任何能力、私有 `/tmp`、只读系统、受限的地址族），配置文件 `/etc/hydra-umc/dsi.conf` 仅在首次由 `kiosk/dsi.conf.example` 生成，并有一条 udev 规则允许 `video` 组调节背光。尚未在真实的 CM5 上运行过。
 - **8 语言界面**（`lib/l10n/`，标准的 `flutter gen-l10n` 流程）—— 英语、西班牙语、法语、德语、意大利语、日语、中文和葡萄牙语，与本生态系统的其他客户端保持一致。`设置 > 语言` 中的持久化设置默认跟随系统语言；`RobotViewModel.lastError` 现在是带类型的 `HydraError`，而不是预先格式化好的英文文本，因此业务逻辑层的错误提示也能正确本地化，而不只是界面上的静态文本。
 
@@ -118,7 +119,7 @@ flutter pub get
 
 ## 🧪 测试
 
-运行 `flutter test` 会执行 306 个自动测试。 不需要硬件，也不需要这台机器以外的任何东西。
+运行 `flutter test` 会执行 331 个自动测试。 不需要硬件，也不需要这台机器以外的任何东西。
 
 CI 运行 `HYDRA_UMC_CI=1 python tools/ci_validate.py`，检查清单、文档、八个 README 和图片。
 
