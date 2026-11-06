@@ -4,6 +4,8 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+## [0.3.4] - The whole app no longer redraws on every message of the model: the root of the app listens only to the language the person chose (it used to redraw the application shell with every robot state and metric that arrived).... (and 1 more changes)
+
 - **The whole app no longer redraws on every message of the model:** the root of the app listens only to the language the person chose (it used to redraw the application shell with every robot state and metric that arrived). Together with the screens that already listened to their own fields, only the control screen still listens to the whole model.
 
 - **Pairing by link on the panel (off by default):** a switch on the sign-in screen opens a box where the link of the admin page of the server (`hydra-umc://pair?host=..&port=..&fp=..&name=..`) is typed or pasted with the on-screen keyboard. The link is read by the shared package of the SDK (a host, a port, a SHA-256 fingerprint of the certificate, a bounded name, no repeated fields; a link without the fingerprint is refused), the panel shows the name, the address and the fingerprint and asks before it keeps anything, and accepting sets the connection to require TLS and pins that certificate. Nothing is read while the switch is off; the box is not drawn on an appliance panel, whose address is fixed. The texts are in the eight languages and eight tests cover the view model, the refusals and the sign-in screen.
