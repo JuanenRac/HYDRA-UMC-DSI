@@ -255,6 +255,206 @@
         }
       }
     },
+    "POST /api/admin/maintenance/install": {
+      "200": {
+        "minimal": {
+          "ok": false,
+          "action": "status",
+          "exitCode": 0,
+          "timedOut": false,
+          "result": null,
+          "message": "sample"
+        },
+        "full": {
+          "ok": false,
+          "action": "status",
+          "exitCode": 0,
+          "timedOut": false,
+          "result": null,
+          "message": "sample"
+        }
+      },
+      "400": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "404": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "409": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "502": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      }
+    },
+    "POST /api/admin/maintenance/prune": {
+      "200": {
+        "minimal": {
+          "ok": false,
+          "action": "status",
+          "exitCode": 0,
+          "timedOut": false,
+          "result": null,
+          "message": "sample"
+        },
+        "full": {
+          "ok": false,
+          "action": "status",
+          "exitCode": 0,
+          "timedOut": false,
+          "result": null,
+          "message": "sample"
+        }
+      },
+      "400": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "404": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "409": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "502": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      }
+    },
+    "POST /api/admin/maintenance/rollback": {
+      "200": {
+        "minimal": {
+          "ok": false,
+          "action": "status",
+          "exitCode": 0,
+          "timedOut": false,
+          "result": null,
+          "message": "sample"
+        },
+        "full": {
+          "ok": false,
+          "action": "status",
+          "exitCode": 0,
+          "timedOut": false,
+          "result": null,
+          "message": "sample"
+        }
+      },
+      "400": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "404": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "409": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "502": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      }
+    },
+    "GET /api/admin/maintenance/status": {
+      "200": {
+        "minimal": {
+          "ok": false,
+          "action": "status",
+          "exitCode": 0,
+          "timedOut": false,
+          "result": null,
+          "message": "sample"
+        },
+        "full": {
+          "ok": false,
+          "action": "status",
+          "exitCode": 0,
+          "timedOut": false,
+          "result": null,
+          "message": "sample"
+        }
+      },
+      "400": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "404": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "502": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      }
+    },
     "GET /api/admin/push": {
       "200": {
         "minimal": {
