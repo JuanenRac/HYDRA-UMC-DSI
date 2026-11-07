@@ -72,3 +72,9 @@ safety_stale_seconds = 10
 # administrator can start, stop or restart one.
 ecosystem_view = off
 ecosystem_poll_seconds = 10
+
+# The tool arms view: which URTC tools are armed (their power stage may act),
+# read only. A report that is old is never shown as safe. It needs the server
+# to know the safety service; without it the card says it is not available.
+tool_arms_panel = off
+tool_arms_poll_seconds = 5

@@ -224,7 +224,10 @@ the list of keys and the example in step.
   apart from the view model so its readings never redraw the control screens): the
   verdict of HYDRA-UMC-SAFETY-ZONES (`GET /state`, read only; only a current READY is
   green), the services of `GET /api/ecosystem/status` (an administrator can start, stop
-  or restart one), and the restart buttons. A restart is asked of the role first, then
+  or restart one), the tool arms of `GET /api/tool-arms` (read only, off by default with
+  `tool_arms_panel`; `models/tool_arms.dart` reads the closed shape of the contract, an old
+  report is never shown as safe and a 404, 502, 503 or 504 reads "not available", never
+  an empty list), and the restart buttons. A restart is asked of the role first, then
   of the person, and is written to an audit trail and to the journal. The screen restart
   closes the app for the service supervisor to start again; the server restart uses
   `POST /api/admin/restart` (administrators); the whole Compute Module

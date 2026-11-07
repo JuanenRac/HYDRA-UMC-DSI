@@ -11,5 +11,6 @@
   "/api/hydra-info",
   "/api/robot/{p}",
   "/api/safety-limits",
-  "/api/system/reboot"
+  "/api/system/reboot",
+  "/api/tool-arms"
 ]

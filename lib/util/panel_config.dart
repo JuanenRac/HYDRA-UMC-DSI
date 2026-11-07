@@ -92,6 +92,10 @@ class PanelConfig {
   final bool ecosystemView;
   final int ecosystemPollSeconds;
 
+  /// The tool arms view (which URTC tools are armed, read only) in the System tab.
+  final bool toolArmsPanel;
+  final int toolArmsPollSeconds;
+
   const PanelConfig({
     this.appliance = false,
     this.virtualKeyboard = false,
@@ -115,6 +119,8 @@ class PanelConfig {
     this.safetyStaleSeconds = 10,
     this.ecosystemView = false,
     this.ecosystemPollSeconds = 10,
+    this.toolArmsPanel = false,
+    this.toolArmsPollSeconds = 5,
   });
 
   /// Every default: the conservative one.
@@ -147,10 +153,12 @@ class PanelConfig {
     'safety_stale_seconds',
     'ecosystem_view',
     'ecosystem_poll_seconds',
+    'tool_arms_panel',
+    'tool_arms_poll_seconds',
   };
 
   /// The System tab has something to show.
-  bool get systemTab => rebootButton || safetyPanel || ecosystemView;
+  bool get systemTab => rebootButton || safetyPanel || ecosystemView || toolArmsPanel;
 
   /// The whole Compute Module may be restarted from the panel (chosen on purpose, twice).
   bool get hostRebootOffered => rebootButton && rebootAction == RebootAction.host && rebootHostAllowed;
@@ -218,6 +226,8 @@ class PanelConfig {
       safetyStaleSeconds: number('safety_stale_seconds', d.safetyStaleSeconds, min: 2, max: 3600),
       ecosystemView: flag('ecosystem_view', d.ecosystemView),
       ecosystemPollSeconds: number('ecosystem_poll_seconds', d.ecosystemPollSeconds, min: 2, max: 600),
+      toolArmsPanel: flag('tool_arms_panel', d.toolArmsPanel),
+      toolArmsPollSeconds: number('tool_arms_poll_seconds', d.toolArmsPollSeconds, min: 2, max: 600),
     );
   }
 

@@ -189,6 +189,9 @@ class HydraApiClient extends HydraApiCore {
     }
   }
 
+  /// The arm state of the URTC tools as the server relays it (read only).
+  Future<Map<String, dynamic>> getToolArms() => getJson('/api/tool-arms', const Duration(seconds: 8));
+
   Future<Map<String, dynamic>> getEcosystemStatus() => getJson('/api/ecosystem/status', const Duration(seconds: 8));
 
   Future<Map<String, dynamic>> postEcosystemService(String unit, String action) => postJson(

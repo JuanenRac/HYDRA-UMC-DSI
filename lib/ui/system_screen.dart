@@ -11,6 +11,8 @@
 //    verdict included) is drawn as "not confirmed", never as a green light.
 //  * Ecosystem: the services of HYDRA-UMC and whether they run; an
 //    administrator can start, stop or restart one (the server checks again).
+//  * Tool arms: which URTC tools are armed (read only). An old report is never
+//    drawn as safe.
 //  * Restart: the screen (the app closes and its supervisor starts it again),
 //    the services (the server restarts itself) and, only when the settings
 //    file chose it on purpose, the whole Compute Module. Each asks first.
@@ -21,6 +23,7 @@ import 'package:provider/provider.dart';
 
 import '../l10n/app_localizations.dart';
 import '../models/system_status.dart';
+import '../models/tool_arms.dart';
 import '../state/robot_view_model.dart';
 import '../state/system_model.dart';
 import '../util/panel_config.dart';
@@ -64,6 +67,7 @@ class SystemScreen extends StatelessWidget {
     final cards = <Widget>[
       if (config.safetyPanel) const Expanded(child: _SafetyCard()),
       if (config.ecosystemView) const Expanded(flex: 2, child: _EcosystemCard()),
+      if (config.toolArmsPanel) const Expanded(flex: 2, child: _ToolArmsCard()),
       if (config.rebootButton) const Expanded(child: _RestartCard()),
     ];
     if (cards.isEmpty) {
@@ -273,6 +277,95 @@ class _EcosystemCard extends StatelessWidget {
       );
     }
     return _Card(title: l10n.systemEcosystemTitle, icon: Icons.hub_outlined, child: body);
+  }
+}
+
+// ---- tool arms ------------------------------------------------------------------
+
+Color toolArmColor(ToolArmLevel level) => switch (level) {
+      ToolArmLevel.armed => const Color(0xFFEF4444),
+      ToolArmLevel.warning => const Color(0xFFF59E0B),
+      ToolArmLevel.unknown => const Color(0xFF64748B),
+      ToolArmLevel.disarmed => const Color(0xFF10B981),
+    };
+
+String toolArmLevelText(AppLocalizations l10n, ToolArmLevel level) => switch (level) {
+      ToolArmLevel.armed => l10n.toolArmsArmed,
+      ToolArmLevel.warning => l10n.toolArmsWarning,
+      ToolArmLevel.unknown => l10n.toolArmsUnknown,
+      ToolArmLevel.disarmed => l10n.toolArmsDisarmed,
+    };
+
+String toolArmsFailureText(AppLocalizations l10n, ToolArmsFailure failure) => switch (failure) {
+      ToolArmsFailure.unavailable => l10n.toolArmsUnavailable,
+      ToolArmsFailure.unsupported => l10n.toolArmsUnsupported,
+      ToolArmsFailure.forbidden => l10n.toolArmsForbidden,
+      ToolArmsFailure.network => l10n.toolArmsNetwork,
+      ToolArmsFailure.other => l10n.toolArmsOther,
+      ToolArmsFailure.shape => l10n.toolArmsShape,
+    };
+
+String toolArmAgeText(AppLocalizations l10n, double seconds) {
+  final age = formatToolArmAge(seconds);
+  return switch (age.unit) {
+    's' => l10n.toolArmsAgeSeconds(age.value),
+    'min' => l10n.toolArmsAgeMinutes(age.value),
+    _ => l10n.toolArmsAgeHours(age.value),
+  };
+}
+
+class _ToolArmsCard extends StatelessWidget {
+  const _ToolArmsCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final model = context.watch<SystemModel>();
+    final report = model.toolArms;
+    final failure = model.toolArmsFailure;
+    final now = DateTime.now();
+
+    Widget body;
+    if (failure != null) {
+      // No list at all: a list that could not be read is "not available", never an empty list that looks like "nothing armed".
+      body = Center(child: Text(toolArmsFailureText(l10n, failure), key: const Key('tool-arms-problem'), textAlign: TextAlign.center, style: const TextStyle(color: Colors.amber)));
+    } else if (report == null) {
+      body = Center(child: Text(l10n.toolArmsLoading, style: const TextStyle(color: Colors.grey)));
+    } else if (report.arms.isEmpty) {
+      body = Center(child: Text(l10n.toolArmsNone, key: const Key('tool-arms-none'), style: const TextStyle(color: Colors.grey)));
+    } else {
+      final rows = report.sorted(now);
+      final stale = rows.where((a) => report.levelOf(a, now) == ToolArmLevel.warning || report.levelOf(a, now) == ToolArmLevel.unknown).length;
+      final armed = rows.where((a) => a.armed).length;
+      body = Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(l10n.toolArmsSummary(armed, rows.length), key: const Key('tool-arms-summary'), style: const TextStyle(color: Colors.white70)),
+          if (stale > 0) Text(l10n.toolArmsStaleNote(stale), key: const Key('tool-arms-stale'), style: const TextStyle(color: Colors.amber, fontSize: 12)),
+          const SizedBox(height: 4),
+          Expanded(
+            child: ListView.builder(
+              itemCount: rows.length,
+              itemBuilder: (context, i) {
+                final arm = rows[i];
+                final level = report.levelOf(arm, now);
+                final color = toolArmColor(level);
+                return ListTile(
+                  key: Key('tool-arm-$i'),
+                  dense: true,
+                  leading: Icon(Icons.circle, size: 12, color: color),
+                  title: Text(l10n.toolArmsRow(arm.robot, arm.toolId), style: const TextStyle(fontSize: 14)),
+                  subtitle: Text('${l10n.toolArmsBy(arm.by.isEmpty ? '-' : arm.by)} · ${toolArmAgeText(l10n, report.ageNow(arm, now))}', style: const TextStyle(fontSize: 12)),
+                  trailing: Text(toolArmLevelText(l10n, level).toUpperCase(), key: Key('tool-arm-level-$i'), style: TextStyle(color: color, fontWeight: FontWeight.bold)),
+                );
+              },
+            ),
+          ),
+          Text(l10n.toolArmsReadOnlyNote, style: const TextStyle(color: Colors.grey, fontSize: 12)),
+        ],
+      );
+    }
+    return _Card(title: l10n.systemToolArmsTitle, icon: Icons.precision_manufacturing_outlined, child: body);
   }
 }
 

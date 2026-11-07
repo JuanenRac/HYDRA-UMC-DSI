@@ -25,6 +25,7 @@ import 'package:flutter/foundation.dart';
 
 import '../models/access.dart';
 import '../models/system_status.dart';
+import '../models/tool_arms.dart';
 import '../network/hydra_api_client.dart';
 import '../network/safety_zones_client.dart';
 import '../util/panel_config.dart';
@@ -123,15 +124,54 @@ class SystemModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  // ---- tool arms --------------------------------------------------------------
+  /// The last good reading, or null. A reading that fails drops it: a list that could not be refreshed is never kept as if it were current.
+  ToolArmsReport? toolArms;
+  ToolArmsFailure? toolArmsFailure;
+  Timer? _toolArmsTimer;
+  bool _toolArmsReading = false;
+
+  /// Reads the arm state of the tools (read only). 404 = the server is old, 502/503/504 = not available there, 401/403 = not allowed.
+  Future<void> readToolArms() async {
+    if (_toolArmsReading || !vm.isLoggedIn) return;
+    _toolArmsReading = true;
+    try {
+      final raw = await vm.runAuthed((c) => c.getToolArms());
+      final report = ToolArmsReport.parse(raw, _clock());
+      toolArms = report;
+      toolArmsFailure = report == null ? ToolArmsFailure.shape : null;
+    } on HydraApiException catch (e) {
+      toolArms = null;
+      final status = e.statusCode;
+      toolArmsFailure = status == 404
+          ? ToolArmsFailure.unsupported
+          : status == 502 || status == 503 || status == 504
+              ? ToolArmsFailure.unavailable
+              : status == 401 || status == 403
+                  ? ToolArmsFailure.forbidden
+                  : status == null
+                      ? ToolArmsFailure.shape
+                      : ToolArmsFailure.other;
+    } catch (_) {
+      toolArms = null;
+      toolArmsFailure = ToolArmsFailure.network;
+    } finally {
+      _toolArmsReading = false;
+    }
+    notifyListeners();
+  }
+
   // ---- timers follow the session and the settings -----------------------------
   bool _safetyRunning = false;
   bool _ecosystemRunning = false;
+  bool _toolArmsRunning = false;
   PanelConfig? _configSeen;
 
   void _sync() {
     final config = vm.panelConfig;
     final wantSafety = vm.isLoggedIn && config.safetyPanel;
     final wantEcosystem = vm.isLoggedIn && config.ecosystemView && _visible;
+    final wantToolArms = vm.isLoggedIn && config.toolArmsPanel && _visible;
     final changedConfig = !identical(_configSeen, config);
     _configSeen = config;
 
@@ -160,6 +200,19 @@ class SystemModel extends ChangeNotifier {
     } else if (!wantEcosystem && _ecosystemRunning) {
       _ecosystemTimer?.cancel();
       _ecosystemRunning = false;
+    }
+
+    if (wantToolArms && (!_toolArmsRunning || changedConfig)) {
+      _toolArmsTimer?.cancel();
+      _toolArmsRunning = true;
+      unawaited(readToolArms());
+      _toolArmsTimer = Timer.periodic(Duration(seconds: config.toolArmsPollSeconds), (_) => readToolArms());
+    } else if (!wantToolArms && _toolArmsRunning) {
+      _toolArmsTimer?.cancel();
+      _toolArmsRunning = false;
+      toolArms = null;
+      toolArmsFailure = null;
+      notifyListeners();
     }
   }
 
@@ -263,6 +316,7 @@ class SystemModel extends ChangeNotifier {
     vm.removeListener(_sync);
     _safetyTimer?.cancel();
     _ecosystemTimer?.cancel();
+    _toolArmsTimer?.cancel();
     _safetyClient?.close();
     super.dispose();
   }
