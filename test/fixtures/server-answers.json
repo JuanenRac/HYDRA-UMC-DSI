@@ -64,6 +64,113 @@
         }
       }
     },
+    "GET /api/admin/device-tokens": {
+      "200": {
+        "minimal": {
+          "items": []
+        },
+        "full": {
+          "items": [
+            {
+              "id": "sample",
+              "name": "sample",
+              "username": "sample",
+              "createdAt": "sample",
+              "expiresAt": "sample",
+              "revokedAt": "sample",
+              "lastUsedAt": "sample",
+              "state": "active"
+            }
+          ]
+        }
+      },
+      "404": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      }
+    },
+    "POST /api/admin/device-tokens": {
+      "200": {
+        "minimal": {
+          "id": "sample",
+          "name": "sample",
+          "username": "sample",
+          "createdAt": "sample",
+          "expiresAt": "sample",
+          "revokedAt": "sample",
+          "lastUsedAt": "sample",
+          "state": "active",
+          "token": "sample"
+        },
+        "full": {
+          "id": "sample",
+          "name": "sample",
+          "username": "sample",
+          "createdAt": "sample",
+          "expiresAt": "sample",
+          "revokedAt": "sample",
+          "lastUsedAt": "sample",
+          "state": "active",
+          "token": "sample"
+        }
+      },
+      "400": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "404": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "409": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      }
+    },
+    "DELETE /api/admin/device-tokens/{id}": {
+      "200": {
+        "minimal": {
+          "revoked": false,
+          "sessionsEnded": 0
+        },
+        "full": {
+          "revoked": false,
+          "sessionsEnded": 0
+        }
+      },
+      "400": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "404": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      }
+    },
     "GET /api/admin/jwt-keys": {
       "200": {
         "minimal": {
@@ -281,6 +388,46 @@
           "order": [
             "server_first"
           ]
+        }
+      }
+    },
+    "GET /api/admin/updates": {
+      "200": {
+        "minimal": {
+          "checkedAt": "sample",
+          "owner": "sample",
+          "rateLimited": false,
+          "items": []
+        },
+        "full": {
+          "checkedAt": "sample",
+          "owner": "sample",
+          "rateLimited": false,
+          "items": [
+            {
+              "name": "sample",
+              "family": "sample",
+              "installed": "sample",
+              "latest": "sample",
+              "state": "current"
+            }
+          ]
+        }
+      },
+      "404": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "503": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
         }
       }
     },
@@ -828,6 +975,46 @@
         }
       }
     },
+    "POST /api/device/login": {
+      "200": {
+        "minimal": {
+          "success": false,
+          "token": "sample",
+          "refreshToken": "sample",
+          "role": "sample"
+        },
+        "full": {
+          "success": false,
+          "token": "sample",
+          "refreshToken": "sample",
+          "role": "sample"
+        }
+      },
+      "401": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "403": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "404": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      }
+    },
     "GET /api/ecosystem/health": {
       "200": {
         "minimal": {
@@ -1061,7 +1248,10 @@
           "hostname": "sample",
           "controllerCount": 0,
           "robotCount": 0,
-          "uptimeSeconds": 0
+          "uptimeSeconds": 0,
+          "addresses": [
+            "sample"
+          ]
         }
       },
       "404": {
