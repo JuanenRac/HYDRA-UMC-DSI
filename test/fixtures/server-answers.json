@@ -2412,6 +2412,66 @@
         "full": {}
       }
     },
+    "GET /api/tool-arms": {
+      "200": {
+        "minimal": {
+          "schema_version": "sample",
+          "ttlSeconds": 0.0,
+          "arms": [],
+          "armedCount": 0,
+          "staleCount": 0
+        },
+        "full": {
+          "schema_version": "sample",
+          "ttlSeconds": 0.0,
+          "arms": [
+            {
+              "robot": "sample",
+              "toolId": 0,
+              "armed": false,
+              "by": "sample",
+              "seq": 0,
+              "ageSeconds": 0.0,
+              "stale": false
+            }
+          ],
+          "armedCount": 0,
+          "staleCount": 0
+        }
+      },
+      "400": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "404": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "502": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "503": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      }
+    },
     "POST /api/totp/begin": {
       "200": {
         "minimal": {
