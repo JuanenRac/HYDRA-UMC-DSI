@@ -1,0 +1,44 @@
+# =============================================================================
+# HYDRA-UMC-DSI - Wayland kiosk on a virtual screen (manual)
+# Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
+# GPL-3.0-or-later - see LICENSE
+# =============================================================================
+# Started by hand only (workflow_dispatch): it never runs on a push or a pull request, so it cannot turn the checks of a push red.
+#
+# In a Debian trixie container (the release of the CM5 image) with no screen and no GPU it starts cage, the compositor the panel's unit uses, on the headless backend and
+# runs a Wayland client in it; it starts weston headless at the panel's size and reads its output back; it checks the udev rule of the backlight with udevadm and the unit
+# with systemd-analyze. It proves that the compositor flags and the unit are accepted by the real programs; it does not draw on a DSI panel and it does not use the
+# seat of tty1 (that needs the board). It holds no key, uploads nothing and publishes nothing.
+
+name: Kiosk on a virtual screen (manual)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: kiosk-headless
+  cancel-in-progress: false
+
+jobs:
+  kiosk:
+    name: cage and weston on a virtual screen
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - name: Check out this repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Run the compositors in a trixie container
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp tools/kiosk_headless_check.sh "$RUNNER_TEMP/check.sh"
+          docker run --rm -v "$GITHUB_WORKSPACE:/work:ro" -v "$RUNNER_TEMP/check.sh:/check.sh:ro" debian:trixie bash /check.sh | tee "$RUNNER_TEMP/kiosk.log"
+          { echo "### Wayland kiosk on a virtual screen"; echo '```'; cat "$RUNNER_TEMP/kiosk.log"; echo '```'; } >> "$GITHUB_STEP_SUMMARY"

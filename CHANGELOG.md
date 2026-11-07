@@ -4,6 +4,8 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+- **The kiosk is checked on a virtual screen by a manual workflow:** `kiosk-headless.yml` starts cage (the compositor of the panel's unit) and weston headless at the panel's size in a Debian trixie container, reads the output back, and runs `udevadm verify` on the backlight rule and `systemd-analyze verify` on the unit. No GPU, seat or DSI panel is involved, so the run on the board stays pending.
+
 - **The HTTP client talks through the shared package of the SDK:** `HydraApiClient` extends the shared `HydraApiCore` over a small `PackageHttpTransport` adapter and keeps its public API; it now numbers its motion commands and renews an expired session like the iOS app (the renewal needs an owner that sets `tokenRenewer`). The error type (`HydraError`), the connection history (times are milliseconds with `DateTime` views; `ConnectionHistory.agoDates` replaces the date form of `ago`), the server access options and the preferences (`ClientPrefs`, `AuthPrefs`) come from the same package, with this app's own wording and storage adapters.
 
 ## [0.3.5] - The stored session follows the rules shared with the other mobile apps: AuthPrefs keeps the host, the port, the scheme and its other flags, and hands the token, the user name and the refresh token to SessionStore of the shared... (and 1 more changes)
