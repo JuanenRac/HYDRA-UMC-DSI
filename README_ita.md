@@ -99,7 +99,7 @@ Ogni riga è una parte di questo repository e il semaforo dice a che punto è og
 
 ## 🧩 Ruolo in HYDRA-UMC
 
-**HYDRA-UMC-DSI** è il touchscreen della CM5 stessa: un'app Flutter nativa per il pannello DSI da 5"/7" che parla con `HYDRA-UMC-SERVER` tramite la sua interfaccia REST e WebSocket, accanto all'interfaccia browser di `HYDRA-UMC-STUDIO`. Non ha logica robotica propria; è il server a decidere cosa è consentito. Gira sul display touch del banco pilota CM5; il suo uso sulla piattaforma di destinazione NVIDIA Jetson Orin NX da 16 GB non è ancora definito.
+**HYDRA-UMC-DSI** è il touchscreen della CM5 stessa: un'app Flutter nativa per il pannello DSI da 5"/7" che parla con `HYDRA-UMC-SERVER` tramite la sua interfaccia REST e WebSocket, accanto all'interfaccia browser di `HYDRA-UMC-STUDIO`. Non ha logica robotica propria; è il server a decidere cosa è consentito. Oggi gira sul display touch del banco pilota CM5. Nel progetto di destinazione il display DSI è collegato allo STM32H757, che dovrebbe eseguire l'interfaccia completa a schermo, in modo che H757 e display continuino a funzionare (arresto, stato, controllo) anche se il Jetson si blocca, mentre il Jetson ospita visione, IA e server. Questo progetto non è costruito né provato, e questa app Flutter resta quella del banco pilota CM5.
 
 ## 🏛️ Architettura
 

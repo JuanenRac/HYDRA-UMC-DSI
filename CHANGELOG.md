@@ -4,6 +4,7 @@
 
 All notable changes to this project are documented here.
 
+- **README: today's role and the target role:** the description says that the app runs on the touch display of the CM5 pilot bench today and that, in the target design, the DSI display hangs from the STM32H757 (which is meant to run the whole interface) while the Jetson hosts vision, AI and the server; it is a design and the app stays the one of the pilot bench.
 - **README: the platform statement:** the description says what this project serves today (the CM5 pilot bench) and that the target platform of HYDRA-UMC, an NVIDIA Jetson Orin NX 16 GB, is a design that has not been built or tested.
 - **Listen-only mode (off by default):** a switch in Settings makes the panel show the robots and their data without sending any command. While it is on, the jog pad, the speed and acceleration sliders, valves and pumps, PLAY, PAUSE, the enable of a robot, HOME/RESET and the vision switch are disabled and a banner on the Control tab says so; the view model also drops every command except STOP and the safe-mode disable, whatever screen asks for it, because refusing a stop would be the unsafe side. The choice is kept across restarts. Texts in the eight languages; 4 tests. The same switch also refuses, at the door of the network, every other write to the server (settings, push and presence registration, files) with a 423 that never leaves the panel, except STOP and the sign-in (`network/listen_only_gate.dart`, 3 more tests).
 
