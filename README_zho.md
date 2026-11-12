@@ -99,7 +99,7 @@ GPL-3.0-or-later - see LICENSE
 
 ## 🧩 在 HYDRA-UMC 中的角色
 
-**HYDRA-UMC-DSI** 是 CM5 自带的触摸屏：一个面向 5"/7" DSI 面板的原生 Flutter 应用，通过 REST 和 WebSocket 与 `HYDRA-UMC-SERVER` 通信，与 `HYDRA-UMC-STUDIO` 的浏览器界面并存。它没有自己的机器人逻辑；允许什么由服务器决定。目前它运行在 CM5 试验台的触摸屏上。在目标设计中，DSI 显示屏接在 STM32H757 上，由 H757 在屏幕上运行完整界面，这样即使 Jetson 卡死，H757 和显示屏也能继续工作（停止、状态、控制），而 Jetson 承载视觉、AI 和服务器。该设计尚未制造或测试，本 Flutter 应用仍是 CM5 试验台的应用。
+**HYDRA-UMC-DSI** 是 CM5 自带的触摸屏：一个面向 5"/7" DSI 面板的原生 Flutter 应用，通过 REST 和 WebSocket 与 `HYDRA-UMC-SERVER` 通信，与 `HYDRA-UMC-STUDIO` 的浏览器界面并存。它没有自己的机器人逻辑；允许什么由服务器决定。目前它运行在 CM5 试验台的触摸屏上。在目标设计中，DSI 显示屏接在 STM32H757 上，由 H757 在屏幕上运行完整界面，这样即使 Jetson 死机，H757 和显示屏也能继续工作（停止、状态、控制），而 Jetson 承载视觉、AI 和服务器。该设计尚未制造或测试，本 Flutter 应用仍是 CM5 试验台的应用。
 
 ## 🏛️ 架构
 

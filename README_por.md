@@ -99,7 +99,7 @@ Cada linha é uma parte deste repositório e a luz diz até onde chega hoje. É 
 
 ## 🧩 Papel no HYDRA-UMC
 
-O **HYDRA-UMC-DSI** é o ecrã tátil da própria CM5: uma aplicação Flutter nativa para o painel DSI de 5"/7" que fala com o `HYDRA-UMC-SERVER` pela sua interface REST e WebSocket, ao lado da interface de navegador do `HYDRA-UMC-STUDIO`. Não tem lógica de robôs própria; o servidor decide o que é permitido. Hoje corre no ecrã tátil do banco piloto com a CM5. No desenho objetivo, o ecrã DSI liga-se ao STM32H757, que deverá executar a interface completa no ecrã, de modo que o H757 e o ecrã continuem a funcionar (paragem, estado, controlo) mesmo que a Jetson bloqueie, enquanto a Jetson aloja a visão, a IA e o servidor. Esse desenho não foi construído nem testado, e esta app Flutter continua a ser a do banco piloto com a CM5.
+O **HYDRA-UMC-DSI** é o ecrã tátil da própria CM5: uma aplicação Flutter nativa para o painel DSI de 5"/7" que fala com o `HYDRA-UMC-SERVER` pela sua interface REST e WebSocket, ao lado da interface de navegador do `HYDRA-UMC-STUDIO`. Não tem lógica de robôs própria; o servidor decide o que é permitido. Hoje corre no ecrã tátil do banco piloto com a CM5. No desenho objetivo, o ecrã DSI liga-se ao STM32H757, que deverá executar a interface completa no ecrã, de modo que o H757 e o ecrã continuem a funcionar (paragem, estado, controlo) mesmo que o Jetson bloqueie, enquanto o Jetson aloja a visão, a IA e o servidor. Esse desenho não foi construído nem testado, e esta app Flutter continua a ser a do banco piloto com a CM5.
 
 ## 🏛️ Arquitetura
 
