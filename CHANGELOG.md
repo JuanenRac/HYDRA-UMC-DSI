@@ -4,6 +4,7 @@
 
 All notable changes to this project are documented here.
 
+- **Widget tests of the audit dialog:** 6 tests against a real local server (a recorded line, the check of the chain when asked, the filters that ask the server again, an empty record, a record the server keeps off, a refusal shown as a sentence); no behaviour changes.
 - **Widget tests of the server options dialog:** 5 tests against a real local server (a row for every option the server sends, the one it fixes cannot be switched, save is off until something changes, a change that lowers a protection asks first and sends nothing when refused, a refusal of the server shown as a sentence); no behaviour changes.
 - **The shared screen data points the signals of the Jetson at the frames of its link (`docs/ui/`):** the copy of the display interface data now names the status and camera picture frames of the SPI link (defined in HYDRA-UMC, in simulation) instead of pending contracts. Nothing ran on a display or a Jetson.
 
