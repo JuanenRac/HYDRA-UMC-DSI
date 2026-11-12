@@ -101,6 +101,9 @@ void main() {
     await _open<String?>(tester, (context) => setNewPin(context, vm), result);
     await _type(tester, '1234');
     await _type(tester, '1234');
+    // keeping the PIN touches real storage, which only moves outside the fake clock of the test
+    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 300)));
+    await tester.pumpAndSettle();
     expect(result.single, anyOf(_en.pinSaved, _en.pinMemoryOnly));
     expect(vm.pin.check('1234'), PinCheck.accepted);
     expect(vm.pin.check('9999'), PinCheck.wrong);
@@ -118,7 +121,7 @@ void main() {
 
   testWidgets('confirmCurrentPin accepts the right PIN', (tester) async {
     final vm = RobotViewModel();
-    await vm.setOperatorPin('1234');
+    await tester.runAsync(() => vm.setOperatorPin('1234'));
     final result = <bool?>[];
     await _open<bool>(tester, (context) => confirmCurrentPin(context, vm), result);
     expect(find.text(_en.pinCurrentTitle), findsOneWidget);
@@ -128,7 +131,7 @@ void main() {
 
   testWidgets('confirmCurrentPin shows the tries left after a wrong PIN and keeps asking until it is right', (tester) async {
     final vm = RobotViewModel();
-    await vm.setOperatorPin('1234');
+    await tester.runAsync(() => vm.setOperatorPin('1234'));
     final result = <bool?>[];
     await _open<bool>(tester, (context) => confirmCurrentPin(context, vm), result);
     await _type(tester, '0000');
@@ -140,7 +143,7 @@ void main() {
 
   testWidgets('confirmCurrentPin returns false when cancelled', (tester) async {
     final vm = RobotViewModel();
-    await vm.setOperatorPin('1234');
+    await tester.runAsync(() => vm.setOperatorPin('1234'));
     final result = <bool?>[];
     await _open<bool>(tester, (context) => confirmCurrentPin(context, vm), result);
     await tester.tap(find.text(_en.playConfirmCancel));
