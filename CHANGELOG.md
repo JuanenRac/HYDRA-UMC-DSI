@@ -4,6 +4,8 @@
 
 All notable changes to this project are documented here.
 
+- **Each card of the System tab listens to its own readings:** the safety, ecosystem and tool arms cards were redrawn whenever any of the three was read or an action ran; each now follows a counter of its own that goes up only when what it draws changes (and the age limit of the safety verdict from the settings). `selector_rebuild_test` has one more test that bumps each counter and checks that only that card is redrawn.
+
 - **The sign-in screen listens to the fields it draws, not to the whole view model:** it is redrawn when the panel layout, the keyboard setting, the address of a pairing or the last error change, and no longer for the metrics tick or the robots; `test/selector_rebuild_test.dart` checks both directions (1 more test; 373 in all).
 
 - **The global STOP is tested to be on screen where robots are driven:** `test/stop_presence_test.dart` (2 widget tests) checks that the Control tab carries the large global STOP once a robot is selected and that the main screen carries the one of its bar, with or without a robot.

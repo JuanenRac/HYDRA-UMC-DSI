@@ -20,6 +20,8 @@ import 'package:hydra_umc_dsi/l10n/app_localizations.dart';
 import 'package:hydra_umc_dsi/network/auth_prefs.dart';
 import 'package:hydra_umc_dsi/services/operator_pin.dart';
 import 'package:hydra_umc_dsi/state/robot_view_model.dart';
+import 'package:hydra_umc_dsi/state/system_model.dart';
+import 'package:hydra_umc_dsi/ui/system_screen.dart';
 import 'package:hydra_umc_dsi/models/access.dart';
 import 'package:hydra_umc_dsi/ui/control_screen.dart';
 import 'package:hydra_umc_dsi/state/hydra_error.dart';
@@ -89,6 +91,11 @@ Future<String> _rebuilt(WidgetTester tester, Future<void> Function() action) asy
     debugPrint = oldPrint;
   }
   return lines.join('\n');
+}
+
+class _Sys extends SystemModel {
+  _Sys(RobotViewModel vm) : super(vm: vm, supervised: true, screenRestarter: () {});
+  void ping() => notifyListeners();
 }
 
 void main() {
@@ -227,5 +234,62 @@ void main() {
       });
       expect(related, contains('LoginScreen'), reason: change.key);
     }
+  });
+
+  testWidgets('each card of the System tab follows its own readings and not the other cards', (tester) async {
+    // Four cards side by side need a wide panel.
+    tester.view.physicalSize = const Size(2400, 900);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+    final vm = _Vm();
+    final model = _Sys(vm);
+    addTearDown(() {
+      model.dispose();
+      vm.dispose();
+    });
+    await tester.pumpWidget(
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider<RobotViewModel>.value(value: vm),
+          ChangeNotifierProvider<SystemModel>.value(value: model),
+        ],
+        child: MaterialApp(
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: const Scaffold(body: SystemScreen()),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    void on(void Function() change) {
+      change();
+      model.ping();
+    }
+
+    // The default settings show the safety card only: switch the others on through the settings file of the view model.
+    vm.panelConfig = const PanelConfig(safetyPanel: true, ecosystemView: true, toolArmsPanel: true, rebootButton: true);
+    vm.poke();
+    await tester.pumpAndSettle();
+
+    final safety = await _rebuilt(tester, () async => on(() => model.safetyStamp++));
+    expect(safety, contains('_SafetyCard'));
+    expect(safety, isNot(contains('_EcosystemCard')));
+    expect(safety, isNot(contains('_ToolArmsCard')));
+
+    final ecosystem = await _rebuilt(tester, () async => on(() => model.ecosystemStamp++));
+    expect(ecosystem, contains('_EcosystemCard'));
+    expect(ecosystem, isNot(contains('_SafetyCard')));
+    expect(ecosystem, isNot(contains('_ToolArmsCard')));
+
+    final arms = await _rebuilt(tester, () async => on(() => model.toolArmsStamp++));
+    expect(arms, contains('_ToolArmsCard'));
+    expect(arms, isNot(contains('_SafetyCard')));
+    expect(arms, isNot(contains('_EcosystemCard')));
   });
 }

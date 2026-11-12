@@ -117,8 +117,10 @@ class _SafetyCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final model = context.watch<SystemModel>();
-    final stale = Duration(seconds: context.read<RobotViewModel>().panelConfig.safetyStaleSeconds);
+    // Redrawn by its own readings (and the age limit of the settings), not by the other cards'.
+    context.select<SystemModel, int>((m) => m.safetyStamp);
+    final model = context.read<SystemModel>();
+    final stale = Duration(seconds: context.select<RobotViewModel, int>((vm) => vm.panelConfig.safetyStaleSeconds));
     final safety = model.safety;
     final level = model.safetyLevel;
     final color = safetyColor(level);
@@ -230,7 +232,8 @@ class _EcosystemCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final model = context.watch<SystemModel>();
+    context.select<SystemModel, int>((m) => m.ecosystemStamp);
+    final model = context.read<SystemModel>();
     final isAdmin = context.select<RobotViewModel, bool>((vm) => vm.isAdmin);
     final eco = model.ecosystem;
 
@@ -320,7 +323,8 @@ class _ToolArmsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final model = context.watch<SystemModel>();
+    context.select<SystemModel, int>((m) => m.toolArmsStamp);
+    final model = context.read<SystemModel>();
     final report = model.toolArms;
     final failure = model.toolArmsFailure;
     final now = DateTime.now();

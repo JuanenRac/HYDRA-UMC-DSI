@@ -64,6 +64,9 @@ class SystemModel extends ChangeNotifier {
 
   // ---- safety ---------------------------------------------------------------
   SafetyStatus? safety;
+
+  /// Goes up whenever what the safety card draws changes, so the card listens to this number and not to the whole model.
+  int safetyStamp = 0;
   SafetyFailure? safetyFailure;
   Timer? _safetyTimer;
   SafetyZonesClient? _safetyClient;
@@ -92,11 +95,15 @@ class SystemModel extends ChangeNotifier {
     } finally {
       _safetyReading = false;
     }
+    safetyStamp++;
     notifyListeners();
   }
 
   // ---- ecosystem ------------------------------------------------------------
   EcosystemStatus? ecosystem;
+
+  /// Goes up whenever what the ecosystem card draws changes (the reading or the unit an action runs on).
+  int ecosystemStamp = 0;
   bool ecosystemFailed = false;
   Timer? _ecosystemTimer;
   bool _ecosystemReading = false;
@@ -121,6 +128,7 @@ class SystemModel extends ChangeNotifier {
     } finally {
       _ecosystemReading = false;
     }
+    ecosystemStamp++;
     notifyListeners();
   }
 
@@ -128,6 +136,9 @@ class SystemModel extends ChangeNotifier {
   /// The last good reading, or null. A reading that fails drops it: a list that could not be refreshed is never kept as if it were current.
   ToolArmsReport? toolArms;
   ToolArmsFailure? toolArmsFailure;
+
+  /// Goes up whenever what the tool arms card draws changes.
+  int toolArmsStamp = 0;
   Timer? _toolArmsTimer;
   bool _toolArmsReading = false;
 
@@ -158,6 +169,7 @@ class SystemModel extends ChangeNotifier {
     } finally {
       _toolArmsReading = false;
     }
+    toolArmsStamp++;
     notifyListeners();
   }
 
@@ -189,6 +201,7 @@ class SystemModel extends ChangeNotifier {
       _safetyRunning = false;
       safety = null;
       safetyFailure = null;
+      safetyStamp++;
       notifyListeners();
     }
 
@@ -212,6 +225,7 @@ class SystemModel extends ChangeNotifier {
       _toolArmsRunning = false;
       toolArms = null;
       toolArmsFailure = null;
+      toolArmsStamp++;
       notifyListeners();
     }
   }
@@ -287,6 +301,7 @@ class SystemModel extends ChangeNotifier {
     final what = 'service-$action:$unit';
     if (_role != 'admin') return _done(what, _role == null || _role == 'viewer' ? SystemActionResult.roleDenied : SystemActionResult.adminOnly);
     _busyUnit = unit;
+    ecosystemStamp++;
     notifyListeners();
     try {
       await vm.runAuthed((c) => c.postEcosystemService(unit, action));
@@ -297,6 +312,7 @@ class SystemModel extends ChangeNotifier {
       return _done(what, SystemActionResult.failed);
     } finally {
       _busyUnit = null;
+      ecosystemStamp++;
       notifyListeners();
     }
   }
