@@ -18,6 +18,8 @@ It keeps state, so a test can tell a story and not only replay one answer:
     `POST /api/ingest/scenario-outcome` (a ScenarioOutcome 1.0 is kept, one that does not fit is a 400),
     `POST /api/ingest/developer-node/status` (the token of a node, `node_tokens`, and not a user account) and
     `POST /api/trajectory/proposals/verify` (a listed key and the signature `fake-valid`: no cryptography here);
+  * `POST /api/camera/ticket`: a ticket for a picture's address (`{ticket, expiresInSeconds}`), valid for five minutes of the test
+    clock and kept in `tickets` (ticket -> account and expiry) for a test to look at; `ticket_valid` says if one still opens a picture;
   * every other route of the full server inventory answers with the `full` body of
     `conformance/app-fixtures/v1/server-answers.json` (the same file the apps replay), so a client can call any route the
     server declares; a route the inventory does not know is a 404.
@@ -42,6 +44,7 @@ ANSWERS = Path(__file__).resolve().parent.parent / "app-fixtures" / "v1" / "serv
 OPEN_ROUTES = {("GET", "/api/hydra-info"), ("POST", "/api/login"), ("POST", "/api/refresh"), ("POST", "/api/logout"), ("GET", "/.well-known/jwks.json")}
 CONTINUOUS = {"jog", "speed", "jogStep"}
 CLAIM_TTL_MS = 300_000
+TICKET_TTL_S = 300
 
 
 class FakeHydra:
@@ -65,6 +68,7 @@ class FakeHydra:
         self.node_statuses: dict[str, dict[str, Any]] = {}
         self.proposal_keys: set[str] = set()  # the key ids the verify route knows
         self.verified: list[dict[str, Any]] = []  # the bodies of the verify calls
+        self.tickets: dict[str, tuple[str, int]] = {}  # camera ticket -> (account, expiry on the test clock)
 
     # ---- helpers ------------------------------------------------------------------------------------
     def bump(self, robot: dict[str, Any]) -> str:
@@ -248,6 +252,16 @@ class FakeHydra:
         self.node_statuses[node] = body
         return 201, {"node_id": node, "seq": len(self.node_statuses)}
 
+    def camera_ticket(self, user: str) -> tuple[int, dict[str, Any]]:
+        """The short-lived ticket a picture's address carries: the answer of the real route, `{ticket, expiresInSeconds}`."""
+        ticket = "tkt-" + secrets.token_hex(12)
+        self.tickets[ticket] = (user, self.now_ms + TICKET_TTL_S * 1000)
+        return 200, {"ticket": ticket, "expiresInSeconds": TICKET_TTL_S}
+
+    def ticket_valid(self, ticket: str) -> bool:
+        entry = self.tickets.get(ticket)
+        return entry is not None and entry[1] > self.now_ms
+
     def verify_proposal(self, body: dict[str, Any]) -> tuple[int, dict[str, Any]]:
         proposal = body.get("proposal")
         if not isinstance(proposal, dict) or not isinstance(body.get("expected_robot_id"), str):
@@ -344,6 +358,8 @@ class Handler(BaseHTTPRequestHandler):
             return state.ingest_scenario(body)
         if (method, path) == ("POST", "/api/trajectory/proposals/verify"):
             return state.verify_proposal(body)
+        if (method, path) == ("POST", "/api/camera/ticket"):
+            return state.camera_ticket(user)
         found = re.fullmatch(r"/api/robot/(\d+)(?:/(claim|release|jog-arm|command))?", path)
         if found:
             robot_id, action = int(found.group(1)), found.group(2)

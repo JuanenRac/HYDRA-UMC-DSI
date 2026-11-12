@@ -50,6 +50,7 @@ String controlScreenShape(RobotViewModel vm) {
     vm.accessBusy,
     vm.conditionalMode.toString(),
     vm.confirmPlay,
+    vm.listenOnly,
     vm.homeResetEnabled,
     vm.homeResetBlock(id).name,
     vm.isAdmin,
@@ -129,8 +130,23 @@ class _ControlScreenState extends State<ControlScreen> {
       return Center(child: Text(l10n.controlNoRobots, style: const TextStyle(color: Colors.grey)));
     }
 
+    final listenOnly = vm.listenOnly;
     return Column(
       children: [
+        if (listenOnly)
+          Container(
+            key: const Key('listen-only-banner'),
+            width: double.infinity,
+            color: const Color(0xFF334155),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Row(
+              children: [
+                const Icon(Icons.hearing, size: 18),
+                const SizedBox(width: 8),
+                Expanded(child: Text(l10n.controlListenOnlyBanner)),
+              ],
+            ),
+          ),
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
           child: SizedBox(
@@ -163,7 +179,7 @@ class _ControlScreenState extends State<ControlScreen> {
                         // playback and a jog would both write the same setpoint.
                         // When the administrator requires it, the jog also waits for
                         // the explicit arming (AccessPanel).
-                        enabled: robot.online && !(robot.isPlaying && !robot.isPaused) && !vm.jogNeedsArming(robot.id, _now),
+                        enabled: !listenOnly && robot.online && !(robot.isPlaying && !robot.isPaused) && !vm.jogNeedsArming(robot.id, _now),
                         onJog: (dx, dy, dz) {
                           HapticFeedback.selectionClick();
                           vm.jogXYZ(_jogTarget, dx, dy, dz, robot.jogStepOr(_defaultJogStep, _jogSteps));
@@ -183,9 +199,20 @@ class _ControlScreenState extends State<ControlScreen> {
                           const SizedBox(height: 12),
                           Wrap(spacing: 10, runSpacing: 10, children: _telemetryTiles(robot)),
                           const SizedBox(height: 20),
-                          _speedAccelSliders(vm, robot, l10n),
-                          const SizedBox(height: 16),
-                          _ioRow(vm, robot, l10n),
+                          IgnorePointer(
+                            ignoring: listenOnly,
+                            child: Opacity(
+                              opacity: listenOnly ? 0.4 : 1,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  _speedAccelSliders(vm, robot, l10n),
+                                  const SizedBox(height: 16),
+                                  _ioRow(vm, robot, l10n),
+                                ],
+                              ),
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -341,14 +368,14 @@ class _ControlScreenState extends State<ControlScreen> {
           const StopAllButton(large: true),
           const SizedBox(width: 40),
           IconButton.filled(
-            onPressed: robot != null && robot.online ? () => _play(vm, robot, l10n) : null,
+            onPressed: !vm.listenOnly && robot != null && robot.online ? () => _play(vm, robot, l10n) : null,
             icon: const Icon(Icons.play_arrow),
             iconSize: 28,
             style: IconButton.styleFrom(backgroundColor: const Color(0xFF15803D), minimumSize: const Size(56, 56)),
           ),
           const SizedBox(width: 20),
           IconButton.filled(
-            onPressed: robot != null && robot.online && robot.isPlaying ? () => vm.sendCommand('pause') : null,
+            onPressed: !vm.listenOnly && robot != null && robot.online && robot.isPlaying ? () => vm.sendCommand('pause') : null,
             icon: Icon(robot?.isPaused == true ? Icons.play_arrow : Icons.pause),
             iconSize: 28,
             style: IconButton.styleFrom(backgroundColor: const Color(0xFFB45309), minimumSize: const Size(56, 56)),
@@ -359,7 +386,7 @@ class _ControlScreenState extends State<ControlScreen> {
             icon: robot?.isEnabled == false ? Icons.power_settings_new : Icons.power_off,
             tooltip: robot?.isEnabled == false ? l10n.controlEnableHold : l10n.controlDisableHold,
             // Anyone signed in can disable a robot (like a stop); only an administrator is offered the enable.
-            enabled: robot != null && (robot.isEnabled ? true : vm.isAdmin),
+            enabled: robot != null && (robot.isEnabled ? true : (vm.isAdmin && !vm.listenOnly)),
             onConfirm: () {
               HapticFeedback.mediumImpact();
               vm.sendCommand(robot?.isEnabled == false ? 'enable' : 'disable');
@@ -377,7 +404,7 @@ class _ControlScreenState extends State<ControlScreen> {
             },
           ),
           // HOME/RESET: drawn only when the person switched it on in the settings; two confirmations.
-          if (vm.homeResetEnabled && robot != null) ...[
+          if (vm.homeResetEnabled && !vm.listenOnly && robot != null) ...[
             const SizedBox(width: 40),
             _homeResetButton(vm, robot, l10n),
           ],

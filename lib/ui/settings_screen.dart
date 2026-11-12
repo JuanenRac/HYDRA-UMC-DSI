@@ -41,6 +41,7 @@ typedef _SettingsView = (
   bool,
   bool,
   bool,
+  bool,
 );
 
 class SettingsScreen extends StatelessWidget {
@@ -103,6 +104,7 @@ class SettingsScreen extends StatelessWidget {
           m.pin.isSet,
           m.isAdmin,
           m.pin.memoryOnly,
+          m.listenOnly,
         ));
     final l10n = AppLocalizations.of(context)!;
     final server = view.$1;
@@ -115,6 +117,7 @@ class SettingsScreen extends StatelessWidget {
     final pinSet = view.$8;
     final isAdmin = view.$9;
     final pinMemoryOnly = view.$10;
+    final listenOnly = view.$11;
     final lockSeconds = vm.panelConfig.idleLockSeconds;
     return ListView(
       padding: const EdgeInsets.all(20),
@@ -140,6 +143,14 @@ class SettingsScreen extends StatelessWidget {
           subtitle: Text(l10n.settingsConfirmPlaySubtitle),
           value: confirmPlay,
           onChanged: (value) => vm.setConfirmPlay(value),
+        ),
+        SwitchListTile(
+          key: const Key('settings-listen-only'),
+          secondary: const Icon(Icons.hearing),
+          title: Text(l10n.settingsListenOnly),
+          subtitle: Text(l10n.settingsListenOnlySubtitle),
+          value: listenOnly,
+          onChanged: (value) => vm.setListenOnly(value),
         ),
         SwitchListTile(
           key: const Key('settings-home-reset'),

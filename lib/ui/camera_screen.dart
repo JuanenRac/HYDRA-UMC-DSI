@@ -70,7 +70,7 @@ class _CameraScreenState extends State<CameraScreen> {
               ),
               Switch(
                 value: robot.hasCamera,
-                onChanged: (enabled) => vm.setVisionEnabled(robot.id, enabled),
+                onChanged: vm.listenOnly ? null : (enabled) => vm.setVisionEnabled(robot.id, enabled),
               ),
             ],
           ),

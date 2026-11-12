@@ -197,6 +197,7 @@ class RobotViewModel extends ChangeNotifier {
     // The controller id of this installation: made once, kept, and adopted here.
     conditionalMode = ConditionalMode.fromKey(await _clientPrefs.loadConditionalMode());
     confirmPlay = await _clientPrefs.loadConfirmPlay();
+    listenOnly = await _clientPrefs.loadListenOnly();
     final storedControllerId = await _clientPrefs.loadControllerId();
     if (isValidControllerId(storedControllerId)) {
       HydraApiClient.controllerId = storedControllerId!;
@@ -653,6 +654,7 @@ class RobotViewModel extends ChangeNotifier {
     Duration debounce = Duration.zero,
     required void Function(RobotView) localMutate,
   }) async {
+    if (listenOnly && command != 'stop' && command != 'disable') return;
     final robotId = robotIdOverride ?? selectedRobotId;
     if (robotId == null) return;
     final target = state.robotById(robotId);
@@ -980,6 +982,7 @@ class RobotViewModel extends ChangeNotifier {
   /// calls it only after the last step; the checks run again here, so a robot that started moving between the steps
   /// is not reset. A refusal shows its own phrase and nothing goes out.
   void homeReset() {
+    if (listenOnly) return;
     final id = selectedRobotId;
     if (id == null) return;
     final block = homeResetBlock(id);
@@ -1041,6 +1044,18 @@ class RobotViewModel extends ChangeNotifier {
     confirmPlay = value;
     notifyListeners();
     await _clientPrefs.saveConfirmPlay(value);
+  }
+
+  /// Listen-only mode: the panel shows the robots and their data but sends no command. Off by default. STOP (the
+  /// global one and the per-robot one) and the safe-mode `disable` keep working, because refusing a stop would
+  /// be the unsafe side; every other command is dropped here, whatever screen asked for it.
+  bool listenOnly = false;
+
+  /// Switches listen-only mode, and keeps the choice.
+  Future<void> setListenOnly(bool value) async {
+    listenOnly = value;
+    notifyListeners();
+    await _clientPrefs.saveListenOnly(value);
   }
 
   /// Keeps new security settings for the next connections. Returns what is
