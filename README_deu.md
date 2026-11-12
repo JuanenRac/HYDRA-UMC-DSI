@@ -99,7 +99,7 @@ Jede Zeile ist ein Teil dieses Repositorys, und die Ampel sagt, wie weit er heut
 
 ## 🧩 Rolle in HYDRA-UMC
 
-**HYDRA-UMC-DSI** ist der Touchscreen der CM5 selbst: eine native Flutter-App für das 5"/7"-DSI-Panel, die über REST und WebSocket mit `HYDRA-UMC-SERVER` spricht, neben der Browseroberfläche von `HYDRA-UMC-STUDIO`. Sie hat keine eigene Robotiklogik; der Server entscheidet, was erlaubt ist.
+**HYDRA-UMC-DSI** ist der Touchscreen der CM5 selbst: eine native Flutter-App für das 5"/7"-DSI-Panel, die über REST und WebSocket mit `HYDRA-UMC-SERVER` spricht, neben der Browseroberfläche von `HYDRA-UMC-STUDIO`. Sie hat keine eigene Robotiklogik; der Server entscheidet, was erlaubt ist. Sie läuft auf dem Touch-Display des CM5-Pilotprüfstands; ihr Einsatz auf der Zielplattform NVIDIA Jetson Orin NX 16 GB ist noch nicht definiert.
 
 ## 🏛️ Architektur
 

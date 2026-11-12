@@ -99,7 +99,7 @@ Compute Module 5 上の HYDRA-UMC 自身の 5"/7" DSI タッチスクリーン�
 
 ## 🧩 HYDRA-UMC での役割
 
-**HYDRA-UMC-DSI** は CM5 自身のタッチ画面です。5"/7" の DSI パネル向けのネイティブ Flutter アプリで、`HYDRA-UMC-STUDIO` のブラウザー UI と並んで、REST と WebSocket で `HYDRA-UMC-SERVER` と通信します。ロボットのロジックは持たず、何が許されるかはサーバーが決めます。
+**HYDRA-UMC-DSI** は CM5 自身のタッチ画面です。5"/7" の DSI パネル向けのネイティブ Flutter アプリで、`HYDRA-UMC-STUDIO` のブラウザー UI と並んで、REST と WebSocket で `HYDRA-UMC-SERVER` と通信します。ロボットのロジックは持たず、何が許されるかはサーバーが決めます。CM5 試験用ベンチのタッチディスプレイで動作します。目標プラットフォームの NVIDIA Jetson Orin NX 16 GB での利用は、まだ定義されていません。
 
 ## 🏛️ アーキテクチャ
 
