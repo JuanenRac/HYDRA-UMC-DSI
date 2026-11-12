@@ -477,6 +477,11 @@
           "events": {
             "jobFinished": false,
             "globalStop": false
+          },
+          "liveActivity": {
+            "enabled": false,
+            "level": "status",
+            "activities": 0
           }
         }
       }
@@ -1783,6 +1788,50 @@
         }
       }
     },
+    "POST /api/push/live-activities": {
+      "200": {
+        "minimal": {
+          "registered": false
+        },
+        "full": {
+          "registered": false
+        }
+      },
+      "400": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "409": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      }
+    },
+    "DELETE /api/push/live-activities/{token}": {
+      "200": {
+        "minimal": {
+          "removed": false
+        },
+        "full": {
+          "removed": false
+        }
+      },
+      "400": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      }
+    },
     "POST /api/refresh": {
       "200": {
         "minimal": {
@@ -2448,6 +2497,60 @@
         }
       },
       "404": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "502": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "503": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      }
+    },
+    "POST /api/tool-arms/reset": {
+      "200": {
+        "minimal": {
+          "success": false,
+          "robot": "sample",
+          "toolId": 0
+        },
+        "full": {
+          "success": false,
+          "robot": "sample",
+          "toolId": 0
+        }
+      },
+      "400": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "404": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "409": {
         "minimal": {
           "error": "sample"
         },
