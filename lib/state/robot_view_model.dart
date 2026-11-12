@@ -36,6 +36,7 @@ import '../models/robot_command_contract.dart';
 import '../models/server_info.dart';
 import '../models/server_security.dart';
 import '../models/stop_all_result.dart';
+import '../network/listen_only_gate.dart';
 import '../network/auth_prefs.dart';
 import '../network/client_prefs.dart';
 import '../network/hydra_api_client.dart';
@@ -198,6 +199,7 @@ class RobotViewModel extends ChangeNotifier {
     conditionalMode = ConditionalMode.fromKey(await _clientPrefs.loadConditionalMode());
     confirmPlay = await _clientPrefs.loadConfirmPlay();
     listenOnly = await _clientPrefs.loadListenOnly();
+    ListenOnlyGate.enabled = listenOnly;
     final storedControllerId = await _clientPrefs.loadControllerId();
     if (isValidControllerId(storedControllerId)) {
       HydraApiClient.controllerId = storedControllerId!;
@@ -1054,6 +1056,7 @@ class RobotViewModel extends ChangeNotifier {
   /// Switches listen-only mode, and keeps the choice.
   Future<void> setListenOnly(bool value) async {
     listenOnly = value;
+    ListenOnlyGate.enabled = value;
     notifyListeners();
     await _clientPrefs.saveListenOnly(value);
   }

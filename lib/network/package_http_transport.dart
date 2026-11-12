@@ -11,6 +11,7 @@
 
 import 'package:http/http.dart' as http;
 import 'package:hydra_umc_app_common/hydra_umc_app_common.dart' show HttpRequestData, HttpResponseData, HttpTransport;
+import 'listen_only_gate.dart';
 
 class PackageHttpTransport implements HttpTransport {
   PackageHttpTransport(this._client);
@@ -19,6 +20,9 @@ class PackageHttpTransport implements HttpTransport {
 
   @override
   Future<HttpResponseData> send(HttpRequestData request) async {
+    if (ListenOnlyGate.enabled && !ListenOnlyGate.allows(request.method, request.path, request.body)) {
+      return ListenOnlyGate.refusal(request.path);
+    }
     final req = http.Request(request.method, Uri.parse(request.url))..headers.addAll(request.headers);
     final body = request.body;
     if (body != null) req.body = body;
