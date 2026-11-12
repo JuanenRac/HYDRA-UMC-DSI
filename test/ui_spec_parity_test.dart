@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 const _languages = ['en', 'es', 'de', 'fr', 'it', 'ja', 'zh', 'pt'];
 
-// The screen of the app that answers each screen of the panel. The panel has one the app does not: the alarms.
+// The screen of the app that answers each screen of the panel (the PIN pad of the panel is the modal screen "unlock"). The panel has one the app does not: the alarms.
 const _appScreens = {
   'dashboard': 'lib/ui/dashboard_screen.dart',
   'control': 'lib/ui/control_screen.dart',
@@ -18,6 +18,7 @@ const _appScreens = {
   'metrics': 'lib/ui/metrics_screen.dart',
   'system': 'lib/ui/system_screen.dart',
   'settings': 'lib/ui/settings_screen.dart',
+  'unlock': 'lib/ui/widgets/pin_pad.dart',
 };
 const _panelOnly = {'alarms'};
 
@@ -68,6 +69,25 @@ void main() {
     final stop = (spec['global_widgets'] as List<dynamic>).where((w) => (w as Map<String, dynamic>)['action'] == 'stop').toList();
     expect(stop.length, 1);
     expect(File('lib/ui/widgets/stop_all.dart').existsSync(), isTrue);
+  });
+
+  test('The panel is landscape only and shows a camera thumbnail', () {
+    expect((spec['display'] as Map<String, dynamic>)['orientation'], 'landscape');
+    final camera = (spec['screens'] as List<dynamic>).cast<Map<String, dynamic>>().firstWhere((s) => s['id'] == 'camera');
+    final image = (camera['widgets'] as List<dynamic>).cast<Map<String, dynamic>>().firstWhere((w) => w['kind'] == 'image');
+    expect(image['signal'], 'jetson.camera_snapshot');
+  });
+
+  test('The PIN pad is a modal screen opened by the banner, and STOP never asks for the PIN', () {
+    final screens = (spec['screens'] as List<dynamic>).cast<Map<String, dynamic>>();
+    expect(screens.firstWhere((s) => s['id'] == 'unlock')['modal'], isTrue);
+    final globals = (spec['global_widgets'] as List<dynamic>).cast<Map<String, dynamic>>();
+    expect(globals.firstWhere((w) => w['id'] == 'banner')['action'], 'nav_unlock');
+    final actions = (spec['actions'] as List<dynamic>).cast<Map<String, dynamic>>();
+    expect(actions.firstWhere((a) => a['id'] == 'stop')['requires'], isEmpty);
+    expect(texts['lock.title']!['arb'], 'lockTitle');
+    expect(texts['lock.hint']!['arb'], 'lockHint');
+    expect(texts['pin.enter']!['arb'], 'pinPadOk');
   });
 
   test('The listen-only text of the panel is the one of the app', () {
