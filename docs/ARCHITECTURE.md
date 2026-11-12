@@ -243,3 +243,7 @@ the list of keys and the example in step.
 * **Screen listening**: the screens listen to the fields they draw (`context.select`),
   not to the whole view model; `test/selector_rebuild_test.dart` counts the widgets
   Flutter rebuilds.
+
+## 10. The same screens on the controller
+
+In the target design the display hangs from the STM32H757, which runs the whole interface so that the panel keeps showing the state and stopping the machine when the host stops answering (the design is in `docs/DSI_EN_H757.md` of the HYDRA-UMC repository). This app and that firmware are two renderers of the same screens: `docs/ui/ui_spec.json` (closed schema `ui_spec.schema.json`) lists the screens, widgets, signals and actions and `docs/ui/i18n.json` the texts in eight languages. They are a copy of `src/ui_h757/spec` of HYDRA-UMC, kept by `tools/sync_ui_spec.py`, and `test/ui_spec_parity_test.dart` checks that the texts linked to a key of this app (`lib/l10n`) are the same in every language and that every screen of the panel has a screen here, except the alarms screen, which the panel alone has. What the app has and the panel does not: the live camera video, the 3D scene, the server options, the ecosystem restart, the pairing and the audit view. None of this has run on a display.
