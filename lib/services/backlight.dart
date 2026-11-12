@@ -27,6 +27,11 @@
 import 'dart:io';
 
 class BacklightControl {
+  /// [basePath] and [linuxOnly] exist so a test can point the control at a fake sysfs folder on any machine; the app uses the defaults.
+  BacklightControl({this.basePath = '/sys/class/backlight', bool? linuxOnly}) : _linuxOnly = linuxOnly ?? Platform.isLinux;
+
+  final String basePath;
+  final bool _linuxOnly;
   Directory? _cachedDevice;
   bool _loggedMissing = false;
 
@@ -35,13 +40,13 @@ class BacklightControl {
   /// hardware - no need to re-glob /sys/class/backlight/ on every call).
   Directory? _findDevice() {
     if (_cachedDevice != null) return _cachedDevice;
-    if (!Platform.isLinux) return null;
-    final base = Directory('/sys/class/backlight');
+    if (!_linuxOnly) return null;
+    final base = Directory(basePath);
     if (!base.existsSync()) {
       if (!_loggedMissing) {
         _loggedMissing = true;
         // ignore: avoid_print
-        print('[Backlight] /sys/class/backlight not present - adaptive backlight disabled on this host.');
+        print('[Backlight] $basePath not present - adaptive backlight disabled on this host.');
       }
       return null;
     }
@@ -50,7 +55,7 @@ class BacklightControl {
       if (!_loggedMissing) {
         _loggedMissing = true;
         // ignore: avoid_print
-        print('[Backlight] No backlight device registered under /sys/class/backlight - adaptive backlight disabled.');
+        print('[Backlight] No backlight device registered under $basePath - adaptive backlight disabled.');
       }
       return null;
     }
@@ -74,6 +79,7 @@ class BacklightControl {
     try {
       final maxFile = File('${device.path}/max_brightness');
       final maxBrightness = int.parse((await maxFile.readAsString()).trim());
+      if (maxBrightness <= 0) return false; // a driver that reports no range cannot be driven by a percentage
       final value = (maxBrightness * clamped / 100).round();
       await File('${device.path}/brightness').writeAsString('$value');
       return true;
