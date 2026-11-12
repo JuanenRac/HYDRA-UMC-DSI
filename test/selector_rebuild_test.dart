@@ -20,6 +20,8 @@ import 'package:hydra_umc_dsi/l10n/app_localizations.dart';
 import 'package:hydra_umc_dsi/network/auth_prefs.dart';
 import 'package:hydra_umc_dsi/services/operator_pin.dart';
 import 'package:hydra_umc_dsi/state/robot_view_model.dart';
+import 'package:hydra_umc_dsi/models/access.dart';
+import 'package:hydra_umc_dsi/ui/control_screen.dart';
 import 'package:hydra_umc_dsi/ui/metrics_screen.dart';
 import 'package:hydra_umc_dsi/ui/settings_screen.dart';
 import 'package:hydra_umc_dsi/ui/three_d_screen.dart';
@@ -150,5 +152,48 @@ void main() {
       vm.poke();
     });
     expect(related, contains('StopAllBanner'));
+  });
+
+  testWidgets('the control screen follows what it draws and decides, and not the readings', (tester) async {
+    final vm = await _pump(tester, const ControlScreen());
+    addTearDown(vm.dispose);
+    // The texts of the language load a frame later: wait for them, or their redraw is counted as the screen's.
+    await tester.pumpAndSettle();
+    // Drawing the robot fills in the parts of its state it did not have (joints, valves, pumps): that one change is the screen's own.
+    vm.poke();
+    await tester.pump();
+    final unrelated = await _rebuilt(tester, () async {
+      vm.metrics = SystemMetrics(cpuLoad: 55, memoryUsage: 20, temp: 40, uptime: 101);
+      vm.poke();
+    });
+    expect(unrelated, isNot(contains('ControlScreen')));
+
+    final changes = <String, void Function()>{
+      'the robot moves': () => vm.selectedRobot!.raw['pos']['x'] = 99,
+      'the robot goes offline': () => vm.selectedRobot!.raw['online'] = false,
+      'a reservation appears': () => vm.claims = [
+        ClaimInfo(robotId: 1, robotName: 'ARM-1', ownerUsername: 'bob', controllerId: 'other', expiresAt: 5),
+      ],
+      'the arming of the jog changes': () => vm.jogArmedUntil[1] = DateTime.utc(2031),
+      'the limits of the robot change': () => vm.safetyByRobot[1] = RobotSafety(
+        robotId: 1,
+        jog: const JogLimits(10, 100),
+        bedMaxC: 0,
+        armRequired: true,
+        armTtlMs: 60000,
+        jogArmedUntil: null,
+      ),
+      'a request is under way': () => vm.accessBusy = true,
+      'the STOP is not confirmed': () => vm.stopAllUnconfirmed = true,
+      'the switch of the home reset changes': () => vm.homeResetEnabled = !vm.homeResetEnabled,
+      'the question before PLAY changes': () => vm.confirmPlay = !vm.confirmPlay,
+    };
+    for (final change in changes.entries) {
+      final related = await _rebuilt(tester, () async {
+        change.value();
+        vm.poke();
+      });
+      expect(related, contains('ControlScreen'), reason: change.key);
+    }
   });
 }

@@ -15,6 +15,7 @@
 // =============================================================================
 
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -31,6 +32,33 @@ import 'widgets/access_panel.dart';
 import 'widgets/digital_readout.dart';
 import 'widgets/joystick_pad.dart';
 import 'widgets/stop_all.dart';
+
+/// Everything the control screen (and the reservation panel inside it) draws or decides from the view model, as one
+/// text: the screen is redrawn when this text changes and not when only the metrics do. A field the screen starts to
+/// read must be added here (test/selector_rebuild_test.dart checks the fields it has now).
+String controlScreenShape(RobotViewModel vm) {
+  final id = vm.selectedRobotId;
+  return jsonEncode([
+    vm.robots.map((r) => r.raw).toList(),
+    id,
+    [for (final c in vm.claims) [c.robotId, c.robotName, c.ownerUsername, c.controllerId, c.expiresAt, c.jogArmedUntil]],
+    [
+      for (final e in vm.safetyByRobot.entries)
+        [e.key, e.value.jog.maxAmount, e.value.jog.maxAbsolute, e.value.bedMaxC, e.value.armRequired, e.value.armTtlMs, e.value.jogArmedUntil],
+    ],
+    [for (final e in vm.jogArmedUntil.entries) [e.key, e.value.millisecondsSinceEpoch]],
+    vm.accessBusy,
+    vm.conditionalMode.toString(),
+    vm.confirmPlay,
+    vm.homeResetEnabled,
+    vm.homeResetBlock(id).name,
+    vm.isAdmin,
+    id != null && vm.jogNeedsArming(id),
+    vm.stopAllInFlight,
+    vm.stopAllUnconfirmed,
+    vm.apiClient != null,
+  ]);
+}
 
 class ControlScreen extends StatefulWidget {
   const ControlScreen({super.key});
@@ -83,7 +111,9 @@ class _ControlScreenState extends State<ControlScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final vm = context.watch<RobotViewModel>();
+    // Redrawn when something this screen draws or decides changes (see controlScreenShape), not for the metrics tick.
+    context.select<RobotViewModel, String>(controlScreenShape);
+    final vm = context.read<RobotViewModel>();
     final l10n = AppLocalizations.of(context)!;
     final robots = vm.robots;
     final robot = vm.selectedRobot;
