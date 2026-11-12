@@ -19,7 +19,7 @@ GPL-3.0-or-later - see LICENSE
   <img src="https://img.shields.io/badge/Framework-Flutter%203.x-02569B.svg" alt="Framework">
   <img src="https://img.shields.io/badge/Language-Dart-0175C2.svg" alt="Language">
   <img src="https://img.shields.io/badge/Platform-Linux%20%7C%20CM5-E34F26.svg" alt="Platform">
-  <img src="https://img.shields.io/badge/Tests-374%20passing-2ea44f.svg" alt="Tests">
+  <img src="https://img.shields.io/badge/Tests-379%20passing-2ea44f.svg" alt="Tests">
   <img src="https://img.shields.io/badge/Version-0.3.6-0f6cbd.svg" alt="Version">
   <img src="https://img.shields.io/badge/Maturity-functional-0F6CBD.svg" alt="Maturity">
 </p>
@@ -32,7 +32,7 @@ GPL-3.0-or-later - see LICENSE
 
 ---
 
-**诚实核查 - 今天真正能运行的部分：** 网络层(`lib/network/hydra_api_client.dart`、`hydra_websocket.dart`、`discovery.dart`、`auth_prefs.dart`)和状态层(`lib/state/robot_view_model.dart`、`hydra_error.dart`)都是真实的并经过测试(`test/*.dart` 中 374 个测试全部通过，其中包括针对一个真实本地服务器、而非模拟对象的真实 WebSocket 连接/重连/认证拒绝往返测试),且 `flutter analyze` 没有报告任何问题。目录中的全部 6 个界面都是真实接线好的 UI，而非占位符。真正尚未构建的部分：**3D View** 界面只是一个小型的原生等距 X/Y/Z 指示器，并非真正的 3D 渲染器 - 它并未嵌入 STUDIO 的真实 Three.js 场景(因为不存在 Linux 版本的 `webview_flutter` 实现)。真实但尚未在目标硬件上验证的部分：`flutter build linux --release` 已经运行过，并生成了一个确认可以启动的二进制文件，但仅在 Ubuntu 24.04 WSL2(x86_64)环境下验证过 - 从未在 CM5 真实的 aarch64 Raspberry Pi OS 上运行过；`systemd/hydra-umc-dsi.service` 自启动单元也从未在任何真实 Linux 机器上运行过。具体已交付的内容请见下方的 "Known Follow-ups" 和 `CHANGELOG.md`。
+**诚实核查 - 今天真正能运行的部分：** 网络层(`lib/network/hydra_api_client.dart`、`hydra_websocket.dart`、`discovery.dart`、`auth_prefs.dart`)和状态层(`lib/state/robot_view_model.dart`、`hydra_error.dart`)都是真实的并经过测试(`test/*.dart` 中 379 个测试全部通过，其中包括针对一个真实本地服务器、而非模拟对象的真实 WebSocket 连接/重连/认证拒绝往返测试),且 `flutter analyze` 没有报告任何问题。目录中的全部 6 个界面都是真实接线好的 UI，而非占位符。真正尚未构建的部分：**3D View** 界面只是一个小型的原生等距 X/Y/Z 指示器，并非真正的 3D 渲染器 - 它并未嵌入 STUDIO 的真实 Three.js 场景(因为不存在 Linux 版本的 `webview_flutter` 实现)。真实但尚未在目标硬件上验证的部分：`flutter build linux --release` 已经运行过，并生成了一个确认可以启动的二进制文件，但仅在 Ubuntu 24.04 WSL2(x86_64)环境下验证过 - 从未在 CM5 真实的 aarch64 Raspberry Pi OS 上运行过；`systemd/hydra-umc-dsi.service` 自启动单元也从未在任何真实 Linux 机器上运行过。具体已交付的内容请见下方的 "Known Follow-ups" 和 `CHANGELOG.md`。
 
 > **安全与安防现状:**本生态系统不是经认证的安全系统。目前尚无硬件 E-STOP 通路,没有由固件强制执行的限位或联锁,也没有经过验证的运动指令;固件映像使用 CRC-32 和 Ed25519 签名校验,发布构建会拒绝已公开的开发密钥(中继之后的工具头和扩展板仍运行 URTC 的引导程序,它们使用共享密钥的 HMAC-SHA256 而不是签名);TLS 与双向 TLS 均为可选项,默认关闭;自制电路板尚未组装或测试。在依赖此处任何说法来保障人身安全之前,请先阅读[安全基线](https://github.com/JuanenRac/HYDRA-UMC-DOCS/blob/main/docs/SECURITY_BASELINE.md)和[威胁模型](https://github.com/JuanenRac/HYDRA-UMC-DOCS/blob/main/docs/THREAT_MODEL.md)。
 
@@ -44,7 +44,7 @@ GPL-3.0-or-later - see LICENSE
 |---|---|
 | 版本 | `0.3.6` |
 | 成熟度 | 可用 |
-| 测试 | 374 (`flutter test`) |
+| 测试 | 379 (`flutter test`) |
 | 技术栈 | Flutter 3.x / Dart |
 | 目标 | HYDRA-UMC 工作单元的 Raspberry Pi CM5 |
 | 真实硬件 | 尚未：此版本没有在真实硬件上运行的记录 |
@@ -60,7 +60,7 @@ GPL-3.0-or-later - see LICENSE
 | 领域 | 状态 | 在这里的含义 |
 |---|---|---|
 | 软件 | 🟡 | 主要用途可用；上面的诚实性检查列出了仍然缺少的内容 |
-| 测试 | 🟢 | 374 项自动测试，每次变更都会运行 |
+| 测试 | 🟢 | 379 项自动测试，每次变更都会运行 |
 | 真实硬件 | 🔴 | 尚未：此版本没有在真实硬件上运行的记录 |
 | 接口与协议 | 🟡 | 提供的路由或消息已有文档，并用客户端测试过；尚未被所有客户端使用 |
 | 集成 | 🟠 | 其消息和路由已对照 SDK 的共享契约检查；尚未与真实设备一起运行 |
@@ -85,7 +85,7 @@ GPL-3.0-or-later - see LICENSE
 - **3D 视图**（`lib/ui/three_d_screen.dart`）—— **并非**像 iOS/Android 应用那样嵌入 STUDIO 真实 Three.js 场景的 WebView——`webview_flutter` 在 Linux 桌面上根本没有实现,而完整的浏览器引擎对这块低功耗嵌入式面板而言是过重的运行时负担。取而代之的是:一个小型的原生等距 X/Y/Z 位置指示器（`CustomPainter`,不涉及 3D 引擎）,并附有一条屏幕提示,指向本主板自身通过 HDMI 连接的显示器上的真实 3D 场景。完整推理见 `docs/ARCHITECTURE.md` 第 4 节。
 - **系统指标**（`lib/ui/metrics_screen.dart`）—— 拥有自己专属的选项卡（不像 iOS/Android 那样折叠进仪表盘中）,包含来自 `GET /api/system/metrics` 的 CPU/内存/温度/运行时间图块,以及来自 `GET /api/hydra-info` 的主机名/控制器数量/机器人数量/应用版本。
 - **设置**（`lib/ui/settings_screen.dart`）—— 连接信息、服务器身份、退出登录,以及本应用自身的版本（见下文[版本管理](#版本管理)）。
-- **配置文件、一体机模式与屏幕键盘**（`lib/util/panel_config.dart`、`lib/ui/widgets/virtual_keyboard.dart`、`kiosk/dsi.conf.example`）—— 面板的所有可调项都在同一个配置文件 `/etc/hydra-umc/dsi.conf`（或 `HYDRA_DSI_CONFIG` 指定的路径）中，每个键默认都是关闭的。`appliance = on` 时，面板就是自己所在 Compute Module 的屏幕：地址为 `127.0.0.1`，没有网络扫描，启动时使用已保存的会话。`virtual_keyboard = on` 时，登录界面会带一个屏幕键盘，输入到最后触摸的输入框（Linux 上的 Flutter 和看板合成器都不自带键盘）。由服务器为无人值守登录签发的专用面板账户尚未实现：人登录一次，会话会被保留。
+- **配置文件、一体机模式与屏幕键盘**（`lib/util/panel_config.dart`、`lib/ui/widgets/virtual_keyboard.dart`、`kiosk/dsi.conf.example`）—— 面板的所有可调项都在同一个配置文件 `/etc/hydra-umc/dsi.conf`（或 `HYDRA_DSI_CONFIG` 指定的路径）中，每个键默认都是关闭的。`appliance = on` 时，面板就是自己所在 Compute Module 的屏幕：地址为 `127.0.0.1`，没有网络扫描，启动时使用已保存的会话。`virtual_keyboard = on` 时，登录界面会带一个屏幕键盘，输入到最后触摸的输入框（Linux 上的 Flutter 和看板合成器都不自带键盘）。将 `device_token_file` 指向一个文件，其中保存服务器管理员为这块屏幕签发的签名令牌，面板就会在启动时以及会话无法续期时自行登录；不设置时，人登录一次，会话会被保留。
 - **空闲锁定、操作员 PIN、调暗与屏幕保护**（`lib/ui/widgets/idle_gate.dart`、`lib/services/operator_pin.dart`、`lib/util/idle_policy.dart`）—— 超过配置的无触摸时间后，面板会调暗、显示屏幕保护（带有缓慢移动的小时钟的黑屏），并锁定直到操作员输入 PIN。PIN 由管理员在设置中设定，仅以加盐摘要的形式保存在安全存储中，错误会被计数（输错会让数字键盘锁定一段时间，每一轮翻倍），并且是可选的：没有 PIN 时面板永不锁定。全局急停 STOP 始终保留在屏保和锁定界面上，唤醒面板的那一次触摸不会同时算作一次按键，而当机器人正在播放轨迹或有未确认的 STOP 时，调暗和屏保会等待。所有时间都在配置文件中，默认关闭。
 - **系统标签页**（`lib/ui/system_screen.dart`、`lib/state/system_model.dart`、`lib/network/safety_zones_client.dart`）—— 仅当配置文件开启其中某项时才显示。**安全面板**读取 `HYDRA-UMC-SAFETY-ZONES` 的判定（`GET /state`，只读）：只有当前有效的 READY 才画成绿色，过期、缺失或无法读取的判定都显示为“未确认”，顶栏的盾牌图标在每个标签页上显示同样的状态。判定下方，面板会列出服务报告为被侵入的区域（危险为红色，警告为琥珀色，附带对象及其余数量）以及它发出的停止请求数量。**生态系统视图**列出 `GET /api/ecosystem/status` 返回的服务，管理员确认后可启动、停止或重启其中之一（`POST /api/ecosystem/service/:unit/:action`，服务器会再次检查）。**工具武装视图**（默认关闭，`tool_arms_panel`）通过 `GET /api/tool-arms`（只读）列出哪些 URTC 工具已武装：过期的报告绝不会显示为安全（报告过期的已武装工具为警告，已解除的为未知），缺失、被拒绝或无法读取的响应显示“不可用”，而不是空列表。**重启按钮**（操作员和管理员，每次都先确认，每次都写入审计记录和日志）可重启本屏幕（应用关闭，由服务管理器重新启动）或 HYDRA-UMC 服务器（`POST /api/admin/restart`，管理员）；只有配置文件特意选择时，才会重启整个 Compute Module（`POST /api/system/reboot`，仅限运行在其上的面板，需确认两次）。服务器会把这些操作记入自身的审计记录（`power-reboot`、`power-shutdown`、`server-restart`）。
 - **HOME/RESET 与服务器保存的点动步长**（`lib/util/home_reset.dart`、`lib/models/robot_command_contract.dart`）—— 与 Android、iOS 应用一致，并来自同一份契约（`docs/robot_command_contract.json`）：点动步长就是服务器为该机器人保存的值，因此各客户端显示相同的数值；HOME/RESET 通过 `reset` 命令把所选机器人移到零位，在设置中开启之前一直是关闭的，会确认两次，并且当机器人离线、处于安全模式、正在播放轨迹或点动未解锁时，会以清楚的一句话拒绝。
@@ -119,7 +119,7 @@ flutter pub get
 
 ## 🧪 测试
 
-运行 `flutter test` 会执行 374 个自动测试。 不需要硬件，也不需要这台机器以外的任何东西。
+运行 `flutter test` 会执行 379 个自动测试。 不需要硬件，也不需要这台机器以外的任何东西。
 
 CI 运行 `HYDRA_UMC_CI=1 python tools/ci_validate.py`，检查清单、文档、八个 README 和图片。
 

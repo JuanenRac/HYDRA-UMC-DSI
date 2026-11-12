@@ -19,7 +19,7 @@ GPL-3.0-or-later - see LICENSE
   <img src="https://img.shields.io/badge/Framework-Flutter%203.x-02569B.svg" alt="Framework">
   <img src="https://img.shields.io/badge/Language-Dart-0175C2.svg" alt="Language">
   <img src="https://img.shields.io/badge/Platform-Linux%20%7C%20CM5-E34F26.svg" alt="Platform">
-  <img src="https://img.shields.io/badge/Tests-374%20passing-2ea44f.svg" alt="Tests">
+  <img src="https://img.shields.io/badge/Tests-379%20passing-2ea44f.svg" alt="Tests">
   <img src="https://img.shields.io/badge/Version-0.3.6-0f6cbd.svg" alt="Version">
   <img src="https://img.shields.io/badge/Maturity-functional-0F6CBD.svg" alt="Maturity">
 </p>
@@ -32,7 +32,7 @@ Compute Module 5 上の HYDRA-UMC 自身の 5"/7" DSI タッチスクリーン�
 
 ---
 
-**正直な現状確認 - 今日実際に動くもの:** ネットワーク層(`lib/network/hydra_api_client.dart`、`hydra_websocket.dart`、`discovery.dart`、`auth_prefs.dart`)と状態層(`lib/state/robot_view_model.dart`、`hydra_error.dart`)は本物でテスト済みである(`test/*.dart` 全体で 374 件のテストが成功しており、モックではなく本物のローカルサーバーに対する本物の WebSocket 接続/再接続/認証拒否の往復テストも含む)。`flutter analyze` も問題を報告していない。カタログの 6 画面はすべて本物の配線されたUIであり、プレースホルダーではない。実際にまだ構築されていないもの: **3D View** 画面は本物の 3D レンダラーではなく、小さなネイティブの等角 X/Y/Z インジケーターにすぎない - STUDIO の本物の Three.js シーンは埋め込まれていない(Linux 版の `webview_flutter` 実装が存在しないため)。本物だが対象ハードウェアでは未検証のもの: `flutter build linux --release` は実行され、実際に起動することが確認されたバイナリを生成しているが、これは Ubuntu 24.04 WSL2(x86_64)上でのみであり、CM5 の実際の aarch64 Raspberry Pi OS 上では一度も実行されていない。また `systemd/hydra-umc-dsi.service` の自動起動ユニットも、実際の Linux マシン上で一度も実行されたことがない。これまでに何が実際に出荷されたかは、下記の "Known Follow-ups" と `CHANGELOG.md` を参照。
+**正直な現状確認 - 今日実際に動くもの:** ネットワーク層(`lib/network/hydra_api_client.dart`、`hydra_websocket.dart`、`discovery.dart`、`auth_prefs.dart`)と状態層(`lib/state/robot_view_model.dart`、`hydra_error.dart`)は本物でテスト済みである(`test/*.dart` 全体で 379 件のテストが成功しており、モックではなく本物のローカルサーバーに対する本物の WebSocket 接続/再接続/認証拒否の往復テストも含む)。`flutter analyze` も問題を報告していない。カタログの 6 画面はすべて本物の配線されたUIであり、プレースホルダーではない。実際にまだ構築されていないもの: **3D View** 画面は本物の 3D レンダラーではなく、小さなネイティブの等角 X/Y/Z インジケーターにすぎない - STUDIO の本物の Three.js シーンは埋め込まれていない(Linux 版の `webview_flutter` 実装が存在しないため)。本物だが対象ハードウェアでは未検証のもの: `flutter build linux --release` は実行され、実際に起動することが確認されたバイナリを生成しているが、これは Ubuntu 24.04 WSL2(x86_64)上でのみであり、CM5 の実際の aarch64 Raspberry Pi OS 上では一度も実行されていない。また `systemd/hydra-umc-dsi.service` の自動起動ユニットも、実際の Linux マシン上で一度も実行されたことがない。これまでに何が実際に出荷されたかは、下記の "Known Follow-ups" と `CHANGELOG.md` を参照。
 
 > **安全性とセキュリティの現状:** このエコシステムは認証された安全システムではありません。ハードウェアの E-STOP 経路、ファームウェアが強制する制限やインターロック、検証済みの動作コマンドはまだありません。ファームウェアイメージは CRC-32 と Ed25519 署名で検査し、リリースビルドは公開済みの開発用鍵を拒否します(リレーの先のツールヘッドと拡張ボードは引き続き URTC のブートローダーを使い、署名ではなく共有鍵の HMAC-SHA256 を使います)。TLS と相互 TLS は任意で、既定では無効です。独自基板はまだ実装も試験もされていません。ここに書かれた内容を人の安全のために頼る前に、[セキュリティベースライン](https://github.com/JuanenRac/HYDRA-UMC-DOCS/blob/main/docs/SECURITY_BASELINE.md)と[脅威モデル](https://github.com/JuanenRac/HYDRA-UMC-DOCS/blob/main/docs/THREAT_MODEL.md)をお読みください。
 
@@ -44,7 +44,7 @@ Compute Module 5 上の HYDRA-UMC 自身の 5"/7" DSI タッチスクリーン�
 |---|---|
 | バージョン | `0.3.6` |
 | 成熟度 | 機能する |
-| テスト | 374 (`flutter test`) |
+| テスト | 379 (`flutter test`) |
 | 技術 | Flutter 3.x / Dart |
 | 対象 | HYDRA-UMC セルの Raspberry Pi CM5 |
 | 実機での確認 | まだです：このバージョンについて実機での動作記録はありません |
@@ -60,7 +60,7 @@ Compute Module 5 上の HYDRA-UMC 自身の 5"/7" DSI タッチスクリーン�
 | 領域 | 状態 | ここでの意味 |
 |---|---|---|
 | ソフトウェア | 🟡 | 主な目的では動作します。足りない点は上の正直さの確認に書かれています |
-| テスト | 🟢 | 自動テスト 374 件。変更のたびに実行されます |
+| テスト | 🟢 | 自動テスト 379 件。変更のたびに実行されます |
 | 実機 | 🔴 | まだです：このバージョンについて実機での動作記録はありません |
 | インターフェースとプロトコル | 🟡 | 提供するルートやメッセージは文書化され、クライアントで試験済みです。すべてのクライアントがまだ使ったわけではありません |
 | 連携 | 🟠 | メッセージとルートは SDK の共通契約に照らして検証されていますが、実機と一緒に動かしたことはありません |
@@ -85,7 +85,7 @@ Compute Module 5 上の HYDRA-UMC 自身の 5"/7" DSI タッチスクリーン�
 - **3D ビュー**（`lib/ui/three_d_screen.dart`）—— iOS/Android アプリとは異なり、STUDIO の実際の Three.js シーンを埋め込む WebView では**ありません**——`webview_flutter` には Linux デスクトップ実装がまったく存在せず、フルブラウザエンジンはこの低消費電力の組み込みパネルが必要とする以上に重いランタイム負荷になります。代わりに：小さなネイティブの等角 X/Y/Z 位置インジケーター（`CustomPainter`、3D エンジンなし）と、本ボード自身の HDMI 接続モニター上にある実際の 3D シーンを指し示す画面上の注記。完全な理由は `docs/ARCHITECTURE.md` 第 4 節を参照してください。
 - **システム指標**（`lib/ui/metrics_screen.dart`）—— iOS/Android のようにダッシュボードに折りたたまれるのではなく、専用のタブを持ち、`GET /api/system/metrics` からの CPU/メモリ/温度/稼働時間タイルと、`GET /api/hydra-info` からのホスト名/コントローラー数/ロボット数/アプリバージョンを表示します。
 - **設定**（`lib/ui/settings_screen.dart`）—— 接続情報、サーバー識別情報、サインアウト、そして本アプリ自身のバージョン（下記の[バージョン管理](#バージョン管理)参照）。
-- **設定ファイル、アプライアンスモード、画面キーボード**（`lib/util/panel_config.dart`、`lib/ui/widgets/virtual_keyboard.dart`、`kiosk/dsi.conf.example`）— パネルの調整項目はすべて 1 つの設定ファイル `/etc/hydra-umc/dsi.conf`（または `HYDRA_DSI_CONFIG` のパス）にあり、どのキーも既定ではオフです。`appliance = on` ではパネルは自分の Compute Module の画面になり、アドレスは `127.0.0.1`、ネットワークスキャンはなく、起動時に保存済みのセッションを使います。`virtual_keyboard = on` ではサインイン画面に、最後に触れた欄へ入力する画面キーボードが付きます（Linux 上の Flutter とキオスクのコンポジターには付属しないため）。無人サインイン用にサーバーが発行する専用パネルアカウントはまだ未実装で、一度サインインすればセッションが保持されます。
+- **設定ファイル、アプライアンスモード、画面キーボード**（`lib/util/panel_config.dart`、`lib/ui/widgets/virtual_keyboard.dart`、`kiosk/dsi.conf.example`）— パネルの調整項目はすべて 1 つの設定ファイル `/etc/hydra-umc/dsi.conf`（または `HYDRA_DSI_CONFIG` のパス）にあり、どのキーも既定ではオフです。`appliance = on` ではパネルは自分の Compute Module の画面になり、アドレスは `127.0.0.1`、ネットワークスキャンはなく、起動時に保存済みのセッションを使います。`virtual_keyboard = on` ではサインイン画面に、最後に触れた欄へ入力する画面キーボードが付きます（Linux 上の Flutter とキオスクのコンポジターには付属しないため）。`device_token_file` に、サーバーの管理者がこの画面用に発行した署名付きトークンを入れたファイルを指定すると、パネルは起動時と、セッションを更新できなくなったときに自分でサインインします。指定しない場合は一度サインインすればセッションが保持されます。
 - **無操作ロック、オペレーター PIN、減光、スクリーンセーバー**（`lib/ui/widgets/idle_gate.dart`、`lib/services/operator_pin.dart`、`lib/util/idle_policy.dart`）— 設定した時間タッチがないと、パネルは減光し、スクリーンセーバー（小さな時計が動く暗い画面）を表示し、オペレーターが PIN を入力するまでロックされます。PIN は管理者が設定で決め、ソルト付きダイジェストとしてのみセキュアストレージに保存され、失敗は数えられ（誤入力するとテンキーが、回ごとに倍になる時間ロックされます）、任意です。PIN がなければパネルはロックされません。全体 STOP はスクリーンセーバーとロック画面にも残り、パネルを起こすタッチは押下として二重に扱われず、減光とスクリーンセーバーはロボットが軌道を再生中か STOP が未確認の間は待ちます。時間はすべて設定ファイルにあり、既定ではオフです。
 - **システムタブ**（`lib/ui/system_screen.dart`、`lib/state/system_model.dart`、`lib/network/safety_zones_client.dart`）— 設定ファイルで何かをオンにしたときだけ表示されます。**安全パネル**は `HYDRA-UMC-SAFETY-ZONES` の判定（`GET /state`、読み取り専用）を読みます。有効な READY だけが緑で描かれ、古い・存在しない・読めない判定は「未確認」となり、上部バーの盾アイコンがどのタブでも同じ状態を示します。判定の下に、サービスが侵入ありと報告したゾーン（危険は赤、警告は琥珀色、対象物と残りの件数つき）と、出した停止要求の数を一覧表示します。**エコシステム表示**は `GET /api/ecosystem/status` のサービスを一覧し、管理者が確認のうえ開始・停止・再起動できます（`POST /api/ecosystem/service/:unit/:action`、サーバーが再度確認）。**ツール武装表示**（初期設定ではオフ、`tool_arms_panel`）は `GET /api/tool-arms`（読み取り専用）でどの URTC ツールが武装中かを一覧表示します。古い報告は安全として表示されず（古い報告の武装ツールは警告、解除済みは不明）、応答がない、拒否された、または読み取れない場合は空の一覧ではなく「利用できません」と表示します。**再起動ボタン**（オペレーターと管理者、それぞれ確認を経て、監査記録とジャーナルに書き込み）は、この画面（アプリが閉じ、サービスの監視機構が再起動）または HYDRA-UMC サーバー（`POST /api/admin/restart`、管理者）を再起動します。Compute Module 全体の再起動（`POST /api/system/reboot`、その上で動くパネルからのみ、確認 2 回）は、設定ファイルで意図的に選んだ場合に限られます。サーバー自身の監査記録にも、これらは書き込まれます（`power-reboot`、`power-shutdown`、`server-restart`）。
 - **HOME/RESET とサーバーのジョグステップ**（`lib/util/home_reset.dart`、`lib/models/robot_command_contract.dart`）— Android・iOS アプリと同じく、同じ契約（`docs/robot_command_contract.json`）に従います。ジョグステップはサーバーがロボットごとに保持する値なので、どのクライアントも同じ値を表示します。HOME/RESET は `reset` コマンドで選択中のロボットをゼロ位置へ移動します。設定でオンにするまでオフで、確認を 2 回求め、ロボットがオフライン、セーフモード、軌道再生中、またはジョグが未アームの間は、分かりやすい一文で拒否されます。
@@ -119,7 +119,7 @@ flutter pub get
 
 ## 🧪 テスト
 
-`flutter test` で自動テスト 374 件を実行します。 ハードウェアも、このマシンの外にあるものも必要ありません。
+`flutter test` で自動テスト 379 件を実行します。 ハードウェアも、このマシンの外にあるものも必要ありません。
 
 CI は `HYDRA_UMC_CI=1 python tools/ci_validate.py` を実行し、マニフェスト、文書、8 つの README、図を検査します。
 
