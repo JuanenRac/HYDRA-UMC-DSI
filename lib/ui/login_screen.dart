@@ -25,6 +25,22 @@ import 'widgets/pairing_widgets.dart';
 import 'widgets/security_dialog.dart';
 import 'widgets/virtual_keyboard.dart';
 
+/// Everything the sign-in screen draws or decides from the view model, as one text: it is redrawn when this text
+/// changes and not for the metrics tick or the robots. A field the screen starts to read must be added here
+/// (test/selector_rebuild_test.dart checks the fields it has now).
+String loginScreenShape(RobotViewModel vm) {
+  return [
+    vm.panelConfig.appliance,
+    vm.panelConfig.virtualKeyboard,
+    vm.pairingEnabled,
+    vm.pairedStamp,
+    vm.pairedHost,
+    vm.pairedPort,
+    vm.lastError?.kind.name,
+    vm.lastError?.params,
+  ].join('|');
+}
+
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -211,7 +227,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final vm = context.watch<RobotViewModel>();
+    // Redrawn when something this screen draws changes (see loginScreenShape), not for the metrics tick.
+    context.select<RobotViewModel, String>(loginScreenShape);
+    final vm = context.read<RobotViewModel>();
     final l10n = AppLocalizations.of(context)!;
     final appliance = vm.panelConfig.appliance;
     final keyboard = vm.panelConfig.virtualKeyboard;

@@ -4,6 +4,8 @@
 
 All notable changes to this project are documented here.
 
+- **The sign-in screen listens to the fields it draws, not to the whole view model:** it is redrawn when the panel layout, the keyboard setting, the address of a pairing or the last error change, and no longer for the metrics tick or the robots; `test/selector_rebuild_test.dart` checks both directions (1 more test; 373 in all).
+
 - **The global STOP is tested to be on screen where robots are driven:** `test/stop_presence_test.dart` (2 widget tests) checks that the Control tab carries the large global STOP once a robot is selected and that the main screen carries the one of its bar, with or without a robot.
 
 ## [0.3.6] - The control screen is redrawn only for what it shows (a first step of the selectors): it used to listen to the whole view model, so every reading of the server's load and every change of anything else redrew the jog pad, the sliders and the buttons. It now lis

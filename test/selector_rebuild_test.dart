@@ -22,6 +22,8 @@ import 'package:hydra_umc_dsi/services/operator_pin.dart';
 import 'package:hydra_umc_dsi/state/robot_view_model.dart';
 import 'package:hydra_umc_dsi/models/access.dart';
 import 'package:hydra_umc_dsi/ui/control_screen.dart';
+import 'package:hydra_umc_dsi/state/hydra_error.dart';
+import 'package:hydra_umc_dsi/ui/login_screen.dart';
 import 'package:hydra_umc_dsi/ui/metrics_screen.dart';
 import 'package:hydra_umc_dsi/ui/settings_screen.dart';
 import 'package:hydra_umc_dsi/ui/three_d_screen.dart';
@@ -194,6 +196,36 @@ void main() {
         vm.poke();
       });
       expect(related, contains('ControlScreen'), reason: change.key);
+    }
+  });
+
+  testWidgets('the sign-in screen follows its errors and its pairing, and not the readings or the robots', (tester) async {
+    final vm = await _pump(tester, const LoginScreen());
+    addTearDown(vm.dispose);
+    await tester.pump(const Duration(milliseconds: 200));
+    vm.poke();
+    await tester.pump();
+    final unrelated = await _rebuilt(tester, () async {
+      vm.metrics = SystemMetrics(cpuLoad: 55, memoryUsage: 20, temp: 40, uptime: 101);
+      vm.selectedRobot!.raw['pos']['x'] = 99;
+      vm.confirmPlay = false;
+      vm.poke();
+    });
+    expect(unrelated, isNot(contains('LoginScreen')));
+    final changes = <String, void Function()>{
+      'a sign-in is refused': () => vm.lastError = const HydraError(HydraErrorKind.loginFailed),
+      'a pairing gives an address': () {
+        vm.pairedHost = 'hydra.local';
+        vm.pairedPort = 3443;
+        vm.pairedStamp++;
+      },
+    };
+    for (final change in changes.entries) {
+      final related = await _rebuilt(tester, () async {
+        change.value();
+        vm.poke();
+      });
+      expect(related, contains('LoginScreen'), reason: change.key);
     }
   });
 }
