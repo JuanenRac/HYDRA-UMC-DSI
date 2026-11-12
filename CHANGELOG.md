@@ -4,6 +4,8 @@
 
 All notable changes to this project are documented here.
 
+- **The shared screen data points the signals of the Jetson at the frames of its link (`docs/ui/`):** the copy of the display interface data now names the status and camera picture frames of the SPI link (defined in HYDRA-UMC, in simulation) instead of pending contracts. Nothing ran on a display or a Jetson.
+
 - **The shared screens gain the optional PIN pad, a camera thumbnail and the landscape-only rule (`docs/ui/`):** the data of the display interface now has a modal PIN pad screen opened by the banner (the PIN is optional and off by default, and STOP never asks for it), a still camera thumbnail instead of nothing, and a closed schema that allows only the landscape orientation; the parity test checks that the new texts linked to this app (`lockTitle`, `lockHint`, `pinPadOk`) are the same in every language and that the PIN pad has its counterpart here (`lib/ui/widgets/pin_pad.dart`). Nothing ran on a display.
 
 - **Tests of the words of the connections and server options dialogs:** 6 tests that read every kind of client, action, failure, "ago" unit, protection that is lowered and source of an option in the eight languages and check that none is empty or repeated; no behaviour changes.
