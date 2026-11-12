@@ -42,6 +42,11 @@ class PanelConfig {
   /// no network scan and no way to point it at another server, and the saved session is used at start-up.
   final bool appliance;
 
+  /// File that holds the signed token of this device (issued by an administrator of the server). In appliance mode the
+  /// panel exchanges it for a short sign-in at start-up and whenever the session cannot be renewed, so nobody types
+  /// a password at an unattended screen. Empty = off. The file must be readable by the panel account only.
+  final String deviceTokenFile;
+
   /// The on-screen keyboard under the fields of the sign-in screen (a touch panel has no other).
   final bool virtualKeyboard;
 
@@ -98,6 +103,7 @@ class PanelConfig {
 
   const PanelConfig({
     this.appliance = false,
+    this.deviceTokenFile = '',
     this.virtualKeyboard = false,
     this.idleLockSeconds = 0,
     this.dimAfterSeconds = 0,
@@ -132,6 +138,7 @@ class PanelConfig {
   /// Every key the file understands (the example file of the kiosk is checked against this list).
   static const Set<String> knownKeys = {
     'appliance',
+    'device_token_file',
     'virtual_keyboard',
     'idle_lock_seconds',
     'dim_after_seconds',
@@ -205,6 +212,7 @@ class PanelConfig {
     const d = PanelConfig.defaults;
     return PanelConfig(
       appliance: flag('appliance', d.appliance),
+      deviceTokenFile: values['device_token_file'] ?? d.deviceTokenFile,
       virtualKeyboard: flag('virtual_keyboard', d.virtualKeyboard),
       idleLockSeconds: number('idle_lock_seconds', d.idleLockSeconds),
       dimAfterSeconds: number('dim_after_seconds', d.dimAfterSeconds),

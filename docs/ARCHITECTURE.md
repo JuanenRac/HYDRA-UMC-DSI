@@ -210,8 +210,9 @@ the list of keys and the example in step.
 
 * **Appliance mode** (`appliance`): the panel is a screen of its own Compute Module.
   The address is `127.0.0.1`, there is no network scan, the saved session is used at
-  start-up. A dedicated panel account issued by the server is not built (it needs a
-  route in the server); the person signs in once.
+  start-up. With `device_token_file` the panel signs in by itself with the signed token
+  of its own device (`POST /api/device/login`, issued by an administrator of the server)
+  at start-up and when its session cannot be renewed; without it the person signs in once.
 * **Idle behaviour** (`ui/widgets/idle_gate.dart` over `util/idle_policy.dart`): after
   the configured time without a touch the backlight is dimmed, then a screen saver
   takes over, and the panel locks until the PIN of the operator is typed

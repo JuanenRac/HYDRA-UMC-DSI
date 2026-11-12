@@ -6,6 +6,7 @@
   "/api/claims",
   "/api/connections/clients",
   "/api/connections/events",
+  "/api/device/login",
   "/api/ecosystem/service/{p}/{p}",
   "/api/ecosystem/status",
   "/api/hydra-info",

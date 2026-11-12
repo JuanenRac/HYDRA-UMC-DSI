@@ -22,6 +22,7 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -44,6 +45,7 @@ import '../services/operator_pin.dart';
 import '../util/home_reset.dart';
 import '../util/pairing_link.dart';
 import '../util/panel_config.dart';
+import '../util/panel_defaults.dart';
 import 'hydra_error.dart';
 
 class SystemMetrics {
@@ -81,11 +83,23 @@ class RobotViewModel extends ChangeNotifier {
   TlsSettings tlsSettings = const TlsSettings();
   final LanguagePrefs _languagePrefs = LanguagePrefs();
 
-  RobotViewModel({AuthPrefs? authPrefs, PanelConfig? config, OperatorPin? operatorPin})
+  RobotViewModel({AuthPrefs? authPrefs, PanelConfig? config, OperatorPin? operatorPin, Future<String?> Function(String path)? deviceTokenReader})
       : _authPrefs = authPrefs ?? AuthPrefs(),
         _configOverride = config,
+        _deviceTokenReader = deviceTokenReader ?? _readTokenFile,
         pin = operatorPin ?? OperatorPin() {
     if (config != null) panelConfig = config;
+  }
+
+  /// Reads the file that holds the token of this device; null when it cannot be read. A test hands in its own reader.
+  final Future<String?> Function(String path) _deviceTokenReader;
+
+  static Future<String?> _readTokenFile(String path) async {
+    try {
+      return await File(path).readAsString();
+    } catch (_) {
+      return null;
+    }
   }
 
   /// The settings file of the panel (util/panel_config.dart): the defaults until [init] has read it.
@@ -206,6 +220,44 @@ class RobotViewModel extends ChangeNotifier {
     // A restored session needs the same connect() step login() runs (fetch
     // settings, open the WS, start the polling).
     if (isLoggedIn) await connect();
+    // An appliance panel with a token of its own signs in without a person.
+    if (!isLoggedIn && await deviceSignIn()) return;
+  }
+
+  /// Appliance mode with `device_token_file`: exchanges the token of this device for a short sign-in on this machine's
+  /// own server (`POST /api/device/login`). False (and nothing changes) when the mode or the file is not set, the file
+  /// cannot be read or holds nothing, or the server refuses the token (the person can still sign in by hand).
+  Future<bool> deviceSignIn({String host = panelDefaultHost, int port = panelDefaultPort}) async {
+    final path = panelConfig.deviceTokenFile;
+    if (!panelConfig.appliance || path.isEmpty) return false;
+    final raw = await _deviceTokenReader(path);
+    final deviceToken = raw?.trim();
+    if (deviceToken == null || deviceToken.isEmpty) return false;
+    final previous = apiClient;
+    final client = HydraApiClient(host, port);
+    try {
+      final resp = await client.deviceLogin(deviceToken);
+      final token = resp['token'] as String?;
+      if (resp['success'] != true || token == null) {
+        client.close();
+        return false;
+      }
+      previous?.close();
+      client.authToken = token;
+      apiClient = client;
+      isLoggedIn = true;
+      activeServer = ServerInfo(host: host, port: port, useTls: client.usesTls);
+      await _authPrefs.saveConnection(host, port);
+      await _authPrefs.saveUseTls(client.usesTls);
+      await _authPrefs.saveToken(token, 'device', refreshToken: resp['refreshToken'] as String?, replaceRefreshToken: true);
+      lastError = null;
+      notifyListeners();
+      await connect();
+      return true;
+    } catch (_) {
+      client.close();
+      return false;
+    }
   }
 
   Future<bool> login(ServerInfo server) async {
@@ -300,11 +352,11 @@ class RobotViewModel extends ChangeNotifier {
     final server = activeServer;
     if (client == null || server == null) return false;
     final refreshToken = await _authPrefs.loadRefreshToken();
-    if (refreshToken == null) return false;
+    if (refreshToken == null) return _renewWithDeviceToken(client);
     try {
       final resp = await client.refresh(refreshToken);
       final newToken = resp['token'] as String?;
-      if (resp['success'] != true || newToken == null) return false;
+      if (resp['success'] != true || newToken == null) return await _renewWithDeviceToken(client);
       client.authToken = newToken;
       final username = await _authPrefs.loadUsername() ?? server.username;
       await _authPrefs.saveToken(newToken, username, refreshToken: resp['refreshToken'] as String?);
@@ -312,12 +364,36 @@ class RobotViewModel extends ChangeNotifier {
       notifyListeners();
       return true;
     } catch (e) {
+      return _renewWithDeviceToken(client);
+    }
+  }
+
+  // The session cannot be renewed with its refresh token: an appliance panel that holds the token of its own
+  // device asks the server for a new sign-in with it (a revoked or expired device token is refused there).
+  Future<bool> _renewWithDeviceToken(HydraApiClient client) async {
+    final path = panelConfig.deviceTokenFile;
+    if (!panelConfig.appliance || path.isEmpty) return false;
+    final deviceToken = (await _deviceTokenReader(path))?.trim();
+    if (deviceToken == null || deviceToken.isEmpty) return false;
+    try {
+      final resp = await client.deviceLogin(deviceToken);
+      final token = resp['token'] as String?;
+      if (resp['success'] != true || token == null) return false;
+      client.authToken = token;
+      await _authPrefs.saveToken(token, 'device', refreshToken: resp['refreshToken'] as String?, replaceRefreshToken: true);
+      lastError = null;
+      notifyListeners();
+      return true;
+    } catch (_) {
       return false;
     }
   }
 
   // The single entry to renewing the session: callers that arrive while a
   // renewal is running share its result instead of starting their own.
+  @visibleForTesting
+  Future<bool> renewSessionForTest() => _renewSession();
+
   Future<bool> _renewSession() {
     final inFlight = _renewalInFlight;
     if (inFlight != null) return inFlight;

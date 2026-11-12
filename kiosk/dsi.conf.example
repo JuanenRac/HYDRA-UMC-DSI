@@ -19,6 +19,14 @@
 # (127.0.0.1), there is no network scan and no address to type.
 appliance = on
 
+# The signed token of this device (an administrator of the server issues it with
+# POST /api/admin/device-tokens; the server needs the device tokens switched on).
+# With a path here the panel signs in by itself at start-up, and again when its
+# session can no longer be renewed, with no password typed at the screen. The
+# file holds the token and nothing else and must be readable by the panel
+# account only. Empty = off: the person signs in once.
+device_token_file =
+
 # An on-screen keyboard under the fields of the sign-in screen. A touch panel
 # with no USB keyboard cannot be signed in without it.
 virtual_keyboard = on

@@ -4,6 +4,8 @@
 
 All notable changes to this project are documented here.
 
+- **An appliance panel can sign in with the token of its own device (off by default):** `device_token_file` in the settings file names a file (readable by the panel account only) that holds the token an administrator of the server issued for this screen. In appliance mode the panel exchanges it for a short sign-in with `POST /api/device/login` at start-up when no session was saved, and again whenever the session cannot be renewed with its refresh token, so nobody types a password at an unattended screen. A refused token (revoked, expired, wrong, or the server's device tokens switched off) leaves the panel signed out and the person can still sign in by hand. `test/device_sign_in_test.dart` covers the key, the sign-in, the cases where nothing is tried, a refused token and the fall-back from a refused refresh token (5 tests).
+
 - **Each card of the System tab listens to its own readings:** the safety, ecosystem and tool arms cards were redrawn whenever any of the three was read or an action ran; each now follows a counter of its own that goes up only when what it draws changes (and the age limit of the safety verdict from the settings). `selector_rebuild_test` has one more test that bumps each counter and checks that only that card is redrawn.
 
 - **The sign-in screen listens to the fields it draws, not to the whole view model:** it is redrawn when the panel layout, the keyboard setting, the address of a pairing or the last error change, and no longer for the metrics tick or the robots; `test/selector_rebuild_test.dart` checks both directions (1 more test; 373 in all).

@@ -72,6 +72,17 @@ class HydraApiClient extends HydraApiCore {
   /// takes (1 to 24 of 0-9 A-Z a-z . _ -).
   static String clientHeaderValue(String version) => HydraApiCore.clientHeaderValue('dsi', version);
 
+  /// `POST /api/device/login`: the token of this device (issued by an administrator) for a short sign-in that is renewed
+  /// with the same refresh token as a password sign-in. Every refusal is the same 401, whatever part of the token was wrong.
+  Future<Map<String, dynamic>> deviceLogin(String deviceToken) async {
+    await resolveScheme();
+    final resp = await call('POST', '$baseUrl/api/device/login',
+        headers: {'Content-Type': 'application/json', ...clientHeaders},
+        body: jsonEncode({'token': deviceToken}),
+        timeout: const Duration(seconds: 15));
+    return expectJson(resp);
+  }
+
   Future<Map<String, dynamic>?> getHydraInfo() async {
     final direct = await _probeHydraInfo(baseUrl);
     if (direct != null) {
