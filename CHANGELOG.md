@@ -1,8 +1,10 @@
 # Changelog
 
+## [Unreleased]
+
 All notable changes to this project are documented here.
 
-## [Unreleased]
+## [0.3.6] - The control screen is redrawn only for what it shows (a first step of the selectors): it used to listen to the whole view model, so every reading of the server's load and every change of anything else redrew the jog pad, the sliders and the buttons. It now lis
 
 - **The control screen is redrawn only for what it shows (a first step of the selectors):** it used to listen to the whole view model, so every reading of the server's load and every change of anything else redrew the jog pad, the sliders and the buttons. It now listens to one text that holds exactly what it draws or decides from (the robots, the reservations, the limits and the arming of the jog, the requests under way, the switches of PLAY and HOME/RESET, the role and the state of the STOP), so a reading of the load redraws nothing, and each of those changes still redraws it. `test/selector_rebuild_test.dart` counts the widgets Flutter rebuilds for the readings and for nine changes that must redraw the screen (1 more test).
 
