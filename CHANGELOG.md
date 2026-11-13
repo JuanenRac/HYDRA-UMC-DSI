@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [0.3.7] - The display interface shared with the STM32H757 firmware, the optional PIN pad and camera thumbnail, listen-only mode and the device token sign-in
 
 All notable changes to this project are documented here.
 
