@@ -2,6 +2,7 @@
 
 ## [Unreleased]
 
+- **The shared tools and the CI jobs have time limits:** the project tool, the validators and the build test pass a timeout to every child process (`HYDRA_UMC_GIT_TIMEOUT_S`, 120 s by default, and `HYDRA_UMC_COMMAND_TIMEOUT_S`, 3600 s by default; a value that is not a positive number means the default), and the baseline and notify jobs of the workflows carry `timeout-minutes`, so a stuck step ends with a message instead of holding a runner.
 - **A test of the remembered language and a coverage floor:** the saved language comes back as its own locale for each of the eight shipped languages, saving nothing removes the override and a code the app does not ship is ignored. The coverage step of the CI now keeps a floor at the measured value (55 % of the lines).
 - **A parity test for the eight language files and the command contract:** the keys, the placeholders and the locale of the eight ARB files are compared with the English one, no text may be empty, and the generated command contract (commands, numbered and continuous ones, limits and the HOME/RESET rules) is compared with the JSON it comes from.
 - **The CI measures the coverage of the tests:** the Flutter test run writes the coverage and a step prints the lines covered by each file and the total (report only, no floor yet); the floor will be fixed with the measured number.
