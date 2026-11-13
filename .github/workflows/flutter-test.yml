@@ -29,4 +29,13 @@ jobs:
         run: |
           flutter pub get
           flutter analyze
-          flutter test
+          flutter test --coverage
+      - name: Report the coverage of the tests (report only, no floor yet)
+        run: |
+          awk -F'[:,]' '/^SF:/{f=$2} /^DA:/{t[f]++; if ($3>0) h[f]++; T++; if ($3>0) H++} END{for (f in t) printf "%6.1f%% %4d/%-4d %s\n", 100*h[f]/t[f], h[f], t[f], f | "sort -n"; close("sort -n"); printf "TOTAL %.1f%% (%d/%d lines)\n", 100*H/T, H, T}' coverage/lcov.info | tee "$RUNNER_TEMP/coverage.txt"
+          {
+            echo "### Test coverage (report only)"
+            echo '```'
+            tail -n 40 "$RUNNER_TEMP/coverage.txt"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
