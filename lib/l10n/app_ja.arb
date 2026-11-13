@@ -233,6 +233,8 @@
   "securityNeedsHost": "先にサーバーのホストとポートを入力してください。",
   "errRobotDisabled": "ロボットはセーフモード(無効)のため、{command} コマンドは適用されませんでした。管理者が有効にするまで STOP だけが使えます。",
   "@errRobotDisabled": {"placeholders": {"command": {"type": "String"}}},
+  "errServerReadOnly": "サーバーは読み取り専用モードです。コマンド {command} は送信されませんでした。STOP とセーフモードの解除だけが通ります。管理者が解除できます。",
+  "@errServerReadOnly": {"placeholders": {"command": {"type": "String"}}},
   "errEnableNotAllowed": "このサーバーはアプリからロボットを有効にすることを許可していません(オプションがオフです)。管理者はサーバー管理でオンにできます。",
   "errAdminRequired": "ロボットを有効にできるのは管理者だけです。",
   "controlDisableHold": "ロボットを無効にする - セーフモード(長押し)",

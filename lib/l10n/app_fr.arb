@@ -233,6 +233,8 @@
   "securityNeedsHost": "Saisissez d'abord l'hôte et le port du serveur.",
   "errRobotDisabled": "Le robot est en mode sécurisé (désactivé) : la commande {command} n'a pas été appliquée. Seul STOP fonctionne tant qu'un administrateur ne l'active pas.",
   "@errRobotDisabled": {"placeholders": {"command": {"type": "String"}}},
+  "errServerReadOnly": "Le serveur est en lecture seule : la commande {command} n’a pas été envoyée. Seuls STOP et la désactivation du mode sûr passent. Un administrateur peut le désactiver.",
+  "@errServerReadOnly": {"placeholders": {"command": {"type": "String"}}},
   "errEnableNotAllowed": "Le serveur n'autorise pas l'activation d'un robot depuis une appli (l'option est désactivée). Un administrateur peut l'activer dans l'administration du serveur.",
   "errAdminRequired": "Seul un administrateur peut activer un robot.",
   "controlDisableHold": "Désactiver le robot - mode sécurisé (maintenir)",

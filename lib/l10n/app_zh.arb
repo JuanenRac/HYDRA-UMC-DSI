@@ -233,6 +233,8 @@
   "securityNeedsHost": "请先输入服务器的主机和端口。",
   "errRobotDisabled": "机器人处于安全模式（已禁用），{command} 命令未执行。在管理员启用之前，只有 STOP 可用。",
   "@errRobotDisabled": {"placeholders": {"command": {"type": "String"}}},
+  "errServerReadOnly": "服务器处于只读模式：命令 {command} 未发送。只有 STOP 和安全模式的解除可以通过。管理员可以关闭它。",
+  "@errServerReadOnly": {"placeholders": {"command": {"type": "String"}}},
   "errEnableNotAllowed": "服务器不允许从应用启用机器人（该选项已关闭）。管理员可以在服务器管理中打开它。",
   "errAdminRequired": "只有管理员才能启用机器人。",
   "controlDisableHold": "禁用机器人 - 安全模式（长按）",

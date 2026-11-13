@@ -186,6 +186,20 @@ void main() {
     expect(vm.selectedRobot!.isPlaying, isFalse);
   });
 
+  test('a 423 server-read-only names the command and is not read as a robot in safe mode', () async {
+    final (server, vm) = await _signedIn();
+    server.commandStatus = 423;
+    server.commandBody = {'error': 'server is read-only', 'code': 'server-read-only'};
+
+    vm.sendCommand('play');
+    await _until(() => vm.lastError != null);
+
+    // Against an SDK release that has the kind it is that kind; against an older one it stays the safe-mode sentence.
+    final expected = HydraErrorKind.values.asNameMap()['serverReadOnly'] ?? HydraErrorKind.robotDisabled;
+    expect(vm.lastError!.kind, expected);
+    expect(vm.lastError!.params['command'], 'play');
+  });
+
   test('a robot that says nothing is enabled', () async {
     final (_, vm) = await _signedIn();
     expect(vm.selectedRobot!.raw.containsKey('enabled'), isFalse);
