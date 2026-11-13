@@ -233,6 +233,8 @@
   "securityNeedsHost": "Escriba primero el host y el puerto del servidor.",
   "errRobotDisabled": "El robot está en modo seguro (deshabilitado): no se aplicó el comando {command}. Solo funciona STOP hasta que un administrador lo habilite.",
   "@errRobotDisabled": {"placeholders": {"command": {"type": "String"}}},
+  "errServerReadOnly": "El servidor está en modo de solo lectura: el comando {command} no se ha enviado. Solo pasan STOP y la desactivación del modo seguro. Un administrador puede desactivarlo.",
+  "@errServerReadOnly": {"placeholders": {"command": {"type": "String"}}},
   "errEnableNotAllowed": "El servidor no permite habilitar un robot desde una app (la opción está desactivada). Un administrador puede activarla en la administración del servidor.",
   "errAdminRequired": "Solo un administrador puede habilitar un robot.",
   "controlDisableHold": "Deshabilitar el robot - modo seguro (mantener)",

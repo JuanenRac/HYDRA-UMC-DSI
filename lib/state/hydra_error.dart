@@ -24,6 +24,9 @@ export 'package:hydra_umc_app_common/hydra_umc_app_common.dart' show HydraError,
 
 extension HydraErrorText on HydraError {
   String localize(AppLocalizations l10n) {
+    // The kind exists from the SDK release that tells a read-only server from a robot in safe mode; matching
+    // it by name lets this app build against the pinned SDK before and after that release.
+    if (kind.name == 'serverReadOnly') return l10n.errServerReadOnly(params['command'] ?? '');
     switch (kind) {
       case HydraErrorKind.loginFailed:
         return l10n.errLoginFailed;
