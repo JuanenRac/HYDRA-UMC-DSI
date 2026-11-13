@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+- **A parity test for the eight language files and the command contract:** the keys, the placeholders and the locale of the eight ARB files are compared with the English one, no text may be empty, and the generated command contract (commands, numbered and continuous ones, limits and the HOME/RESET rules) is compared with the JSON it comes from.
+- **The CI measures the coverage of the tests:** the Flutter test run writes the coverage and a step prints the lines covered by each file and the total (report only, no floor yet); the floor will be fixed with the measured number.
 - **A read-only server is told apart from a robot in safe mode (text in the eight languages):** a 423 `server-read-only` now reads "The server is in read-only mode: the command was not sent. Only STOP and the safe-mode disable go through. An administrator can switch it off." instead of the safe-mode sentence of a single robot. The wording and the mapping are in place; they take effect with the SDK release that carries the new error kind (until then the old sentence is shown). `test/server_read_only_text_test.dart` and a case in `test/robot_view_model_safe_mode_test.dart`.
 
 ## [0.3.7] - The display interface shared with the STM32H757 firmware, the optional PIN pad and camera thumbnail, listen-only mode and the device token sign-in
