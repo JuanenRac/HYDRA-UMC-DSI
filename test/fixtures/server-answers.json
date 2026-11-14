@@ -171,6 +171,374 @@
         }
       }
     },
+    "GET /api/admin/fleet-update": {
+      "200": {
+        "minimal": {
+          "applyEnabled": false,
+          "busy": false,
+          "report": {
+            "schema": "hydra-fleet-update/1",
+            "id": "sample",
+            "mode": "plan",
+            "state": "planned",
+            "startedAt": "sample",
+            "updatedAt": "sample",
+            "error": "sample",
+            "stoppedAt": "sample",
+            "requireSignedTags": false,
+            "disk": {
+              "rootFreeMb": 0,
+              "workspaceFreeMb": 0
+            },
+            "services": []
+          }
+        },
+        "full": {
+          "applyEnabled": false,
+          "busy": false,
+          "report": {
+            "schema": "hydra-fleet-update/1",
+            "id": "sample",
+            "mode": "plan",
+            "state": "planned",
+            "startedAt": "sample",
+            "updatedAt": "sample",
+            "error": "sample",
+            "stoppedAt": "sample",
+            "requireSignedTags": false,
+            "disk": {
+              "rootFreeMb": 0,
+              "workspaceFreeMb": 0
+            },
+            "services": [
+              {
+                "name": "sample",
+                "kind": "repo",
+                "repo": "sample",
+                "installed": "sample",
+                "latest": "sample",
+                "action": "update",
+                "reason": "sample",
+                "state": "waiting",
+                "step": "",
+                "substep": "sample",
+                "substeps": 0,
+                "detail": "sample",
+                "error": "sample",
+                "order": 0,
+                "elapsedS": 0,
+                "freeMb": 0,
+                "needMb": 0,
+                "unitRestored": false,
+                "log": [
+                  null
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "404": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      }
+    },
+    "POST /api/admin/fleet-update/apply": {
+      "200": {
+        "minimal": {
+          "applyEnabled": false,
+          "busy": false,
+          "report": {
+            "schema": "hydra-fleet-update/1",
+            "id": "sample",
+            "mode": "plan",
+            "state": "planned",
+            "startedAt": "sample",
+            "updatedAt": "sample",
+            "error": "sample",
+            "stoppedAt": "sample",
+            "requireSignedTags": false,
+            "disk": {
+              "rootFreeMb": 0,
+              "workspaceFreeMb": 0
+            },
+            "services": []
+          }
+        },
+        "full": {
+          "applyEnabled": false,
+          "busy": false,
+          "report": {
+            "schema": "hydra-fleet-update/1",
+            "id": "sample",
+            "mode": "plan",
+            "state": "planned",
+            "startedAt": "sample",
+            "updatedAt": "sample",
+            "error": "sample",
+            "stoppedAt": "sample",
+            "requireSignedTags": false,
+            "disk": {
+              "rootFreeMb": 0,
+              "workspaceFreeMb": 0
+            },
+            "services": [
+              {
+                "name": "sample",
+                "kind": "repo",
+                "repo": "sample",
+                "installed": "sample",
+                "latest": "sample",
+                "action": "update",
+                "reason": "sample",
+                "state": "waiting",
+                "step": "",
+                "substep": "sample",
+                "substeps": 0,
+                "detail": "sample",
+                "error": "sample",
+                "order": 0,
+                "elapsedS": 0,
+                "freeMb": 0,
+                "needMb": 0,
+                "unitRestored": false,
+                "log": [
+                  null
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "400": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "404": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "409": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "502": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      }
+    },
+    "POST /api/admin/fleet-update/plan": {
+      "200": {
+        "minimal": {
+          "applyEnabled": false,
+          "busy": false,
+          "report": {
+            "schema": "hydra-fleet-update/1",
+            "id": "sample",
+            "mode": "plan",
+            "state": "planned",
+            "startedAt": "sample",
+            "updatedAt": "sample",
+            "error": "sample",
+            "stoppedAt": "sample",
+            "requireSignedTags": false,
+            "disk": {
+              "rootFreeMb": 0,
+              "workspaceFreeMb": 0
+            },
+            "services": []
+          }
+        },
+        "full": {
+          "applyEnabled": false,
+          "busy": false,
+          "report": {
+            "schema": "hydra-fleet-update/1",
+            "id": "sample",
+            "mode": "plan",
+            "state": "planned",
+            "startedAt": "sample",
+            "updatedAt": "sample",
+            "error": "sample",
+            "stoppedAt": "sample",
+            "requireSignedTags": false,
+            "disk": {
+              "rootFreeMb": 0,
+              "workspaceFreeMb": 0
+            },
+            "services": [
+              {
+                "name": "sample",
+                "kind": "repo",
+                "repo": "sample",
+                "installed": "sample",
+                "latest": "sample",
+                "action": "update",
+                "reason": "sample",
+                "state": "waiting",
+                "step": "",
+                "substep": "sample",
+                "substeps": 0,
+                "detail": "sample",
+                "error": "sample",
+                "order": 0,
+                "elapsedS": 0,
+                "freeMb": 0,
+                "needMb": 0,
+                "unitRestored": false,
+                "log": [
+                  null
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "404": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "409": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "502": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      }
+    },
+    "POST /api/admin/fleet-update/resume": {
+      "200": {
+        "minimal": {
+          "applyEnabled": false,
+          "busy": false,
+          "report": {
+            "schema": "hydra-fleet-update/1",
+            "id": "sample",
+            "mode": "plan",
+            "state": "planned",
+            "startedAt": "sample",
+            "updatedAt": "sample",
+            "error": "sample",
+            "stoppedAt": "sample",
+            "requireSignedTags": false,
+            "disk": {
+              "rootFreeMb": 0,
+              "workspaceFreeMb": 0
+            },
+            "services": []
+          }
+        },
+        "full": {
+          "applyEnabled": false,
+          "busy": false,
+          "report": {
+            "schema": "hydra-fleet-update/1",
+            "id": "sample",
+            "mode": "plan",
+            "state": "planned",
+            "startedAt": "sample",
+            "updatedAt": "sample",
+            "error": "sample",
+            "stoppedAt": "sample",
+            "requireSignedTags": false,
+            "disk": {
+              "rootFreeMb": 0,
+              "workspaceFreeMb": 0
+            },
+            "services": [
+              {
+                "name": "sample",
+                "kind": "repo",
+                "repo": "sample",
+                "installed": "sample",
+                "latest": "sample",
+                "action": "update",
+                "reason": "sample",
+                "state": "waiting",
+                "step": "",
+                "substep": "sample",
+                "substeps": 0,
+                "detail": "sample",
+                "error": "sample",
+                "order": 0,
+                "elapsedS": 0,
+                "freeMb": 0,
+                "needMb": 0,
+                "unitRestored": false,
+                "log": [
+                  null
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "400": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "404": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "409": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "502": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      }
+    },
     "GET /api/admin/jwt-keys": {
       "200": {
         "minimal": {
@@ -519,6 +887,266 @@
     },
     "PUT /api/admin/safety-limits": {
       "400": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      }
+    },
+    "GET /api/admin/self-update": {
+      "200": {
+        "minimal": {
+          "checkedAt": "sample",
+          "owner": "sample",
+          "rateLimited": false,
+          "items": [],
+          "applyEnabled": false,
+          "job": {
+            "id": "sample",
+            "action": "apply",
+            "component": "server",
+            "state": "checking",
+            "fromVersion": "sample",
+            "targetVersion": "sample",
+            "startedAt": "sample",
+            "updatedAt": "sample",
+            "error": "no_release",
+            "detail": "sample",
+            "log": [],
+            "by": "sample"
+          }
+        },
+        "full": {
+          "checkedAt": "sample",
+          "owner": "sample",
+          "rateLimited": false,
+          "items": [
+            {
+              "id": "server",
+              "repo": "sample",
+              "installed": "sample",
+              "previous": "sample",
+              "latest": "sample",
+              "state": "current",
+              "signedPackage": false
+            }
+          ],
+          "applyEnabled": false,
+          "job": {
+            "id": "sample",
+            "action": "apply",
+            "component": "server",
+            "state": "checking",
+            "fromVersion": "sample",
+            "targetVersion": "sample",
+            "startedAt": "sample",
+            "updatedAt": "sample",
+            "error": "no_release",
+            "detail": "sample",
+            "packageName": "sample",
+            "log": [
+              {
+                "at": "sample",
+                "step": "checking",
+                "text": "sample"
+              }
+            ],
+            "by": "sample"
+          }
+        }
+      },
+      "404": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "503": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      }
+    },
+    "POST /api/admin/self-update/apply": {
+      "200": {
+        "minimal": {
+          "id": "sample",
+          "action": "apply",
+          "component": "server",
+          "state": "checking",
+          "fromVersion": "sample",
+          "targetVersion": "sample",
+          "startedAt": "sample",
+          "updatedAt": "sample",
+          "error": "no_release",
+          "detail": "sample",
+          "log": [],
+          "by": "sample"
+        },
+        "full": {
+          "id": "sample",
+          "action": "apply",
+          "component": "server",
+          "state": "checking",
+          "fromVersion": "sample",
+          "targetVersion": "sample",
+          "startedAt": "sample",
+          "updatedAt": "sample",
+          "error": "no_release",
+          "detail": "sample",
+          "packageName": "sample",
+          "log": [
+            {
+              "at": "sample",
+              "step": "checking",
+              "text": "sample"
+            }
+          ],
+          "by": "sample"
+        }
+      },
+      "400": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "404": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "409": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      }
+    },
+    "GET /api/admin/self-update/jobs/{id}": {
+      "200": {
+        "minimal": {
+          "id": "sample",
+          "action": "apply",
+          "component": "server",
+          "state": "checking",
+          "fromVersion": "sample",
+          "targetVersion": "sample",
+          "startedAt": "sample",
+          "updatedAt": "sample",
+          "error": "no_release",
+          "detail": "sample",
+          "log": [],
+          "by": "sample"
+        },
+        "full": {
+          "id": "sample",
+          "action": "apply",
+          "component": "server",
+          "state": "checking",
+          "fromVersion": "sample",
+          "targetVersion": "sample",
+          "startedAt": "sample",
+          "updatedAt": "sample",
+          "error": "no_release",
+          "detail": "sample",
+          "packageName": "sample",
+          "log": [
+            {
+              "at": "sample",
+              "step": "checking",
+              "text": "sample"
+            }
+          ],
+          "by": "sample"
+        }
+      },
+      "404": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "503": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      }
+    },
+    "POST /api/admin/self-update/rollback": {
+      "200": {
+        "minimal": {
+          "id": "sample",
+          "action": "apply",
+          "component": "server",
+          "state": "checking",
+          "fromVersion": "sample",
+          "targetVersion": "sample",
+          "startedAt": "sample",
+          "updatedAt": "sample",
+          "error": "no_release",
+          "detail": "sample",
+          "log": [],
+          "by": "sample"
+        },
+        "full": {
+          "id": "sample",
+          "action": "apply",
+          "component": "server",
+          "state": "checking",
+          "fromVersion": "sample",
+          "targetVersion": "sample",
+          "startedAt": "sample",
+          "updatedAt": "sample",
+          "error": "no_release",
+          "detail": "sample",
+          "packageName": "sample",
+          "log": [
+            {
+              "at": "sample",
+              "step": "checking",
+              "text": "sample"
+            }
+          ],
+          "by": "sample"
+        }
+      },
+      "400": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "404": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "409": {
         "minimal": {
           "error": "sample"
         },
@@ -1572,6 +2200,24 @@
         }
       },
       "404": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      }
+    },
+    "POST /api/ingest/dev-server/status": {
+      "400": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "503": {
         "minimal": {
           "error": "sample"
         },
