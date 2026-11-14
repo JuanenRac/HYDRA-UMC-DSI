@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+- **The shared app package and the contracts of the SDK are pinned to `v0.6.4`, and the tests replay its newest server answers:** `pubspec.yaml`, `pubspec.lock` and the workflow point at the tag; the package now carries the reading of the digest of a release asset and the live progress of a CAN flash cycle, ready for the screens that need them, and the recorded answers include the last health frame of a controller board (`GET /api/ecosystem/node-health`).
+
 - **The vendored server answers and the stand-in server are the ones of the current SDK:** the copies the tests replay now equal the files the SDK generates from the server inventory, including the routes of the program updates.
 
 - **The shared tools and the CI jobs have time limits:** the project tool, the validators and the build test pass a timeout to every child process (`HYDRA_UMC_GIT_TIMEOUT_S`, 120 s by default, and `HYDRA_UMC_COMMAND_TIMEOUT_S`, 3600 s by default; a value that is not a positive number means the default), and the baseline and notify jobs of the workflows carry `timeout-minutes`, so a stuck step ends with a message instead of holding a runner.
