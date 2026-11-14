@@ -220,6 +220,8 @@
   "settingsConfirmPlaySubtitle": "Shows the robot, its recorded points, the speed and who has it reserved before a trajectory starts.",
   "settingsListenOnly": "Listen only",
   "settingsListenOnlySubtitle": "Shows the robots and their data but sends no command: the controls are disabled. STOP always works.",
+  "settingsRequireReleaseSignature": "Require a release signature",
+  "settingsRequireReleaseSignatureSubtitle": "When this app checks a downloaded release, it also requires the Ed25519 signature of the releases and refuses a release without a valid one. Off by default: the digest is still checked.",
   "controlListenOnlyBanner": "Listen only: commands are disabled. STOP still works.",
   "playConfirmTitle": "Start playback?",
   "playConfirmMessage": "{robot} will run the trajectory it has: {points} recorded points at {speed}% speed.\n{reservation}",

@@ -202,6 +202,8 @@
   "settingsConfirmPlaySubtitle": "Mostra o robô, os seus pontos gravados, a velocidade e quem o tem reservado antes de iniciar uma trajetória.",
   "settingsListenOnly": "Só escuta",
   "settingsListenOnlySubtitle": "Mostra os robôs e os seus dados, mas não envia nenhum comando: os controlos ficam desativados. O STOP funciona sempre.",
+  "settingsRequireReleaseSignature": "Exigir a assinatura da versão",
+  "settingsRequireReleaseSignatureSubtitle": "Ao verificar uma versão descarregada, exige também a assinatura Ed25519 das versões e rejeita a que não tenha uma válida. Desativado por predefinição: o resumo digital continua a ser verificado.",
   "controlListenOnlyBanner": "Só escuta: os comandos estão desativados. O STOP continua a funcionar.",
   "playConfirmTitle": "Iniciar a reprodução?",
   "playConfirmMessage": "{robot} vai executar a trajetória que tem: {points} pontos gravados a {speed}% de velocidade.\n{reservation}",
