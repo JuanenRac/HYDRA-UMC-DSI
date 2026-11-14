@@ -3,12 +3,12 @@
 // Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 // GPL-3.0-or-later - see LICENSE
 //
-// Ported from HYDRA-UMC-IOS-CONTROL's own l10n/language_prefs.dart.
+// Same as HYDRA-UMC-IOS-CONTROL's own l10n/language_prefs.dart.
 // Persists an explicit language override across launches via
 // shared_preferences (same "remember me" mechanism as
 // network/auth_prefs.dart) - the same precedence order this ecosystem
 // already uses in HYDRA-UMC-UPDATER's own i18n.py resolveInitialLang():
-// a previously saved choice on this device, then the OS's own configured
+// a choice saved earlier on this device, then the OS's own configured
 // locale (when it's one of the 7 this app ships), then English.
 // =============================================================================
 

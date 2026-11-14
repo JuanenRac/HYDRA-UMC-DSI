@@ -46,7 +46,7 @@ trap 'hydra_umc_pause_on_exit' EXIT
 
 
 # (The pause before the window closes is the single EXIT trap above, which
-# asks only in an interactive terminal; a second trap used to replace it and
+# asks only in an interactive terminal; a second trap would replace it and
 # wait for a key even in CI and in pipes.)
 
 if ! command -v flutter >/dev/null 2>&1; then

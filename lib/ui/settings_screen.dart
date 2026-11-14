@@ -3,7 +3,7 @@
 // Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 // GPL-3.0-or-later - see LICENSE
 //
-// Ported from HYDRA-UMC-IOS-CONTROL's own ui/settings_screen.dart, with
+// Based on HYDRA-UMC-IOS-CONTROL's own ui/settings_screen.dart, with
 // the discovery/hostname fields from hydraInfo (see
 // state/robot_view_model.dart) added since this screen doubles as the
 // "about this connection" view a kiosk operator would otherwise have no

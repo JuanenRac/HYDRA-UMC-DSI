@@ -4,7 +4,7 @@
 // GPL-3.0-or-later - see LICENSE
 //
 // Per-robot cards, reactive in real time via Provider's own ChangeNotifier -
-// ported from HYDRA-UMC-IOS-CONTROL's own ui/dashboard_screen.dart. LED
+// based on HYDRA-UMC-IOS-CONTROL's own ui/dashboard_screen.dart. LED
 // convention, combined-robot display, and module chips deliberately match
 // that panel so the same robot looks and behaves the same way whether it's
 // viewed from the browser, a phone, a tablet, or this touchscreen.
@@ -25,14 +25,13 @@ class DashboardScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Real bug found while auditing this screen: it used to be one single
-    // `context.watch<RobotViewModel>()` at the very top, so ANY
-    // notifyListeners() call on the view model - a metrics tick (every 5s,
-    // see robot_view_model.dart's own _metricsTimer), a WS status change,
-    // or a single robot's live telemetry - rebuilt the ENTIRE screen: the
-    // metrics bar AND every robot card in the grid, whether that update
-    // touched them or not. Split into two independently-`Selector`ed
-    // widgets below so each side of RobotViewModel's single ChangeNotifier
+    // One single `context.watch<RobotViewModel>()` at the very top would
+    // rebuild the ENTIRE screen on ANY notifyListeners() call on the view
+    // model - a metrics tick (every 5s, see robot_view_model.dart's own
+    // _metricsTimer), a WS status change, or a single robot's live
+    // telemetry: the metrics bar AND every robot card in the grid, whether
+    // that update touched them or not. So the screen is split into two
+    // independently-`Selector`ed widgets below, so each side of RobotViewModel's single ChangeNotifier
     // only rebuilds the part of the screen that actually reads it.
     return const Column(
       children: [

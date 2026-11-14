@@ -3,7 +3,7 @@
 // Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 // GPL-3.0-or-later - see LICENSE
 //
-// Entry point - ported from HYDRA-UMC-IOS-CONTROL's own main.dart. Same
+// Entry point - the same as HYDRA-UMC-IOS-CONTROL's own main.dart. Same
 // dark theme/color seed as the other 2 apps in this ecosystem (a robot
 // arm looks the same red/green/cyan whichever client is showing it), same
 // login-gated root widget. The window itself starts at a fixed 1280x720
