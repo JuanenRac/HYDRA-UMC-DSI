@@ -16,7 +16,7 @@ It keeps state, so a test can tell a story and not only replay one answer:
     that stops every robot and says so robot by robot;
   * the feeds the sibling services hand to the server: `GET /api/faults` (the faults a test raises with `raise_fault`),
     `POST /api/ingest/scenario-outcome` (a ScenarioOutcome 1.0 is kept, one that does not fit is a 400),
-    `POST /api/ingest/developer-node/status` (the token of a node, `node_tokens`, and not a user account) and
+    `POST /api/ingest/dev-server/status` (the token of a node, `node_tokens`, and not a user account; the old `/api/ingest/developer-node/status` still answers) and
     `POST /api/trajectory/proposals/verify` (a listed key and the signature `fake-valid`: no cryptography here);
   * `POST /api/camera/ticket`: a ticket for a picture's address (`{ticket, expiresInSeconds}`), valid for five minutes of the test
     clock and kept in `tickets` (ticket -> account and expiry) for a test to look at; `ticket_valid` says if one still opens a picture;
@@ -45,6 +45,8 @@ OPEN_ROUTES = {("GET", "/api/hydra-info"), ("POST", "/api/login"), ("POST", "/ap
 CONTINUOUS = {"jog", "speed", "jogStep"}
 CLAIM_TTL_MS = 300_000
 TICKET_TTL_S = 300
+NODE_STATUS_PATHS = {"/api/ingest/dev-server/status", "/api/ingest/developer-node/status"}
+NODE_STATUS_SCHEMAS = {"dev-server-status/1", "developer-node-status/1"}
 
 
 class FakeHydra:
@@ -247,8 +249,8 @@ class FakeHydra:
         node = self.node_tokens.get(token)
         if node is None:
             return 401, {"error": "a valid node token is required"}
-        if body.get("schema") != "developer-node-status/1":
-            return 400, {"error": "not a developer-node-status/1"}
+        if body.get("schema") not in NODE_STATUS_SCHEMAS:
+            return 400, {"error": "not a dev-server-status/1"}
         self.node_statuses[node] = body
         return 201, {"node_id": node, "seq": len(self.node_statuses)}
 
@@ -324,7 +326,7 @@ class Handler(BaseHTTPRequestHandler):
         body = self._body() if method in ("POST", "PUT", "PATCH") else {}
         with state.lock:
             state.requests.append((method, path))
-            if (method, path) == ("POST", "/api/ingest/developer-node/status"):
+            if method == "POST" and path in NODE_STATUS_PATHS:
                 header = self.headers.get("Authorization", "")
                 status, answer = state.ingest_node_status(header[7:] if header.startswith("Bearer ") else "", body)
                 return self._send(status, answer)
