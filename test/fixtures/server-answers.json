@@ -1927,6 +1927,56 @@
         }
       }
     },
+    "GET /api/ecosystem/node-health": {
+      "200": {
+        "minimal": {
+          "online": false,
+          "slot": 0,
+          "heard": false,
+          "source": "brain-health"
+        },
+        "full": {
+          "online": false,
+          "slot": 0,
+          "heard": false,
+          "ageMs": 0,
+          "sequence": 0,
+          "flags": 0,
+          "flagNames": [
+            "sample"
+          ],
+          "txErrors": 0,
+          "rxErrors": 0,
+          "stalls": 0,
+          "uptimeS": 0,
+          "source": "brain-health"
+        }
+      },
+      "400": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "403": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "503": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      }
+    },
     "POST /api/ecosystem/service/{unit}/{action}": {
       "200": {
         "minimal": {
