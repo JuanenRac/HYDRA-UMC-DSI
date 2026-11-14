@@ -3,7 +3,7 @@
 // Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 // GPL-3.0-or-later - see LICENSE
 //
-// Jog-pendant-style directional pad - ported from HYDRA-UMC-IOS-CONTROL's
+// Jog-pendant-style directional pad - based on HYDRA-UMC-IOS-CONTROL's
 // own ui/widgets/joystick_pad.dart, sized up for a fixed-distance touch
 // panel (finger input, no cursor precision) instead of a phone screen held
 // at arm's length.

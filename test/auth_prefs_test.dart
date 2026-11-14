@@ -1,5 +1,5 @@
 // the session
-// token used to live in plain SharedPreferences, indistinguishable from
+// token lives in the secure store, not in plain SharedPreferences, where it would be indistinguishable from
 // host/port. These tests exercise AuthPrefs against a fake
 // SecureTokenBackend (no real platform channel) covering: the real
 // no-regression fallback when secure storage is unavailable, and the real
@@ -110,7 +110,7 @@ void main() {
 
       // this project's own real closure criterion: the token must NEVER reach
       // plain SharedPreferences just because secure storage failed - the
-      // old, pre-fix behavior this test used to assert as correct.
+      // behavior of keeping the token in plain storage.
       final prefs = await SharedPreferences.getInstance();
       expect(prefs.getString('hydra_token'), isNull);
       expect(prefs.getString('hydra_username'), isNull);

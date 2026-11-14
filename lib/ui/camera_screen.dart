@@ -3,7 +3,7 @@
 // Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 // GPL-3.0-or-later - see LICENSE
 //
-// Ported from HYDRA-UMC-IOS-CONTROL's own ui/camera_screen.dart - the
+// The same as HYDRA-UMC-IOS-CONTROL's own ui/camera_screen.dart - the
 // hand-rolled MjpegView (widgets/mjpeg_view.dart) has no platform
 // dependency, so this screen needed no real change beyond touch-sized
 // controls, unlike ui/three_d_screen.dart which had to be redesigned

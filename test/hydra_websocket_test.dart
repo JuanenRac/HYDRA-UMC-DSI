@@ -223,11 +223,11 @@ void main() {
     test(
       'a real 1008 close (server-rejected token) surfaces wsAuthRejected and never reconnects',
       () async {
-        // Real bug fixed 2026-09-08: onDone used to always reconnect,
-        // unconditionally, despite this file's own header comment already
-        // claiming a 1008 close was "treated as sign in again" - a token
-        // the server will never accept again just spun forever in
-        // "connecting" -> "disconnected" with no visible error at all.
+        // onDone must not always reconnect unconditionally, as this file's
+        // own header comment says a 1008 close is "treated as sign in
+        // again" - a token the server will never accept again would spin
+        // forever in "connecting" -> "disconnected" with no visible error
+        // at all.
         final statuses = <WsStatus>[];
         final errors = <HydraError>[];
         final ws = HydraWebSocket(

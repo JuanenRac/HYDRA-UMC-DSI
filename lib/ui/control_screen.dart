@@ -3,7 +3,7 @@
 // Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 // GPL-3.0-or-later - see LICENSE
 //
-// Ported from HYDRA-UMC-IOS-CONTROL's own ui/control_screen.dart, laid out
+// Based on HYDRA-UMC-IOS-CONTROL's own ui/control_screen.dart, laid out
 // side-by-side (jog pad left, telemetry/sliders/IO right) instead of a
 // single scrolling column - this app's fixed 1280x720 frame has the width
 // to spare and none of the vertical room a phone has, so the original

@@ -3,9 +3,9 @@
 // Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 // GPL-3.0-or-later - see LICENSE
 //
-// Single ChangeNotifier every screen listens to via Provider - ported from
+// Single ChangeNotifier every screen listens to via Provider - the same as
 // HYDRA-UMC-IOS-CONTROL's own state/robot_view_model.dart (same Dart/
-// Flutter stack, direct reuse per [[No reference -> reuse, don't invent]]).
+// Flutter stack, reused directly).
 // Every write goes through sendAtomicCommand(), which POSTs the real atomic
 // POST /api/robot/:id/command endpoint instead of overwriting the whole
 // settings tree - see that file's own header comment for the full
@@ -136,13 +136,12 @@ class RobotViewModel extends ChangeNotifier {
   // AFTER later ones already applied (and possibly already succeeded)
   // would restore its own stale pre-mutation snapshot over top of that
   // newer state, silently erasing real progress the operator already
-  // made. Ported from HYDRA-UMC-IOS-CONTROL's own robot_view_model.dart -
-  // this file's rollback existed without this guard until now, a real gap
-  // vs. that reference (see the delta-sync design).
+  // made. Same guard as HYDRA-UMC-IOS-CONTROL's own robot_view_model.dart
+  // (see the delta-sync design).
   final Map<dynamic, int> _commandGeneration = {};
 
   // Jog commands on the wire, per robot. A held button repeats every 150 ms;
-  // on a slow link the POSTs used to pile up and still be applied after the
+  // on a slow link the POSTs would pile up and still be applied after the
   // button was released. While one is in flight the next tick is dropped.
   final Map<dynamic, int> _jogsInFlight = {};
 
@@ -556,8 +555,8 @@ class RobotViewModel extends ChangeNotifier {
   }
 
   /// Applies one {controllerId, robotId, patch, cameraId?, cameraPatch?}
-  /// delta in place onto state.raw's own nested Maps - ported from
-  /// HYDRA-UMC-IOS-CONTROL's own robot_view_model.dart. Looks the robot up
+  /// delta in place onto state.raw's own nested Maps, as
+  /// HYDRA-UMC-IOS-CONTROL's own robot_view_model.dart does. Looks the robot up
   /// by controllerId + robotId directly rather than via
   /// HydraState.robotById() (which only searches activeController) - a
   /// delta can legitimately target a robot in a non-active controller in a
@@ -668,9 +667,9 @@ class RobotViewModel extends ChangeNotifier {
 
     final client = apiClient;
     if (client == null) {
-      // Nothing to roll back yet (no mutation applied below) - but this was
-      // previously a silent no-op with zero feedback, so a stray command
-      // fired while disconnected just vanished with no sign anything was
+      // Nothing to roll back yet (no mutation applied below) - but it must
+      // not be a silent no-op with zero feedback, or a stray command
+      // fired while disconnected would just vanish with no sign anything was
       // wrong.
       lastError = const HydraError(HydraErrorKind.notConnected);
       notifyListeners();

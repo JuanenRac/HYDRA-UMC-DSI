@@ -4,9 +4,9 @@
 // GPL-3.0-or-later - see LICENSE
 //
 // Two independent discovery paths, both feeding the same "Scan local
-// network" dialog in ui/login_screen.dart, ported from
+// network" dialog in ui/login_screen.dart, the same as
 // HYDRA-UMC-IOS-CONTROL's own network/discovery.dart (same Dart/Flutter
-// stack, direct reuse per [[No reference -> reuse, don't invent]]):
+// stack, reused directly):
 //   - discoverMdns(): real mDNS/Bonjour, querying the "_hydra._tcp.local"
 //     service server.ts publishes - near-instant on a network that
 //     delivers the multicast replies.
