@@ -2,6 +2,7 @@
 
 ## [Unreleased]
 
+- **The search for servers on the network comes from the shared app package:** the mDNS query and the sweep of the local subnets now run in the SDK package, and the app only supplies the probe that reads `GET /api/hydra-info`; the scan dialog and its result are unchanged, except that a server found by the mDNS query that answers over HTTPS alone is now recorded as such, as the sweep already did. Tests: the probe turns a server answer into the server record, anything else or no answer into nothing, and leaves the client of a sweep open (`test/discovery_probe_test.dart`).
 - **The shared app package and the contracts of the SDK are pinned to `v0.6.4`, and the tests replay its newest server answers:** `pubspec.yaml`, `pubspec.lock` and the workflow point at the tag; the package now carries the reading of the digest of a release asset and the live progress of a CAN flash cycle, ready for the screens that need them, and the recorded answers include the last health frame of a controller board (`GET /api/ecosystem/node-health`).
 
 - **The vendored server answers and the stand-in server are the ones of the current SDK:** the copies the tests replay now equal the files the SDK generates from the server inventory, including the routes of the program updates.
