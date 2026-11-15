@@ -124,7 +124,7 @@ class _SecurityDialogState extends State<SecurityDialog> {
       title: Row(children: [
         const Icon(Icons.shield_outlined),
         const SizedBox(width: 10),
-        Expanded(child: Text(l10n.securityTitle)),
+        Expanded(child: Text(l10n.commonSecurity)),
       ]),
       content: SizedBox(
         width: 460,
@@ -212,8 +212,8 @@ class _SecurityDialogState extends State<SecurityDialog> {
         ),
       ),
       actions: [
-        TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(l10n.securityCancel)),
-        FilledButton(key: const Key('security-save'), onPressed: () => _save(l10n), child: Text(l10n.securitySave)),
+        TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(l10n.commonCancel)),
+        FilledButton(key: const Key('security-save'), onPressed: () => _save(l10n), child: Text(l10n.commonSave)),
       ],
     );
   }

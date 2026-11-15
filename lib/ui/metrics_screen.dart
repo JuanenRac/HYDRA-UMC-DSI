@@ -47,16 +47,16 @@ class MetricsScreen extends StatelessWidget {
             spacing: 16,
             runSpacing: 16,
             children: [
-              _MetricTile(icon: Icons.memory, label: l10n.metricsCpuLoad, value: '${metrics.cpuLoad}%', color: _loadColor(metrics.cpuLoad)),
+              _MetricTile(icon: Icons.memory, label: l10n.commonCpuLoad, value: '${metrics.cpuLoad}%', color: _loadColor(metrics.cpuLoad)),
               _MetricTile(
                 icon: Icons.storage,
-                label: l10n.metricsMemoryUsage,
+                label: l10n.commonMemoryUsage,
                 value: '${metrics.memoryUsage}%',
                 color: _loadColor(metrics.memoryUsage),
               ),
               _MetricTile(
                 icon: Icons.thermostat,
-                label: l10n.metricsTemperature,
+                label: l10n.commonTemperature,
                 // A host without a temperature sensor reports a made-up value
                 // (temp_is_real: false): shown as "--", never coloured as an alarm.
                 value: metrics.tempIsReal ? '${metrics.temp.toStringAsFixed(1)}°C' : '--',
@@ -67,7 +67,7 @@ class MetricsScreen extends StatelessWidget {
           ),
           const SizedBox(height: 28),
           if (info != null) ...[
-            Text(l10n.metricsServerTitle, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            Text(l10n.commonServer, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 16),
             Wrap(
               spacing: 16,
@@ -82,14 +82,14 @@ class MetricsScreen extends StatelessWidget {
                 ),
                 _MetricTile(
                   icon: Icons.developer_board,
-                  label: l10n.metricsControllers,
+                  label: l10n.commonControllers,
                   value: '${info['controllerCount'] ?? 0}',
                   color: Colors.white70,
                   small: true,
                 ),
                 _MetricTile(
                   icon: Icons.precision_manufacturing,
-                  label: l10n.metricsRobots,
+                  label: l10n.commonRobots,
                   value: '${info['robotCount'] ?? 0}',
                   color: Colors.white70,
                   small: true,

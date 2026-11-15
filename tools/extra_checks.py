@@ -10,6 +10,8 @@ READMEs; both checks fail when the picture, the JSON or the code it points to di
 """
 from __future__ import annotations
 
+import importlib.util
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -34,4 +36,25 @@ def check(root: Path) -> list[str]:
                                 cwd=root, text=True, encoding="utf-8", errors="replace", capture_output=True, check=False)
         if result.returncode != 0:
             problems.append(f"tools/{script} {' '.join(arguments)}: " + (result.stdout + result.stderr).strip().splitlines()[-1][:300])
+    problems.extend(common_texts(root))
     return problems
+
+
+def common_texts(root: Path) -> list[str]:
+    """The common words of the apps (contracts/i18n/common.json of HYDRA-UMC-SDK) are carried exactly as the SDK writes them.
+
+    The SDK is looked for in HYDRA_UMC_SDK_DIR, else next to this repository; without it, or with a release that does not have the check yet, nothing is checked."""
+    sdk = Path(os.environ["HYDRA_UMC_SDK_DIR"]) if os.environ.get("HYDRA_UMC_SDK_DIR") else root.parent / "HYDRA-UMC-SDK"
+    script = sdk / "tools" / "i18n_common.py"
+    contract = sdk / "contracts" / "i18n" / "common.json"
+    if not script.is_file() or not contract.is_file():
+        return []
+    spec = importlib.util.spec_from_file_location("i18n_common", script)
+    if spec is None or spec.loader is None:
+        return []
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    checker = getattr(module, "check_arb", None)
+    if checker is None:
+        return []
+    return ["common texts: " + problem for problem in checker(module.load(contract), root)[:20]]

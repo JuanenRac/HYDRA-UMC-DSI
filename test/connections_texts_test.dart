@@ -29,7 +29,7 @@ void main() {
         expect(entry.value.trim(), isNotEmpty, reason: '${locale.languageCode} ${entry.key}');
       }
       expect(texts.values.toSet().length, texts.length, reason: '${locale.languageCode}: two kinds read the same');
-      expect(connectionKindName(l10n, 'something-new'), l10n.connectionsKindOther);
+      expect(connectionKindName(l10n, 'something-new'), l10n.commonOther);
     }
   });
 

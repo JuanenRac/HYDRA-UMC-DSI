@@ -108,7 +108,7 @@ class _AuditDialogState extends State<AuditDialog> {
     const bad = Color(0xFFF87171);
 
     final robotLabel = _robotIndex == 0 || _robotIndex > robots.length
-        ? l10n.auditAllRobots
+        ? l10n.commonAllRobots
         : (robots[_robotIndex - 1].name.isEmpty ? '#${robots[_robotIndex - 1].id}' : robots[_robotIndex - 1].name);
 
     return AlertDialog(
@@ -132,7 +132,7 @@ class _AuditDialogState extends State<AuditDialog> {
                       setState(() => _typeIndex = (_typeIndex + 1) % (AuditRecord.types.length + 1));
                       _load(false);
                     },
-                    child: Text(_type == null ? l10n.auditAllTypes : _typeName(l10n, _type!)),
+                    child: Text(_type == null ? l10n.commonAllTypes : _typeName(l10n, _type!)),
                   ),
                   OutlinedButton(
                     key: const ValueKey('audit-robot'),
@@ -156,7 +156,7 @@ class _AuditDialogState extends State<AuditDialog> {
               Wrap(
                 spacing: 6,
                 children: [
-                  TextButton(key: const ValueKey('audit-refresh'), onPressed: busy ? null : () => _load(false), child: Text(l10n.auditRefresh)),
+                  TextButton(key: const ValueKey('audit-refresh'), onPressed: busy ? null : () => _load(false), child: Text(l10n.commonRefresh)),
                   FilledButton(key: const ValueKey('audit-verify'), onPressed: busy ? null : () => _load(true), child: Text(l10n.auditVerify)),
                   TextButton(
                     key: const ValueKey('audit-copy'),
@@ -206,7 +206,7 @@ class _AuditDialogState extends State<AuditDialog> {
           ),
         ),
       ),
-      actions: [TextButton(key: const ValueKey('audit-close'), onPressed: () => Navigator.of(context).pop(), child: Text(l10n.auditClose))],
+      actions: [TextButton(key: const ValueKey('audit-close'), onPressed: () => Navigator.of(context).pop(), child: Text(l10n.commonClose))],
     );
   }
 

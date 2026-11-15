@@ -176,7 +176,7 @@ class _ResultBanner extends StatelessWidget {
             ),
           ),
           IconButton(
-            tooltip: l10n.stopAllClose,
+            tooltip: l10n.commonClose,
             onPressed: onClose,
             icon: const Icon(Icons.close, color: Colors.white),
           ),

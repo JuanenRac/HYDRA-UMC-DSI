@@ -217,8 +217,8 @@ class _EcosystemCard extends StatelessWidget {
           title: Text(action == 'stop' ? l10n.ecoConfirmStop(p.name) : l10n.ecoConfirmRestart(p.name)),
           content: Text(l10n.ecoConfirmBody),
           actions: [
-            TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: Text(l10n.playConfirmCancel)),
-            FilledButton(key: const Key('eco-confirm'), onPressed: () => Navigator.of(dialogContext).pop(true), child: Text(action == 'stop' ? l10n.ecoStop : l10n.ecoRestart)),
+            TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: Text(l10n.commonCancel)),
+            FilledButton(key: const Key('eco-confirm'), onPressed: () => Navigator.of(dialogContext).pop(true), child: Text(action == 'stop' ? l10n.ecoStop : l10n.commonRestart)),
           ],
         ),
       );
@@ -269,7 +269,7 @@ class _EcosystemCard extends StatelessWidget {
                       ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
                       : Row(mainAxisSize: MainAxisSize.min, children: [
                           if (!running) IconButton(key: Key('eco-start-${p.name}'), tooltip: l10n.ecoStart, icon: const Icon(Icons.play_arrow), onPressed: controllable ? () => _act(context, p, 'start') : null),
-                          if (running) IconButton(key: Key('eco-restart-${p.name}'), tooltip: l10n.ecoRestart, icon: const Icon(Icons.restart_alt), onPressed: controllable ? () => _act(context, p, 'restart') : null),
+                          if (running) IconButton(key: Key('eco-restart-${p.name}'), tooltip: l10n.commonRestart, icon: const Icon(Icons.restart_alt), onPressed: controllable ? () => _act(context, p, 'restart') : null),
                           if (running) IconButton(key: Key('eco-stop-${p.name}'), tooltip: l10n.ecoStop, icon: const Icon(Icons.stop_circle_outlined), onPressed: controllable ? () => _act(context, p, 'stop') : null),
                         ]),
                 );
@@ -279,7 +279,7 @@ class _EcosystemCard extends StatelessWidget {
         ],
       );
     }
-    return _Card(title: l10n.systemEcosystemTitle, icon: Icons.hub_outlined, child: body);
+    return _Card(title: l10n.commonEcosystem, icon: Icons.hub_outlined, child: body);
   }
 }
 
@@ -386,7 +386,7 @@ class _RestartCard extends StatelessWidget {
         title: Text(title),
         content: Text(body),
         actions: [
-          TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: Text(l10n.playConfirmCancel)),
+          TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: Text(l10n.commonCancel)),
           FilledButton(key: key, onPressed: () => Navigator.of(dialogContext).pop(true), child: Text(button)),
         ],
       ),
@@ -409,20 +409,20 @@ class _RestartCard extends StatelessWidget {
     final isAdmin = context.select<RobotViewModel, bool>((vm) => vm.isAdmin);
 
     Future<void> screen() async {
-      if (!await _confirm(context, l10n.rebootScreenButton, l10n.rebootConfirmScreen, l10n.rebootConfirmButton, key: const Key('reboot-confirm-screen'))) return;
+      if (!await _confirm(context, l10n.rebootScreenButton, l10n.rebootConfirmScreen, l10n.commonRestart, key: const Key('reboot-confirm-screen'))) return;
       if (!context.mounted) return;
       final result = model.restartScreen();
       if (result != SystemActionResult.ok && context.mounted) _say(context, result);
     }
 
     Future<void> services() async {
-      if (!await _confirm(context, l10n.rebootServicesButton, l10n.rebootConfirmServices, l10n.rebootConfirmButton, key: const Key('reboot-confirm-services'))) return;
+      if (!await _confirm(context, l10n.rebootServicesButton, l10n.rebootConfirmServices, l10n.commonRestart, key: const Key('reboot-confirm-services'))) return;
       final result = await model.restartServices();
       if (context.mounted) _say(context, result);
     }
 
     Future<void> host() async {
-      if (!await _confirm(context, l10n.rebootHostButton, l10n.rebootConfirmHost, l10n.rebootConfirmButton, key: const Key('reboot-confirm-host-1'))) return;
+      if (!await _confirm(context, l10n.rebootHostButton, l10n.rebootConfirmHost, l10n.commonRestart, key: const Key('reboot-confirm-host-1'))) return;
       if (!context.mounted) return;
       if (!await _confirm(context, l10n.rebootHostButton, l10n.rebootConfirmHostLast, l10n.rebootHostNow, key: const Key('reboot-confirm-host-2'))) return;
       final result = await model.restartHost();
