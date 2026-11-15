@@ -1848,6 +1848,16 @@
         }
       }
     },
+    "POST /api/droid-estop/settings": {
+      "400": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      }
+    },
     "GET /api/ecosystem/health": {
       "200": {
         "minimal": {
@@ -2462,6 +2472,50 @@
         }
       }
     },
+    "POST /api/operator/confirmations": {
+      "200": {
+        "minimal": {
+          "token": "sample",
+          "action": "sample",
+          "job_id": "sample",
+          "expires_at": 0,
+          "ttl_seconds": 0,
+          "single_use": true
+        },
+        "full": {
+          "token": "sample",
+          "action": "sample",
+          "job_id": "sample",
+          "expires_at": 0,
+          "ttl_seconds": 0,
+          "single_use": true
+        }
+      },
+      "400": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "403": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "503": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      }
+    },
     "GET /api/operator/presence": {
       "200": {
         "minimal": {
@@ -2897,6 +2951,34 @@
         }
       }
     },
+    "GET /api/ros2-bridge/settings": {
+      "200": {
+        "minimal": {
+          "requireSros2": false,
+          "active": false,
+          "restartNeeded": false,
+          "canChange": false,
+          "environmentReady": false
+        },
+        "full": {
+          "requireSros2": false,
+          "active": false,
+          "restartNeeded": false,
+          "canChange": false,
+          "environmentReady": false
+        }
+      }
+    },
+    "POST /api/ros2-bridge/settings": {
+      "400": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      }
+    },
     "GET /api/rul/config": {
       "200": {
         "minimal": {
@@ -3274,14 +3356,6 @@
           ],
           "armedCount": 0,
           "staleCount": 0
-        }
-      },
-      "400": {
-        "minimal": {
-          "error": "sample"
-        },
-        "full": {
-          "error": "sample"
         }
       },
       "404": {
