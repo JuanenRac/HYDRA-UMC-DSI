@@ -176,7 +176,7 @@ HYDRA-UMC-DSI/
 │   ├── l10n/                                                         localizaciones en ocho idiomas
 │   ├── util/                                                         Utilidades sin pantalla propia
 │   └── ui/                                                           pantallas y widgets
-├── kiosk/                                                            instalador del quiosco, ejemplo de ajustes y regla del brillo
+├── kiosk/                                                            instalador del quiosco, scripts de ajustes y regla del brillo
 ├── systemd/                                                          unidad systemd del quiosco
 ├── linux/                                                            Runner de escritorio GTK - el target REAL, ventana fija 1280x720
 ├── windows/                                                          Runner de escritorio Windows - solo verificación en máquina de desarrollo

@@ -176,7 +176,7 @@ HYDRA-UMC-DSI/
 │   ├── l10n/                                                         localizações em oito idiomas
 │   ├── util/                                                         Utilitários sem ecrã próprio
 │   └── ui/                                                           ecrãs e widgets
-├── kiosk/                                                            instalador do quiosque, exemplo de definições e regra da luz de fundo
+├── kiosk/                                                            instalador do quiosque, scripts de definições e regra da luz de fundo
 ├── systemd/                                                          unidade systemd do quiosque
 ├── linux/                                                            Executor GTK de desktop - o alvo REAL, janela fixa de 1280x720
 ├── windows/                                                          Executor de desktop Windows - apenas verificação na máquina de desenvolvimento

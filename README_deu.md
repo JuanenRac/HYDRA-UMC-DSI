@@ -176,7 +176,7 @@ HYDRA-UMC-DSI/
 │   ├── l10n/                                                         Lokalisierungen in acht Sprachen
 │   ├── util/                                                         Hilfsfunktionen ohne eigenen Bildschirm
 │   └── ui/                                                           Ansichten und Widgets
-├── kiosk/                                                            Kiosk-Installer, Einstellungsbeispiel und Helligkeitsregel
+├── kiosk/                                                            Kiosk-Installer, Einstellungsskripte und Helligkeitsregel
 ├── systemd/                                                          systemd-Unit des Kiosks
 ├── linux/                                                            GTK-Desktop-Runner - das ECHTE Ziel, festes 1280x720-Fenster
 ├── windows/                                                          Windows-Desktop-Runner - nur Verifikation auf der Entwicklungsmaschine
