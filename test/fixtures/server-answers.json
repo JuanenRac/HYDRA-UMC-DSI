@@ -886,6 +886,41 @@
       }
     },
     "PUT /api/admin/safety-limits": {
+      "200": {
+        "minimal": {
+          "success": false,
+          "limits": {}
+        },
+        "full": {
+          "limits": {
+            "jog": {
+              "armRequired": false,
+              "armTtlMs": 0.0,
+              "default": {
+                "maxAmount": 0.0,
+                "maxAbsolute": 0.0
+              },
+              "models": {}
+            },
+            "temperature": {
+              "default": {
+                "bedMaxC": 0.0
+              },
+              "models": {}
+            },
+            "claims": {
+              "requireControllerId": false
+            },
+            "audit": {
+              "enabled": false,
+              "motionIntervalSeconds": 0.0
+            }
+          },
+          "defaults": {},
+          "hardLimits": {},
+          "success": false
+        }
+      },
       "400": {
         "minimal": {
           "error": "sample"
@@ -1171,11 +1206,15 @@
       "200": {
         "minimal": {
           "success": false,
-          "appliesOnRestart": false
+          "appliesOnRestart": false,
+          "warnings": []
         },
         "full": {
           "success": false,
-          "appliesOnRestart": false
+          "appliesOnRestart": false,
+          "warnings": [
+            "sample"
+          ]
         }
       },
       "400": {
@@ -1798,8 +1837,81 @@
         "full": {}
       }
     },
+    "GET /api/connector-hub/gate/settings": {
+      "200": {
+        "minimal": {
+          "allowLoopbackNoIdentity": false
+        },
+        "full": {
+          "allowLoopbackNoIdentity": false,
+          "loopbackSwitchAllowed": false,
+          "verifiesTokens": false,
+          "persisted": false
+        }
+      },
+      "404": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "503": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      }
+    },
     "POST /api/connector-hub/gate/settings": {
+      "200": {
+        "minimal": {
+          "allowLoopbackNoIdentity": false
+        },
+        "full": {
+          "allowLoopbackNoIdentity": false,
+          "loopbackSwitchAllowed": false,
+          "verifiesTokens": false,
+          "persisted": false,
+          "changed": false
+        }
+      },
       "400": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "403": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "404": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "409": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "503": {
         "minimal": {
           "error": "sample"
         },
@@ -1848,8 +1960,77 @@
         }
       }
     },
+    "GET /api/droid-estop/settings": {
+      "200": {
+        "minimal": {
+          "enabled": false
+        },
+        "full": {
+          "enabled": false,
+          "running": false
+        }
+      },
+      "404": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "503": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      }
+    },
     "POST /api/droid-estop/settings": {
+      "200": {
+        "minimal": {
+          "enabled": false
+        },
+        "full": {
+          "enabled": false,
+          "running": false,
+          "changed": false
+        }
+      },
       "400": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "403": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "404": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "409": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "503": {
         "minimal": {
           "error": "sample"
         },
@@ -2203,8 +2384,83 @@
         }
       }
     },
+    "GET /api/hil-bridge/settings": {
+      "200": {
+        "minimal": {
+          "requireTwinPass": false
+        },
+        "full": {
+          "requireTwinPass": false,
+          "locked": false,
+          "persisted": false,
+          "ready": false,
+          "canChange": false
+        }
+      },
+      "404": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "503": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      }
+    },
     "POST /api/hil-bridge/settings": {
+      "200": {
+        "minimal": {
+          "requireTwinPass": false
+        },
+        "full": {
+          "requireTwinPass": false,
+          "locked": false,
+          "persisted": false,
+          "ready": false,
+          "canChange": false,
+          "changed": false
+        }
+      },
       "400": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "403": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "404": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "409": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "503": {
         "minimal": {
           "error": "sample"
         },
@@ -2584,8 +2840,77 @@
         }
       }
     },
+    "GET /api/ops-agent/proposals": {
+      "200": {
+        "minimal": {
+          "pending": []
+        },
+        "full": {
+          "pending": [
+            {}
+          ],
+          "decided": [
+            {}
+          ]
+        }
+      },
+      "404": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "502": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "503": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      }
+    },
     "POST /api/ops-agent/proposals/decide": {
+      "200": {
+        "minimal": {},
+        "full": {
+          "decision": "approved"
+        }
+      },
       "400": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "404": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "502": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "503": {
         "minimal": {
           "error": "sample"
         },
@@ -2707,6 +3032,17 @@
       }
     },
     "GET /api/robot/{id}": {
+      "200": {
+        "minimal": {
+          "robot": {},
+          "revision": "sample"
+        },
+        "full": {
+          "robot": {},
+          "revision": "sample",
+          "cellId": null
+        }
+      },
       "404": {
         "minimal": {
           "error": "sample"
@@ -2728,14 +3064,17 @@
       "200": {
         "minimal": {
           "success": false,
-          "reservationHistory": []
+          "reservation": {},
+          "reservationHistory": [],
+          "revision": "sample"
         },
         "full": {
           "success": false,
           "reservation": {},
           "reservationHistory": [
             {}
-          ]
+          ],
+          "revision": "sample"
         }
       },
       "400": {
@@ -2772,6 +3111,24 @@
       }
     },
     "POST /api/robot/{id}/command": {
+      "200": {
+        "minimal": {
+          "success": false,
+          "revision": "sample"
+        },
+        "full": {
+          "success": false,
+          "affectedCount": 0.0,
+          "revision": "sample",
+          "operation_id": "sample",
+          "operation": {},
+          "lifecycle": {},
+          "applied": {},
+          "warnings": [
+            null
+          ]
+        }
+      },
       "400": {
         "minimal": {
           "error": "sample"
@@ -2848,6 +3205,18 @@
       }
     },
     "POST /api/robot/{id}/jog-arm": {
+      "200": {
+        "minimal": {
+          "success": false,
+          "armed": false
+        },
+        "full": {
+          "success": false,
+          "armed": false,
+          "expiresAt": 0.0,
+          "ttlMs": 0.0
+        }
+      },
       "400": {
         "minimal": {
           "error": "sample"
@@ -2885,14 +3254,15 @@
       "200": {
         "minimal": {
           "success": false,
-          "reservationHistory": []
+          "reservationHistory": [],
+          "revision": "sample"
         },
         "full": {
           "success": false,
-          "reservation": {},
           "reservationHistory": [
             {}
-          ]
+          ],
+          "revision": "sample"
         }
       },
       "400": {
@@ -2967,10 +3337,76 @@
           "canChange": false,
           "environmentReady": false
         }
+      },
+      "404": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "503": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
       }
     },
     "POST /api/ros2-bridge/settings": {
+      "200": {
+        "minimal": {
+          "requireSros2": false,
+          "active": false,
+          "restartNeeded": false,
+          "canChange": false,
+          "environmentReady": false
+        },
+        "full": {
+          "requireSros2": false,
+          "active": false,
+          "restartNeeded": false,
+          "canChange": false,
+          "environmentReady": false,
+          "changed": false,
+          "appliesAfterRestart": false
+        }
+      },
       "400": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "403": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "404": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "409": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "503": {
         "minimal": {
           "error": "sample"
         },
@@ -3019,8 +3455,79 @@
         }
       }
     },
+    "GET /api/semantic-planner/settings": {
+      "200": {
+        "minimal": {
+          "requireIdentity": false
+        },
+        "full": {
+          "requireIdentity": false,
+          "verifiesTokens": false,
+          "persisted": false
+        }
+      },
+      "404": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "503": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      }
+    },
     "POST /api/semantic-planner/settings": {
+      "200": {
+        "minimal": {
+          "requireIdentity": false
+        },
+        "full": {
+          "requireIdentity": false,
+          "verifiesTokens": false,
+          "persisted": false,
+          "changed": false
+        }
+      },
       "400": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "403": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "404": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "409": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "503": {
         "minimal": {
           "error": "sample"
         },
@@ -3050,10 +3557,15 @@
     "POST /api/settings": {
       "200": {
         "minimal": {
-          "success": false
+          "success": false,
+          "revision": "sample"
         },
         "full": {
-          "success": false
+          "success": false,
+          "revision": "sample",
+          "warnings": [
+            {}
+          ]
         }
       },
       "409": {
@@ -3076,10 +3588,15 @@
     "PUT /api/settings": {
       "200": {
         "minimal": {
-          "success": false
+          "success": false,
+          "revision": "sample"
         },
         "full": {
-          "success": false
+          "success": false,
+          "revision": "sample",
+          "warnings": [
+            {}
+          ]
         }
       },
       "409": {
@@ -3309,26 +3826,208 @@
     },
     "GET /api/telemetry/aggregate": {
       "200": {
-        "minimal": {},
-        "full": {}
+        "minimal": [],
+        "full": [
+          {
+            "bucketStart": 0.0,
+            "value": 0.0,
+            "count": 0.0
+          }
+        ]
+      },
+      "400": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "503": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
       }
     },
     "GET /api/telemetry/downsample-plan": {
       "200": {
-        "minimal": {},
-        "full": {}
+        "minimal": {
+          "plan": {
+            "tiers": [],
+            "delete": false
+          },
+          "hash": "sample"
+        },
+        "full": {
+          "plan": {
+            "tiers": [
+              {
+                "kind": "sample",
+                "field": "sample",
+                "raw": null,
+                "bucket": null,
+                "fineBucket": null,
+                "rollupRetention": null,
+                "fineRetention": null
+              }
+            ],
+            "delete": false
+          },
+          "hash": "sample",
+          "tiers": [
+            {}
+          ],
+          "knownKinds": [
+            "sample"
+          ],
+          "switches": {
+            "allowDelete": false,
+            "deleteRequestedByPlan": false,
+            "deleteOldSwitch": false,
+            "effectiveMode": "delete",
+            "fineRollups": false,
+            "autoIntervalSeconds": 0.0
+          },
+          "audit": [
+            {}
+          ]
+        }
+      },
+      "404": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "503": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
       }
     },
     "PUT /api/telemetry/downsample-plan": {
       "200": {
-        "minimal": {},
-        "full": {}
+        "minimal": {
+          "saved": false,
+          "hash": "sample"
+        },
+        "full": {
+          "saved": false,
+          "preview": false,
+          "unchanged": false,
+          "hash": "sample",
+          "previousHash": "sample",
+          "tiers": [
+            {}
+          ],
+          "mode": "delete",
+          "changes": [
+            {}
+          ],
+          "warnings": [
+            "sample"
+          ],
+          "effects": {
+            "totals": {
+              "rawPointsToRollUp": 0.0,
+              "rollupsToExpire": 0.0,
+              "fineRollupsToExpire": 0.0
+            }
+          },
+          "currentEffects": {
+            "totals": {
+              "rawPointsToRollUp": 0.0,
+              "rollupsToExpire": 0.0,
+              "fineRollupsToExpire": 0.0
+            }
+          }
+        }
+      },
+      "400": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "403": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "404": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "409": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "413": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "503": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
       }
     },
     "GET /api/telemetry/query": {
       "200": {
-        "minimal": {},
-        "full": {}
+        "minimal": [],
+        "full": [
+          {
+            "sourceId": "sample",
+            "kind": "sample",
+            "field": "sample",
+            "timestamp": 0.0,
+            "value": 0.0
+          }
+        ]
+      },
+      "400": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "503": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
       }
     },
     "GET /api/tool-arms": {
