@@ -63,7 +63,7 @@ class SettingsScreen extends StatelessWidget {
       case 'connecting':
         return l10n.connStatusConnecting;
       case 'error':
-        return l10n.connStatusError;
+        return l10n.commonError;
       case 'disconnected':
       default:
         return l10n.connStatusDisconnected;
@@ -205,7 +205,7 @@ class SettingsScreen extends StatelessWidget {
         ListTile(
           key: const Key('settings-security'),
           leading: const Icon(Icons.shield_outlined),
-          title: Text(l10n.securityTitle),
+          title: Text(l10n.commonSecurity),
           subtitle: Text(pinnedFingerprint.isNotEmpty ? TlsFingerprint.display(pinnedFingerprint) : l10n.securityIntro),
           onTap: () => showSecurityDialog(
             context,
@@ -222,7 +222,7 @@ class SettingsScreen extends StatelessWidget {
             value: languageCode,
             underline: const SizedBox.shrink(),
             items: [
-              DropdownMenuItem<String?>(value: null, child: Text(l10n.settingsLanguageSystem)),
+              DropdownMenuItem<String?>(value: null, child: Text(l10n.commonSystemDefault)),
               for (final locale in AppLocalizations.supportedLocales)
                 DropdownMenuItem<String?>(
                   value: locale.languageCode,
@@ -235,7 +235,7 @@ class SettingsScreen extends StatelessWidget {
         const Divider(),
         ListTile(
           leading: const Icon(Icons.logout, color: Colors.redAccent),
-          title: Text(l10n.settingsSignOut),
+          title: Text(l10n.commonSignOut),
           onTap: () => vm.logout(),
         ),
         const Divider(),

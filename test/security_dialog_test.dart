@@ -140,9 +140,9 @@ void main() {
       final vm = RobotViewModel();
       await _open(tester, vm, locale: locale);
       final l10n = AppLocalizations.of(tester.element(find.byKey(const Key('security-save'))))!;
-      expect(l10n.securityTitle, isNotEmpty, reason: locale.languageCode);
-      expect(find.text(l10n.securityTitle), findsOneWidget, reason: locale.languageCode);
-      await tester.tap(find.text(l10n.securityCancel));
+      expect(l10n.commonSecurity, isNotEmpty, reason: locale.languageCode);
+      expect(find.text(l10n.commonSecurity), findsOneWidget, reason: locale.languageCode);
+      await tester.tap(find.text(l10n.commonCancel));
       await tester.pumpAndSettle();
     }
   });

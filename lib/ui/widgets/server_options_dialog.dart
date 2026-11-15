@@ -37,7 +37,7 @@ String protectionLoweringText(AppLocalizations l10n, ProtectionLowering lowering
 String optionSourceText(AppLocalizations l10n, OptionSource source) => switch (source) {
       OptionSource.env => l10n.serverOptionsSourceEnv,
       OptionSource.config => l10n.serverOptionsSourceConfig,
-      OptionSource.defaultValue => l10n.serverOptionsSourceDefault,
+      OptionSource.defaultValue => l10n.commonDefault,
     };
 
 class ServerOptionsDialog extends StatefulWidget {
@@ -83,7 +83,7 @@ class _ServerOptionsDialogState extends State<ServerOptionsDialog> {
             children: [for (final item in lowering) Text('- ${protectionLoweringText(l10n, item)}')],
           ),
           actions: [
-            TextButton(key: const ValueKey('server-options-confirm-no'), onPressed: () => Navigator.of(ctx).pop(false), child: Text(l10n.securityCancel)),
+            TextButton(key: const ValueKey('server-options-confirm-no'), onPressed: () => Navigator.of(ctx).pop(false), child: Text(l10n.commonCancel)),
             TextButton(key: const ValueKey('server-options-confirm-yes'), onPressed: () => Navigator.of(ctx).pop(true), child: Text(l10n.serverOptionsConfirmYes)),
           ],
         ),
@@ -173,8 +173,8 @@ class _ServerOptionsDialogState extends State<ServerOptionsDialog> {
         child: SingleChildScrollView(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: children)),
       ),
       actions: [
-        TextButton(key: const ValueKey('server-options-refresh'), onPressed: busy ? null : () => vm.refreshServerOptions(), child: Text(l10n.auditRefresh)),
-        TextButton(key: const ValueKey('server-options-close'), onPressed: () => Navigator.of(context).pop(), child: Text(l10n.auditClose)),
+        TextButton(key: const ValueKey('server-options-refresh'), onPressed: busy ? null : () => vm.refreshServerOptions(), child: Text(l10n.commonRefresh)),
+        TextButton(key: const ValueKey('server-options-close'), onPressed: () => Navigator.of(context).pop(), child: Text(l10n.commonClose)),
       ],
     );
   }

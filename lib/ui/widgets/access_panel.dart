@@ -75,12 +75,12 @@ class _AccessPanelState extends State<AccessPanel> {
                 FilledButton(
                   key: const ValueKey('access-reserve'),
                   onPressed: !busy && standing == ClaimStanding.free ? () => vm.claimSelectedRobot() : null,
-                  child: Text(l10n.accessReserve),
+                  child: Text(l10n.commonReserve),
                 ),
                 OutlinedButton(
                   key: const ValueKey('access-release'),
                   onPressed: !busy && standing == ClaimStanding.mineHere ? () => vm.releaseSelectedRobot() : null,
-                  child: Text(l10n.accessRelease),
+                  child: Text(l10n.commonRelease),
                 ),
                 TextButton(
                   key: const ValueKey('access-list'),
@@ -102,7 +102,7 @@ class _AccessPanelState extends State<AccessPanel> {
               child: OutlinedButton(
                 key: const ValueKey('access-connections'),
                 onPressed: () => showDialog<void>(context: context, builder: (_) => ConnectionsDialog(vm: vm)),
-                child: Text(l10n.connectionsOpen),
+                child: Text(l10n.commonConnections),
               ),
             ),
             // The audit record and the access options of the server are for administrators only (the server refuses them to anyone else).
@@ -140,9 +140,9 @@ class _AccessPanelState extends State<AccessPanel> {
                 key: const ValueKey('access-conditional'),
                 showSelectedIcon: false,
                 segments: [
-                  ButtonSegment(value: ConditionalMode.standard, label: Text(l10n.accessConditionalStandard)),
+                  ButtonSegment(value: ConditionalMode.standard, label: Text(l10n.commonStandard)),
                   ButtonSegment(value: ConditionalMode.strict, label: Text(l10n.accessConditionalStrict)),
-                  ButtonSegment(value: ConditionalMode.off, label: Text(l10n.accessConditionalOff)),
+                  ButtonSegment(value: ConditionalMode.off, label: Text(l10n.commonOff)),
                 ],
                 selected: {vm.conditionalMode},
                 onSelectionChanged: (s) => vm.setConditionalMode(s.first),
@@ -168,7 +168,7 @@ class _AccessPanelState extends State<AccessPanel> {
           TextButton(
             key: const ValueKey('access-take-over-cancel'),
             onPressed: () => Navigator.of(dialog).pop(false),
-            child: Text(l10n.accessTakeOverCancel),
+            child: Text(l10n.commonCancel),
           ),
           FilledButton(
             key: const ValueKey('access-take-over-confirm'),

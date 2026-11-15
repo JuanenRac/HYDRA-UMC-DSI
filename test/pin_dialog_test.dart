@@ -69,7 +69,7 @@ void main() {
     final result = <String?>[];
     await _open<String?>(tester, (context) => askPin(context, 'Title here'), result);
     expect(find.text('a hint'), findsNothing);
-    await tester.tap(find.text(_en.playConfirmCancel));
+    await tester.tap(find.text(_en.commonCancel));
     await tester.pumpAndSettle();
     expect(result, [null]);
   });
@@ -113,7 +113,7 @@ void main() {
     final vm = RobotViewModel();
     final result = <String?>[];
     await _open<String?>(tester, (context) => setNewPin(context, vm), result);
-    await tester.tap(find.text(_en.playConfirmCancel));
+    await tester.tap(find.text(_en.commonCancel));
     await tester.pumpAndSettle();
     expect(result, [null]);
     expect(vm.pin.check('1234'), PinCheck.notSet);
@@ -146,7 +146,7 @@ void main() {
     await tester.runAsync(() => vm.setOperatorPin('1234'));
     final result = <bool?>[];
     await _open<bool>(tester, (context) => confirmCurrentPin(context, vm), result);
-    await tester.tap(find.text(_en.playConfirmCancel));
+    await tester.tap(find.text(_en.commonCancel));
     await tester.pumpAndSettle();
     expect(result, [false]);
   });

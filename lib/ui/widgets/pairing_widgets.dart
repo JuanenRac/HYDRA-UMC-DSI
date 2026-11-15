@@ -99,7 +99,7 @@ Future<void> showPairingDialog(BuildContext context, RobotViewModel vm) async {
         ),
       ),
       actions: [
-        TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: Text(l10n.playConfirmCancel)),
+        TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: Text(l10n.commonCancel)),
         FilledButton(key: const Key('pairing-confirm'), onPressed: () => Navigator.of(dialogContext).pop(true), child: Text(l10n.pairingDialogConfirm)),
       ],
     ),

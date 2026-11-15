@@ -34,7 +34,7 @@ Future<String?> askPin(BuildContext context, String title, {String? hint, String
           ],
         ),
       ),
-      actions: [TextButton(onPressed: () => Navigator.of(dialogContext).pop(), child: Text(l10n.playConfirmCancel))],
+      actions: [TextButton(onPressed: () => Navigator.of(dialogContext).pop(), child: Text(l10n.commonCancel))],
     ),
   );
 }

@@ -153,7 +153,7 @@ class _ControlScreenState extends State<ControlScreen> {
             width: 320,
             child: DropdownButtonFormField<dynamic>(
               initialValue: robot?.id,
-              decoration: InputDecoration(labelText: l10n.controlRobotLabel, border: const OutlineInputBorder(), isDense: true),
+              decoration: InputDecoration(labelText: l10n.commonRobot, border: const OutlineInputBorder(), isDense: true),
               items: robots.map((r) => DropdownMenuItem(value: r.id, child: Text(r.name))).toList(),
               onChanged: (id) => vm.selectRobot(id),
             ),
@@ -222,7 +222,7 @@ class _ControlScreenState extends State<ControlScreen> {
             ),
           )
         else
-          Expanded(child: Center(child: Text(l10n.controlSelectRobot, style: const TextStyle(color: Colors.grey)))),
+          Expanded(child: Center(child: Text(l10n.commonSelectARobot, style: const TextStyle(color: Colors.grey)))),
         _playbackBar(vm, robot, l10n),
       ],
     );
@@ -273,7 +273,7 @@ class _ControlScreenState extends State<ControlScreen> {
       children: [
         Row(
           children: [
-            SizedBox(width: 90, child: Text(l10n.controlSpeed, style: const TextStyle(color: Colors.grey))),
+            SizedBox(width: 90, child: Text(l10n.commonSpeed, style: const TextStyle(color: Colors.grey))),
             Expanded(
               child: Slider(
                 value: robot.speed.clamp(10, 500),
@@ -289,7 +289,7 @@ class _ControlScreenState extends State<ControlScreen> {
         ),
         Row(
           children: [
-            SizedBox(width: 90, child: Text(l10n.controlAcceleration, style: const TextStyle(color: Colors.grey))),
+            SizedBox(width: 90, child: Text(l10n.commonAcceleration, style: const TextStyle(color: Colors.grey))),
             Expanded(
               child: Slider(
                 value: robot.acceleration.clamp(10, 500),
@@ -349,7 +349,7 @@ class _ControlScreenState extends State<ControlScreen> {
         title: Text(l10n.playConfirmTitle),
         content: Text(l10n.playConfirmMessage(robot.name, recordedPointsCount(robot.raw), playSpeedPercent(robot.speed), reservation)),
         actions: [
-          TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: Text(l10n.playConfirmCancel)),
+          TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: Text(l10n.commonCancel)),
           FilledButton(onPressed: () => Navigator.of(dialogContext).pop(true), child: Text(l10n.playConfirmStart)),
         ],
       ),
@@ -453,11 +453,11 @@ class _ControlScreenState extends State<ControlScreen> {
           title: Text(last ? l10n.homeResetStep2Title : l10n.homeResetStep1Title(robot.name)),
           content: Text(last ? l10n.homeResetStep2Message(robot.name) : l10n.homeResetStep1Message),
           actions: [
-            TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: Text(l10n.playConfirmCancel)),
+            TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: Text(l10n.commonCancel)),
             FilledButton(
               key: Key(last ? 'home-reset-confirm-last' : 'home-reset-confirm-first'),
               onPressed: () => Navigator.of(dialogContext).pop(true),
-              child: Text(last ? l10n.homeResetStep2Button : l10n.homeResetStep1Button),
+              child: Text(last ? l10n.homeResetStep2Button : l10n.commonContinue),
             ),
           ],
         ),
