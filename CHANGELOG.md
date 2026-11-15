@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 
+
+## [0.3.8]
+
 - **The settings file of the panel lives in a directory of the panel, and the account of the panel is proved able to read it:** the panel runs as `hydra-dsi`, which cannot enter the shared `/etc/hydra-umc` (mode 0750, group of the agent), and the app takes a settings file it cannot read for no file, so `/etc/hydra-umc/dsi.conf` was ignored without a word (the defaults, every optional feature off). The unit asks systemd for `/etc/hydra-umc-dsi` (`ConfigurationDirectory=`, mode 0750), `HYDRA_DSI_CONFIG` and the default path of `panel_config.dart` point to `/etc/hydra-umc-dsi/dsi.conf`. `kiosk/dsi_config.sh` (installed as `/opt/hydra-umc-dsi/dsi_config.sh`): `prepare` (root, first `ExecStartPre`) makes the directory mode 0750 with the group of the account and copies the file of the earlier place once, never overwriting, never deleting; `check` (the account, second `ExecStartPre`) refuses to start when the directory cannot be entered or a file that is there cannot be read. `install_kiosk.sh` runs both, `check` as the account before it installs the unit, and ends with status 4 (`DSI_CONFIG=REFUSED`) when the account cannot read the file. The shared `/etc/hydra-umc` is never changed. `tools/verify_kiosk_screen.py` gains the tests of the two commands and of the order in the installer. Not run on a CM5.
 
 - **Simulation of a server that goes wrong and comes back:** `test/outage_simulation_test.dart` (4 tests) plays the network with a stand-in: the connection is cut, the server answers 503 or 504, a page that is not JSON or an expired session, in an order drawn from a fixed seed. Every fault reaches the caller as an error and never as a silent success, the global STOP is never reported as done while the server is wrong and is answered once it is back, and after fifty failed calls the first good one is answered. The evidence level is `simulator`; the same outage on a Compute Module 5 with its panel stays pending (the bench steps are in `docs/BENCH_TESTS.md`).
@@ -26,6 +29,8 @@
 - **A parity test for the eight language files and the command contract:** the keys, the placeholders and the locale of the eight ARB files are compared with the English one, no text may be empty, and the generated command contract (commands, numbered and continuous ones, limits and the HOME/RESET rules) is compared with the JSON it comes from.
 - **The CI measures the coverage of the tests:** the Flutter test run writes the coverage and a step prints the lines covered by each file and the total (report only, no floor yet); the floor will be fixed with the measured number.
 - **A read-only server is told apart from a robot in safe mode (text in the eight languages):** a 423 `server-read-only` now reads "The server is in read-only mode: the command was not sent. Only STOP and the safe-mode disable go through. An administrator can switch it off." instead of the safe-mode sentence of a single robot. The wording and the mapping are in place; they take effect with the SDK release that carries the new error kind (until then the old sentence is shown). `test/server_read_only_text_test.dart` and a case in `test/robot_view_model_safe_mode_test.dart`.
+
+- Build version synchronized with `hydra-umc.project.json` and the repository-native version source.
 
 ## [0.3.7] - The display interface shared with the STM32H757 firmware, the optional PIN pad and camera thumbnail, listen-only mode and the device token sign-in
 
