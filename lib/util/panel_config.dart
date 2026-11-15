@@ -6,7 +6,7 @@
 // Every tunable of the panel lives in ONE configuration file, never in the
 // code: a plain text file of `key = value` lines (`#` starts a comment). The
 // file is looked for, first one wins, at the path of the environment variable
-// HYDRA_DSI_CONFIG, then at /etc/hydra-umc/dsi.conf. A missing or unreadable
+// HYDRA_DSI_CONFIG, then at /etc/hydra-umc-dsi/dsi.conf. A missing or unreadable
 // file, an unknown key or a value that does not make sense never stops the
 // panel: that key keeps its default, and every default is the conservative
 // one (each optional feature is off, each timer is off, the reboot button
@@ -133,7 +133,7 @@ class PanelConfig {
   static const PanelConfig defaults = PanelConfig();
 
   /// Where the file is looked for when no path is given.
-  static const String defaultPath = '/etc/hydra-umc/dsi.conf';
+  static const String defaultPath = '/etc/hydra-umc-dsi/dsi.conf';
 
   /// Every key the file understands (the example file of the kiosk is checked against this list).
   static const Set<String> knownKeys = {

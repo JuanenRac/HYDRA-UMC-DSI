@@ -202,7 +202,7 @@ board this app's own binary runs on.
 
 ## 9. The settings file, the idle behaviour and the System tab
 
-Every tunable of the panel lives in one settings file (`/etc/hydra-umc/dsi.conf`,
+Every tunable of the panel lives in one settings file (`/etc/hydra-umc-dsi/dsi.conf`,
 or the path in `HYDRA_DSI_CONFIG`), read by `util/panel_config.dart`: `key = value`
 lines, every default is the conservative one (the feature is off), a bad line keeps
 the default of its key. `kiosk/dsi.conf.example` documents every key and a test keeps

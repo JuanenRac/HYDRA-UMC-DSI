@@ -68,7 +68,14 @@ UtmpMode=user
 EnvironmentFile=-/etc/hydra-umc/local-screen.conf
 ExecCondition=/bin/sh -c 'test "$${HYDRA_LOCAL_SCREEN:-hdmi}" = dsi'
 # The settings file of the panel (kiosk/dsi.conf.example): every tunable lives there, none in the code.
-Environment=HYDRA_DSI_CONFIG=/etc/hydra-umc/dsi.conf
+# It is in a directory of the panel alone (systemd creates it, mode 0750): the account cannot enter the shared /etc/hydra-umc, and the app would ignore
+# the file without a word. The first ExecStartPre (root) makes the directory enterable by the group of the account and copies the file of the earlier place once,
+# never overwriting and never deleting; the second runs as the account and refuses to start when it cannot read a file that is there.
+Environment=HYDRA_DSI_CONFIG=/etc/hydra-umc-dsi/dsi.conf
+ConfigurationDirectory=hydra-umc-dsi
+ConfigurationDirectoryMode=0750
+ExecStartPre=+/bin/sh /opt/hydra-umc-dsi/dsi_config.sh prepare
+ExecStartPre=/bin/sh /opt/hydra-umc-dsi/dsi_config.sh check
 Environment=HYDRA_DSI_APP=/opt/hydra-umc-dsi/bundle/hydra_umc_dsi
 EnvironmentFile=-/etc/hydra-umc/dsi.env
 Environment=HOME=/var/lib/hydra-dsi
