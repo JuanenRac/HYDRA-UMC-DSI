@@ -176,7 +176,7 @@ HYDRA-UMC-DSI/
 │   ├── l10n/                                                         localizzazioni in otto lingue
 │   ├── util/                                                         Utilità senza schermata propria
 │   └── ui/                                                           schermate e widget
-├── kiosk/                                                            installer del kiosk, esempio di impostazioni e regola della retroilluminazione
+├── kiosk/                                                            installer del kiosk, script delle impostazioni e regola della retroilluminazione
 ├── systemd/                                                          unità systemd del kiosk
 ├── linux/                                                            Runner desktop GTK - il target REALE, finestra fissa 1280x720
 ├── windows/                                                          Runner desktop Windows - solo verifica sulla macchina di sviluppo

@@ -176,7 +176,7 @@ HYDRA-UMC-DSI/
 │   ├── l10n/                                                         localizations in eight languages
 │   ├── util/                                                         Helpers without a screen of their own
 │   └── ui/                                                           screens and widgets
-├── kiosk/                                                            kiosk installer, settings example and backlight rule
+├── kiosk/                                                            kiosk installer, settings scripts and backlight rule
 ├── systemd/                                                          systemd unit of the kiosk
 ├── linux/                                                            GTK desktop runner - the REAL target, fixed 1280x720 window
 ├── windows/                                                          Windows desktop runner - dev-machine verification only

@@ -267,24 +267,24 @@
         {
           "name": "kiosk/",
           "desc": {
-            "en": "kiosk installer, settings example and backlight rule",
-            "es": "instalador del quiosco, ejemplo de ajustes y regla del brillo",
-            "de": "Kiosk-Installer, Einstellungsbeispiel und Helligkeitsregel",
-            "fr": "installateur du kiosque, exemple de réglages et règle du rétroéclairage",
-            "it": "installer del kiosk, esempio di impostazioni e regola della retroilluminazione",
-            "ja": "キオスクのインストーラー、設定例、バックライトのルール",
-            "zh": "展台安装脚本、设置示例和背光规则",
-            "pt": "instalador do quiosque, exemplo de definições e regra da luz de fundo"
+            "en": "kiosk installer, settings scripts and backlight rule",
+            "es": "instalador del quiosco, scripts de ajustes y regla del brillo",
+            "de": "Kiosk-Installer, Einstellungsskripte und Helligkeitsregel",
+            "fr": "installateur du kiosque, scripts de réglages et règle du rétroéclairage",
+            "it": "installer del kiosk, script delle impostazioni e regola della retroilluminazione",
+            "ja": "キオスクのインストーラー、設定スクリプト、バックライトのルール",
+            "zh": "展台安装脚本、设置脚本和背光规则",
+            "pt": "instalador do quiosque, scripts de definições e regra da luz de fundo"
           },
           "tree_desc": {
-            "en": "kiosk installer, settings example and backlight rule",
-            "es": "instalador del quiosco, ejemplo de ajustes y regla del brillo",
-            "de": "Kiosk-Installer, Einstellungsbeispiel und Helligkeitsregel",
-            "fr": "installateur du kiosque, exemple de réglages et règle du rétroéclairage",
-            "it": "installer del kiosk, esempio di impostazioni e regola della retroilluminazione",
-            "ja": "キオスクのインストーラー、設定例、バックライトのルール",
-            "zh": "展台安装脚本、设置示例和背光规则",
-            "pt": "instalador do quiosque, exemplo de definições e regra da luz de fundo"
+            "en": "kiosk installer, settings scripts and backlight rule",
+            "es": "instalador del quiosco, scripts de ajustes y regla del brillo",
+            "de": "Kiosk-Installer, Einstellungsskripte und Helligkeitsregel",
+            "fr": "installateur du kiosque, scripts de réglages et règle du rétroéclairage",
+            "it": "installer del kiosk, script delle impostazioni e regola della retroilluminazione",
+            "ja": "キオスクのインストーラー、設定スクリプト、バックライトのルール",
+            "zh": "展台安装脚本、设置脚本和背光规则",
+            "pt": "instalador do quiosque, scripts de definições e regra da luz de fundo"
           }
         },
         {
