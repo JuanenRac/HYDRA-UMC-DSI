@@ -54,4 +54,17 @@ class ClientPrefs extends ClientPrefsCore {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_keyRequireReleaseSignature, value);
   }
+
+  static const _keyUpdateNotice = 'hydra_update_notice';
+
+  /// Whether the person asked to be told about new versions; off before any choice, and then nothing is read from the network.
+  Future<bool> loadUpdateNotice() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_keyUpdateNotice) ?? false;
+  }
+
+  Future<void> saveUpdateNotice(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_keyUpdateNotice, value);
+  }
 }

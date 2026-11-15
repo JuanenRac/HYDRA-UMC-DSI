@@ -478,5 +478,11 @@
   "toolArmsNetwork": "サーバーが応答しません。",
   "toolArmsOther": "サーバーがツールの武装状態を返せませんでした。",
   "toolArmsShape": "サーバーがツールの武装状態について想定外の応答を返しました。",
-  "toolArmsReadOnlyNote": "このパネルは状態を表示するだけです。ツールの武装、解除、停止は一切行いません。"
+  "toolArmsReadOnlyNote": "このパネルは状態を表示するだけです。ツールの武装、解除、停止は一切行いません。",
+  "settingsUpdateNotice": "新しいバージョンを知らせる",
+  "settingsUpdateNoticeSubtitle": "操作したときに公開されているバージョン一覧を読み、より新しいバージョンがあるかを表示します。ダウンロードやインストールは行いません。既定ではオフです。",
+  "settingsUpdateCheckNow": "新しいバージョンを確認",
+  "settingsUpdateAvailable": "バージョン {version} が利用できます",
+  "settingsUpdateUpToDate": "このバージョンは最新です",
+  "settingsUpdateCheckFailed": "バージョン一覧を読み込めませんでした"
 }

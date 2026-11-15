@@ -21,7 +21,7 @@ class PackageHttpTransport implements HttpTransport {
   @override
   Future<HttpResponseData> send(HttpRequestData request) async {
     if (ListenOnlyGate.enabled && !ListenOnlyGate.allows(request.method, request.path, request.body)) {
-      return ListenOnlyGate.refusal(request.path);
+      return ListenOnlyGate.refusal(request.path, device: 'panel');
     }
     final req = http.Request(request.method, Uri.parse(request.url))..headers.addAll(request.headers);
     final body = request.body;

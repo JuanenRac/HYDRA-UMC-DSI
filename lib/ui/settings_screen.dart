@@ -27,6 +27,7 @@ import '../network/tls_settings.dart';
 import '../state/robot_view_model.dart';
 import 'widgets/pin_dialog.dart';
 import 'widgets/release_signature_switch.dart';
+import 'widgets/update_notice_tile.dart';
 import 'widgets/security_dialog.dart';
 
 /// What the settings screen draws, picked out of the view model so a change of anything else (a position, a
@@ -146,6 +147,7 @@ class SettingsScreen extends StatelessWidget {
           onChanged: (value) => vm.setConfirmPlay(value),
         ),
         const ReleaseSignatureSwitch(),
+        const UpdateNoticeTile(),
         SwitchListTile(
           key: const Key('settings-listen-only'),
           secondary: const Icon(Icons.hearing),
