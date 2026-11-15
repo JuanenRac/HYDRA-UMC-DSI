@@ -484,5 +484,20 @@
   "settingsUpdateCheckNow": "检查新版本",
   "settingsUpdateAvailable": "版本 {version} 可用",
   "settingsUpdateUpToDate": "此版本已是最新",
-  "settingsUpdateCheckFailed": "无法读取版本列表"
+  "settingsUpdateCheckFailed": "无法读取版本列表",
+  "canOtaTitle": "CAN 刷写",
+  "canOtaPhaseConnecting": "正在连接板卡",
+  "canOtaPhaseEnteringBootloader": "正在进入引导程序",
+  "canOtaPhaseErasingFram": "正在擦除 FRAM",
+  "canOtaPhaseTransferring": "正在发送镜像",
+  "canOtaPhaseVerifying": "正在校验镜像",
+  "canOtaPhaseRebooting": "正在重启板卡",
+  "canOtaPhaseDone": "刷写完成",
+  "canOtaPhaseError": "刷写失败",
+  "canOtaPercent": "{percent} %",
+  "@canOtaPercent": {"placeholders": {"percent": {"type": "int"}}},
+  "canOtaPages": "{sent} / {total} 页",
+  "@canOtaPages": {"placeholders": {"sent": {"type": "int"}, "total": {"type": "int"}}},
+  "canOtaError": "原因：{reason}",
+  "@canOtaError": {"placeholders": {"reason": {"type": "String"}}}
 }

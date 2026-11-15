@@ -32,6 +32,9 @@ class HydraWebSocket {
   /// The `claims` message, pushed only to a connection that asked for remoteApiVersion=2.
   final void Function(Map<String, dynamic> message)? onClaims;
 
+  /// The `canota_progress` message (live progress of a flash cycle of a board, sent only to administrators). Without it the message is ignored.
+  final void Function(Map<String, dynamic> message)? onCanOtaProgress;
+
   late final common.HydraWebSocket _inner;
 
   HydraWebSocket({
@@ -44,6 +47,7 @@ class HydraWebSocket {
     required this.onError,
     this.onDelta,
     this.onClaims,
+    this.onCanOtaProgress,
   }) {
     _inner = common.HydraWebSocket(
       host: host,
@@ -55,6 +59,7 @@ class HydraWebSocket {
       onError: (e) => onError(HydraError(_kindOf(e.kind), e.params)),
       onDelta: onDelta,
       onClaims: onClaims,
+      onCanOtaProgress: onCanOtaProgress,
       httpClientFactory: createHttpClient,
     );
   }

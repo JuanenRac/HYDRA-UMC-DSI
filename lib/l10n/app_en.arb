@@ -511,5 +511,20 @@
   "settingsUpdateAvailable": "Version {version} is available",
   "@settingsUpdateAvailable": {"placeholders": {"version": {"type": "String"}}},
   "settingsUpdateUpToDate": "This version is up to date",
-  "settingsUpdateCheckFailed": "The list of releases could not be read"
+  "settingsUpdateCheckFailed": "The list of releases could not be read",
+  "canOtaTitle": "CAN flash",
+  "canOtaPhaseConnecting": "Connecting to the board",
+  "canOtaPhaseEnteringBootloader": "Entering the bootloader",
+  "canOtaPhaseErasingFram": "Erasing the FRAM",
+  "canOtaPhaseTransferring": "Sending the image",
+  "canOtaPhaseVerifying": "Verifying the image",
+  "canOtaPhaseRebooting": "Restarting the board",
+  "canOtaPhaseDone": "Flash finished",
+  "canOtaPhaseError": "Flash failed",
+  "canOtaPercent": "{percent} %",
+  "@canOtaPercent": {"placeholders": {"percent": {"type": "int"}}},
+  "canOtaPages": "{sent} of {total} pages",
+  "@canOtaPages": {"placeholders": {"sent": {"type": "int"}, "total": {"type": "int"}}},
+  "canOtaError": "Reason: {reason}",
+  "@canOtaError": {"placeholders": {"reason": {"type": "String"}}}
 }

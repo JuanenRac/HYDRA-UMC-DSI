@@ -484,5 +484,20 @@
   "settingsUpdateCheckNow": "Nach neuer Version suchen",
   "settingsUpdateAvailable": "Version {version} ist verfügbar",
   "settingsUpdateUpToDate": "Diese Version ist aktuell",
-  "settingsUpdateCheckFailed": "Die Liste der Versionen konnte nicht gelesen werden"
+  "settingsUpdateCheckFailed": "Die Liste der Versionen konnte nicht gelesen werden",
+  "canOtaTitle": "CAN-Flash",
+  "canOtaPhaseConnecting": "Verbindung zur Platine",
+  "canOtaPhaseEnteringBootloader": "Wechsel in den Bootloader",
+  "canOtaPhaseErasingFram": "FRAM wird gelöscht",
+  "canOtaPhaseTransferring": "Image wird gesendet",
+  "canOtaPhaseVerifying": "Image wird geprüft",
+  "canOtaPhaseRebooting": "Platine wird neu gestartet",
+  "canOtaPhaseDone": "Flash abgeschlossen",
+  "canOtaPhaseError": "Flash fehlgeschlagen",
+  "canOtaPercent": "{percent} %",
+  "@canOtaPercent": {"placeholders": {"percent": {"type": "int"}}},
+  "canOtaPages": "{sent} von {total} Seiten",
+  "@canOtaPages": {"placeholders": {"sent": {"type": "int"}, "total": {"type": "int"}}},
+  "canOtaError": "Grund: {reason}",
+  "@canOtaError": {"placeholders": {"reason": {"type": "String"}}}
 }

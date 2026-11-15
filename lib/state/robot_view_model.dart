@@ -29,6 +29,7 @@ import 'package:flutter/foundation.dart';
 
 import '../l10n/language_prefs.dart';
 import '../models/access.dart';
+import '../models/can_ota_progress.dart';
 import '../models/connection_history.dart';
 import '../models/contract_v2.dart';
 import '../models/hydra_state.dart';
@@ -168,6 +169,10 @@ class RobotViewModel extends ChangeNotifier {
   bool isLoggedIn = false;
   HydraError? lastError;
   String connectionStatus = 'disconnected';
+
+  /// The live progress of a flash cycle of a board (WebSocket message `canota_progress`), empty when none runs or the socket is closed.
+  /// Read-only: the panel shows the cycle the server reports and starts none.
+  final ValueNotifier<CanOtaProgress?> canOtaProgressListenable = ValueNotifier<CanOtaProgress?>(null);
   dynamic selectedRobotId;
   SystemMetrics? metrics;
   Map<String, dynamic>? hydraInfo;
@@ -482,6 +487,7 @@ class RobotViewModel extends ChangeNotifier {
       useTls: useTls,
       token: token,
       onStatus: (status) {
+        if (status == WsStatus.disconnected) canOtaProgressListenable.value = null;
         connectionStatus = switch (status) {
           WsStatus.connecting => 'connecting',
           WsStatus.connected => 'connected',
@@ -496,6 +502,7 @@ class RobotViewModel extends ChangeNotifier {
       },
       onDelta: _applyRobotDelta,
       onClaims: _applyClaimsPush,
+      onCanOtaProgress: applyCanOtaProgress,
       onError: (error) {
         lastError = error;
         // The server's "Access denied" frame and the 1008 close that follows
@@ -509,6 +516,13 @@ class RobotViewModel extends ChangeNotifier {
         notifyListeners();
       },
     )..connect();
+  }
+
+  /// The progress of a flash cycle the server pushed (WebSocket message `canota_progress`). A message with a phase the panel does not know leaves what is shown as it was.
+  @visibleForTesting
+  void applyCanOtaProgress(Map<String, dynamic> message) {
+    final progress = CanOtaProgress.fromMessage(message);
+    if (progress != null) canOtaProgressListenable.value = progress;
   }
 
   static int _asInt(dynamic v) => v is num ? v.toInt() : 0;
@@ -1776,6 +1790,7 @@ class RobotViewModel extends ChangeNotifier {
   @override
   void dispose() {
     _disposed = true;
+    canOtaProgressListenable.dispose();
     _ws?.disconnect();
     _metricsTimer?.cancel();
     _hydraInfoTimer?.cancel();
