@@ -16,7 +16,7 @@ import 'package:hydra_umc_app_common/hydra_umc_app_common.dart' show sha256Hex;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:hydra_umc_dsi/network/client_prefs.dart';
-import 'package:hydra_umc_dsi/update/ed25519.dart';
+import 'package:hydra_umc_app_common/hydra_umc_app_common.dart' show ed25519PublicKey, ed25519Sign;
 import 'package:hydra_umc_dsi/update/release_verifier.dart';
 
 String toHex(List<int> b) => b.map((x) => x.toRadixString(16).padLeft(2, '0')).join();
