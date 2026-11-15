@@ -1314,6 +1314,39 @@
       }
     },
     "GET /api/audit": {
+      "200": {
+        "minimal": {
+          "enabled": false,
+          "lockedOff": false,
+          "entries": []
+        },
+        "full": {
+          "enabled": false,
+          "lockedOff": false,
+          "entries": [
+            {
+              "seq": 0,
+              "ts": "sample",
+              "prev": "sample",
+              "hash": "sample",
+              "type": "sample",
+              "outcome": "ok",
+              "userId": null,
+              "username": "sample",
+              "controllerId": "sample",
+              "ip": "sample",
+              "robotId": 0,
+              "detail": {}
+            }
+          ],
+          "verification": {
+            "ok": false,
+            "entries": 0,
+            "brokenAtSeq": 0,
+            "reason": "sample"
+          }
+        }
+      },
       "404": {
         "minimal": {
           "error": "sample"
@@ -1754,6 +1787,28 @@
       "200": {
         "minimal": {},
         "full": {}
+      }
+    },
+    "GET /api/claims": {
+      "200": {
+        "minimal": {
+          "claims": []
+        },
+        "full": {
+          "claims": [
+            {
+              "robotId": 0,
+              "robotName": "sample",
+              "cellId": null,
+              "ownerId": null,
+              "ownerUsername": "sample",
+              "controllerId": "sample",
+              "claimedAt": 0.0,
+              "expiresAt": 0.0,
+              "jogArmedUntil": 0.0
+            }
+          ]
+        }
       }
     },
     "GET /api/connections/clients": {
@@ -3430,6 +3485,122 @@
       }
     },
     "GET /api/safety-limits": {
+      "200": {
+        "minimal": {
+          "limits": {
+            "jog": {
+              "armRequired": false,
+              "armTtlMs": 0.0,
+              "default": {
+                "maxAmount": 0.0,
+                "maxAbsolute": 0.0
+              },
+              "models": {}
+            },
+            "temperature": {
+              "default": {
+                "bedMaxC": 0.0
+              },
+              "models": {}
+            },
+            "claims": {
+              "requireControllerId": false
+            },
+            "audit": {
+              "enabled": false,
+              "motionIntervalSeconds": 0.0
+            }
+          },
+          "defaults": {
+            "jog": {
+              "armRequired": false,
+              "armTtlMs": 0.0,
+              "default": {
+                "maxAmount": 0.0,
+                "maxAbsolute": 0.0
+              },
+              "models": {}
+            },
+            "temperature": {
+              "default": {
+                "bedMaxC": 0.0
+              },
+              "models": {}
+            },
+            "claims": {
+              "requireControllerId": false
+            },
+            "audit": {
+              "enabled": false,
+              "motionIntervalSeconds": 0.0
+            }
+          },
+          "hardLimits": {}
+        },
+        "full": {
+          "limits": {
+            "jog": {
+              "armRequired": false,
+              "armTtlMs": 0.0,
+              "default": {
+                "maxAmount": 0.0,
+                "maxAbsolute": 0.0
+              },
+              "models": {}
+            },
+            "temperature": {
+              "default": {
+                "bedMaxC": 0.0
+              },
+              "models": {}
+            },
+            "claims": {
+              "requireControllerId": false
+            },
+            "audit": {
+              "enabled": false,
+              "motionIntervalSeconds": 0.0
+            }
+          },
+          "defaults": {
+            "jog": {
+              "armRequired": false,
+              "armTtlMs": 0.0,
+              "default": {
+                "maxAmount": 0.0,
+                "maxAbsolute": 0.0
+              },
+              "models": {}
+            },
+            "temperature": {
+              "default": {
+                "bedMaxC": 0.0
+              },
+              "models": {}
+            },
+            "claims": {
+              "requireControllerId": false
+            },
+            "audit": {
+              "enabled": false,
+              "motionIntervalSeconds": 0.0
+            }
+          },
+          "hardLimits": {},
+          "robot": {
+            "id": 0,
+            "model": "sample",
+            "jog": {
+              "maxAmount": 0.0,
+              "maxAbsolute": 0.0
+            },
+            "temperature": {
+              "bedMaxC": 0.0
+            },
+            "jogArmedUntil": 0.0
+          }
+        }
+      },
       "400": {
         "minimal": {
           "error": "sample"
@@ -4363,6 +4534,21 @@
       }
     },
     "POST /api/voice/confirm": {
+      "200": {
+        "minimal": {
+          "type": "confirmation_result",
+          "status": "confirmed",
+          "verified": false
+        },
+        "full": {
+          "type": "confirmation_result",
+          "status": "confirmed",
+          "requestId": "sample",
+          "intent": {},
+          "subject": "sample",
+          "verified": false
+        }
+      },
       "400": {
         "minimal": {
           "error": "sample"
@@ -4405,6 +4591,32 @@
       }
     },
     "POST /api/voice/turn": {
+      "200": {
+        "minimal": {
+          "type": "assistant_reply",
+          "requestId": "sample",
+          "text": "sample",
+          "level": "sample",
+          "speak": false,
+          "requiresConfirmation": false
+        },
+        "full": {
+          "type": "assistant_reply",
+          "requestId": "sample",
+          "text": "sample",
+          "level": "sample",
+          "speak": false,
+          "requiresConfirmation": false,
+          "visualState": "sample",
+          "intent": {},
+          "interpretation": {},
+          "messageCode": "sample",
+          "messageParams": {},
+          "textLanguage": "sample",
+          "confirmationToken": "sample",
+          "confirmationValiditySeconds": 0.0
+        }
+      },
       "400": {
         "minimal": {
           "error": "sample"

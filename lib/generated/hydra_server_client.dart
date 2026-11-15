@@ -10,6 +10,148 @@ typedef HydraPassthrough = Map<String, dynamic>;
 
 typedef HydraSupervisorSnapshot = Map<String, dynamic>;
 
+/// One line of the audit record: the hash chain (seq, prev, hash) around the event. The keys of an event the server adds later are kept.
+class HydraAuditEntry {
+  const HydraAuditEntry({
+    required this.seq,
+    required this.ts,
+    required this.prev,
+    required this.hash,
+    required this.type,
+    required this.outcome,
+    this.userId,
+    this.username,
+    this.controllerId,
+    this.ip,
+    this.robotId,
+    this.detail,
+    this.additionalProperties = const <String, dynamic>{},
+  });
+
+  factory HydraAuditEntry.fromJson(Map<String, dynamic> json) => HydraAuditEntry(
+        seq: (json['seq'] as num).toInt(),
+        ts: json['ts'] as String,
+        prev: json['prev'] as String,
+        hash: json['hash'] as String,
+        type: json['type'] as String,
+        outcome: json['outcome'] as String,
+        userId: json['userId'],
+        username: json['username'] == null ? null : json['username'] as String,
+        controllerId: json['controllerId'] == null ? null : json['controllerId'] as String,
+        ip: json['ip'] == null ? null : json['ip'] as String,
+        robotId: json['robotId'] == null ? null : (json['robotId'] as num).toInt(),
+        detail: json['detail'] == null ? null : _hydraMap(json['detail']),
+        additionalProperties: _hydraMap(<String, dynamic>{for (final entry in json.entries) if (!_knownKeys.contains(entry.key)) entry.key: entry.value}),
+      );
+
+  static const Set<String> _knownKeys = <String>{'seq', 'ts', 'prev', 'hash', 'type', 'outcome', 'userId', 'username', 'controllerId', 'ip', 'robotId', 'detail'};
+
+  final int seq;
+  final String ts;
+  final String prev;
+  final String hash;
+  /// Short stable name of the event: claim, release, force-claim, force-release, safety-limits, jog-arm, stop-all, table-move...
+  final String type;
+  final String outcome;
+  /// The id of the account (any JSON value).
+  final dynamic userId;
+  final String? username;
+  final String? controllerId;
+  final String? ip;
+  final int? robotId;
+  final Map<String, dynamic>? detail;
+  /// The keys the contract does not list, kept as they came.
+  final Map<String, dynamic> additionalProperties;
+
+  Map<String, dynamic> toJson() {
+    final hydraOut = <String, dynamic>{...additionalProperties};
+    hydraOut['seq'] = seq;
+    hydraOut['ts'] = ts;
+    hydraOut['prev'] = prev;
+    hydraOut['hash'] = hash;
+    hydraOut['type'] = type;
+    hydraOut['outcome'] = outcome;
+    final hydraField6 = userId;
+    if (hydraField6 != null) hydraOut['userId'] = hydraField6;
+    final hydraField7 = username;
+    if (hydraField7 != null) hydraOut['username'] = hydraField7;
+    final hydraField8 = controllerId;
+    if (hydraField8 != null) hydraOut['controllerId'] = hydraField8;
+    final hydraField9 = ip;
+    if (hydraField9 != null) hydraOut['ip'] = hydraField9;
+    final hydraField10 = robotId;
+    if (hydraField10 != null) hydraOut['robotId'] = hydraField10;
+    final hydraField11 = detail;
+    if (hydraField11 != null) hydraOut['detail'] = hydraField11;
+    return hydraOut;
+  }
+}
+
+/// GET /api/audit as JSON: the newest entries (oldest first) and, with ?verify=1, the check of the hash chain. The same entries come as lines of JSON with ?format=jsonl.
+class HydraAuditReport {
+  const HydraAuditReport({
+    required this.enabled,
+    required this.lockedOff,
+    required this.entries,
+    this.verification,
+  });
+
+  factory HydraAuditReport.fromJson(Map<String, dynamic> json) => HydraAuditReport(
+        enabled: json['enabled'] as bool,
+        lockedOff: json['lockedOff'] as bool,
+        entries: (json['entries'] as List).map((v0) => HydraAuditEntry.fromJson(_hydraMap(v0))).toList(),
+        verification: json['verification'] == null ? null : HydraAuditVerification.fromJson(_hydraMap(json['verification'])),
+      );
+
+  final bool enabled;
+  final bool lockedOff;
+  final List<HydraAuditEntry> entries;
+  final HydraAuditVerification? verification;
+
+  Map<String, dynamic> toJson() {
+    final hydraOut = <String, dynamic>{};
+    hydraOut['enabled'] = enabled;
+    hydraOut['lockedOff'] = lockedOff;
+    hydraOut['entries'] = entries.map((v0) => v0.toJson()).toList();
+    final hydraField3 = verification;
+    if (hydraField3 != null) hydraOut['verification'] = hydraField3.toJson();
+    return hydraOut;
+  }
+}
+
+/// An object of the server contract.
+class HydraAuditVerification {
+  const HydraAuditVerification({
+    required this.ok,
+    required this.entries,
+    this.brokenAtSeq,
+    this.reason,
+  });
+
+  factory HydraAuditVerification.fromJson(Map<String, dynamic> json) => HydraAuditVerification(
+        ok: json['ok'] as bool,
+        entries: (json['entries'] as num).toInt(),
+        brokenAtSeq: json['brokenAtSeq'] == null ? null : (json['brokenAtSeq'] as num).toInt(),
+        reason: json['reason'] == null ? null : json['reason'] as String,
+      );
+
+  final bool ok;
+  final int entries;
+  final int? brokenAtSeq;
+  final String? reason;
+
+  Map<String, dynamic> toJson() {
+    final hydraOut = <String, dynamic>{};
+    hydraOut['ok'] = ok;
+    hydraOut['entries'] = entries;
+    final hydraField2 = brokenAtSeq;
+    if (hydraField2 != null) hydraOut['brokenAtSeq'] = hydraField2;
+    final hydraField3 = reason;
+    if (hydraField3 != null) hydraOut['reason'] = hydraField3;
+    return hydraOut;
+  }
+}
+
 /// An object of the server contract.
 class HydraBluetoothScan {
   const HydraBluetoothScan({
@@ -280,6 +422,86 @@ class HydraCanotaFlash {
     final hydraOut = <String, dynamic>{};
     hydraOut['success'] = success;
     hydraOut['finalPhase'] = finalPhase;
+    return hydraOut;
+  }
+}
+
+/// An object of the server contract.
+class HydraClaimList {
+  const HydraClaimList({
+    required this.claims,
+  });
+
+  factory HydraClaimList.fromJson(Map<String, dynamic> json) => HydraClaimList(
+        claims: (json['claims'] as List).map((v0) => HydraClaimView.fromJson(_hydraMap(v0))).toList(),
+      );
+
+  final List<HydraClaimView> claims;
+
+  Map<String, dynamic> toJson() {
+    final hydraOut = <String, dynamic>{};
+    hydraOut['claims'] = claims.map((v0) => v0.toJson()).toList();
+    return hydraOut;
+  }
+}
+
+/// One robot that has an active claim: who holds it, from which controller, until when and until when its jog is armed.
+class HydraClaimView {
+  const HydraClaimView({
+    required this.robotId,
+    this.robotName,
+    this.cellId,
+    this.ownerId,
+    required this.ownerUsername,
+    this.controllerId,
+    required this.claimedAt,
+    required this.expiresAt,
+    this.jogArmedUntil,
+  });
+
+  factory HydraClaimView.fromJson(Map<String, dynamic> json) => HydraClaimView(
+        robotId: (json['robotId'] as num).toInt(),
+        robotName: json['robotName'] == null ? null : json['robotName'] as String,
+        cellId: json['cellId'],
+        ownerId: json['ownerId'],
+        ownerUsername: json['ownerUsername'] as String,
+        controllerId: json['controllerId'] == null ? null : json['controllerId'] as String,
+        claimedAt: json['claimedAt'] as num,
+        expiresAt: json['expiresAt'] as num,
+        jogArmedUntil: json['jogArmedUntil'] == null ? null : json['jogArmedUntil'] as num,
+      );
+
+  final int robotId;
+  final String? robotName;
+  /// The id of the controller the robot belongs to (any JSON value; the server does not fix its type).
+  final dynamic cellId;
+  /// The id of the account that holds the claim (any JSON value).
+  final dynamic ownerId;
+  final String ownerUsername;
+  final String? controllerId;
+  /// Milliseconds since the epoch.
+  final num claimedAt;
+  /// Milliseconds since the epoch.
+  final num expiresAt;
+  /// Milliseconds since the epoch; null when the jog is not armed.
+  final num? jogArmedUntil;
+
+  Map<String, dynamic> toJson() {
+    final hydraOut = <String, dynamic>{};
+    hydraOut['robotId'] = robotId;
+    final hydraField1 = robotName;
+    if (hydraField1 != null) hydraOut['robotName'] = hydraField1;
+    final hydraField2 = cellId;
+    if (hydraField2 != null) hydraOut['cellId'] = hydraField2;
+    final hydraField3 = ownerId;
+    if (hydraField3 != null) hydraOut['ownerId'] = hydraField3;
+    hydraOut['ownerUsername'] = ownerUsername;
+    final hydraField5 = controllerId;
+    if (hydraField5 != null) hydraOut['controllerId'] = hydraField5;
+    hydraOut['claimedAt'] = claimedAt;
+    hydraOut['expiresAt'] = expiresAt;
+    final hydraField8 = jogArmedUntil;
+    if (hydraField8 != null) hydraOut['jogArmedUntil'] = hydraField8;
     return hydraOut;
   }
 }
@@ -5284,6 +5506,337 @@ class HydraRulConfig {
   }
 }
 
+/// The limits every client is held to (data/safety-limits.json), as saved by PUT /api/admin/safety-limits.
+class HydraSafetyLimitsConfig {
+  const HydraSafetyLimitsConfig({
+    required this.jog,
+    required this.temperature,
+    required this.claims,
+    required this.audit,
+  });
+
+  factory HydraSafetyLimitsConfig.fromJson(Map<String, dynamic> json) => HydraSafetyLimitsConfig(
+        jog: HydraSafetyLimitsConfigJog.fromJson(_hydraMap(json['jog'])),
+        temperature: HydraSafetyLimitsConfigTemperature.fromJson(_hydraMap(json['temperature'])),
+        claims: HydraSafetyLimitsConfigClaims.fromJson(_hydraMap(json['claims'])),
+        audit: HydraSafetyLimitsConfigAudit.fromJson(_hydraMap(json['audit'])),
+      );
+
+  final HydraSafetyLimitsConfigJog jog;
+  final HydraSafetyLimitsConfigTemperature temperature;
+  final HydraSafetyLimitsConfigClaims claims;
+  final HydraSafetyLimitsConfigAudit audit;
+
+  Map<String, dynamic> toJson() {
+    final hydraOut = <String, dynamic>{};
+    hydraOut['jog'] = jog.toJson();
+    hydraOut['temperature'] = temperature.toJson();
+    hydraOut['claims'] = claims.toJson();
+    hydraOut['audit'] = audit.toJson();
+    return hydraOut;
+  }
+}
+
+/// An object of the server contract.
+class HydraSafetyLimitsConfigAudit {
+  const HydraSafetyLimitsConfigAudit({
+    required this.enabled,
+    required this.motionIntervalSeconds,
+  });
+
+  factory HydraSafetyLimitsConfigAudit.fromJson(Map<String, dynamic> json) => HydraSafetyLimitsConfigAudit(
+        enabled: json['enabled'] as bool,
+        motionIntervalSeconds: json['motionIntervalSeconds'] as num,
+      );
+
+  final bool enabled;
+  final num motionIntervalSeconds;
+
+  Map<String, dynamic> toJson() {
+    final hydraOut = <String, dynamic>{};
+    hydraOut['enabled'] = enabled;
+    hydraOut['motionIntervalSeconds'] = motionIntervalSeconds;
+    return hydraOut;
+  }
+}
+
+/// An object of the server contract.
+class HydraSafetyLimitsConfigClaims {
+  const HydraSafetyLimitsConfigClaims({
+    required this.requireControllerId,
+  });
+
+  factory HydraSafetyLimitsConfigClaims.fromJson(Map<String, dynamic> json) => HydraSafetyLimitsConfigClaims(
+        requireControllerId: json['requireControllerId'] as bool,
+      );
+
+  final bool requireControllerId;
+
+  Map<String, dynamic> toJson() {
+    final hydraOut = <String, dynamic>{};
+    hydraOut['requireControllerId'] = requireControllerId;
+    return hydraOut;
+  }
+}
+
+/// An object of the server contract.
+class HydraSafetyLimitsConfigJog {
+  const HydraSafetyLimitsConfigJog({
+    required this.armRequired,
+    required this.armTtlMs,
+    required this.defaultValue,
+    required this.models,
+  });
+
+  factory HydraSafetyLimitsConfigJog.fromJson(Map<String, dynamic> json) => HydraSafetyLimitsConfigJog(
+        armRequired: json['armRequired'] as bool,
+        armTtlMs: json['armTtlMs'] as num,
+        defaultValue: HydraSafetyLimitsConfigJogDefault.fromJson(_hydraMap(json['default'])),
+        models: <String, HydraSafetyLimitsConfigJogModelsValue>{for (final entry0 in _hydraMap(json['models']).entries) entry0.key: HydraSafetyLimitsConfigJogModelsValue.fromJson(_hydraMap(entry0.value))},
+      );
+
+  final bool armRequired;
+  final num armTtlMs;
+  final HydraSafetyLimitsConfigJogDefault defaultValue;
+  /// Per model (lower-case name before the parenthesis), the entries that differ from the default.
+  final Map<String, HydraSafetyLimitsConfigJogModelsValue> models;
+
+  Map<String, dynamic> toJson() {
+    final hydraOut = <String, dynamic>{};
+    hydraOut['armRequired'] = armRequired;
+    hydraOut['armTtlMs'] = armTtlMs;
+    hydraOut['default'] = defaultValue.toJson();
+    hydraOut['models'] = <String, dynamic>{for (final entry0 in models.entries) entry0.key: entry0.value.toJson()};
+    return hydraOut;
+  }
+}
+
+/// An object of the server contract.
+class HydraSafetyLimitsConfigJogDefault {
+  const HydraSafetyLimitsConfigJogDefault({
+    required this.maxAmount,
+    required this.maxAbsolute,
+  });
+
+  factory HydraSafetyLimitsConfigJogDefault.fromJson(Map<String, dynamic> json) => HydraSafetyLimitsConfigJogDefault(
+        maxAmount: json['maxAmount'] as num,
+        maxAbsolute: json['maxAbsolute'] as num,
+      );
+
+  final num maxAmount;
+  final num maxAbsolute;
+
+  Map<String, dynamic> toJson() {
+    final hydraOut = <String, dynamic>{};
+    hydraOut['maxAmount'] = maxAmount;
+    hydraOut['maxAbsolute'] = maxAbsolute;
+    return hydraOut;
+  }
+}
+
+/// The limits of a relative and an absolute jog; a model entry names only what it changes.
+class HydraSafetyLimitsConfigJogModelsValue {
+  const HydraSafetyLimitsConfigJogModelsValue({
+    this.maxAmount,
+    this.maxAbsolute,
+  });
+
+  factory HydraSafetyLimitsConfigJogModelsValue.fromJson(Map<String, dynamic> json) => HydraSafetyLimitsConfigJogModelsValue(
+        maxAmount: json['maxAmount'] == null ? null : json['maxAmount'] as num,
+        maxAbsolute: json['maxAbsolute'] == null ? null : json['maxAbsolute'] as num,
+      );
+
+  final num? maxAmount;
+  final num? maxAbsolute;
+
+  Map<String, dynamic> toJson() {
+    final hydraOut = <String, dynamic>{};
+    final hydraField0 = maxAmount;
+    if (hydraField0 != null) hydraOut['maxAmount'] = hydraField0;
+    final hydraField1 = maxAbsolute;
+    if (hydraField1 != null) hydraOut['maxAbsolute'] = hydraField1;
+    return hydraOut;
+  }
+}
+
+/// An object of the server contract.
+class HydraSafetyLimitsConfigTemperature {
+  const HydraSafetyLimitsConfigTemperature({
+    required this.defaultValue,
+    required this.models,
+  });
+
+  factory HydraSafetyLimitsConfigTemperature.fromJson(Map<String, dynamic> json) => HydraSafetyLimitsConfigTemperature(
+        defaultValue: HydraSafetyLimitsConfigTemperatureDefault.fromJson(_hydraMap(json['default'])),
+        models: <String, HydraSafetyLimitsConfigTemperatureModelsValue>{for (final entry0 in _hydraMap(json['models']).entries) entry0.key: HydraSafetyLimitsConfigTemperatureModelsValue.fromJson(_hydraMap(entry0.value))},
+      );
+
+  final HydraSafetyLimitsConfigTemperatureDefault defaultValue;
+  final Map<String, HydraSafetyLimitsConfigTemperatureModelsValue> models;
+
+  Map<String, dynamic> toJson() {
+    final hydraOut = <String, dynamic>{};
+    hydraOut['default'] = defaultValue.toJson();
+    hydraOut['models'] = <String, dynamic>{for (final entry0 in models.entries) entry0.key: entry0.value.toJson()};
+    return hydraOut;
+  }
+}
+
+/// An object of the server contract.
+class HydraSafetyLimitsConfigTemperatureDefault {
+  const HydraSafetyLimitsConfigTemperatureDefault({
+    required this.bedMaxC,
+  });
+
+  factory HydraSafetyLimitsConfigTemperatureDefault.fromJson(Map<String, dynamic> json) => HydraSafetyLimitsConfigTemperatureDefault(
+        bedMaxC: json['bedMaxC'] as num,
+      );
+
+  final num bedMaxC;
+
+  Map<String, dynamic> toJson() {
+    final hydraOut = <String, dynamic>{};
+    hydraOut['bedMaxC'] = bedMaxC;
+    return hydraOut;
+  }
+}
+
+/// An object of the server contract.
+class HydraSafetyLimitsConfigTemperatureModelsValue {
+  const HydraSafetyLimitsConfigTemperatureModelsValue({
+    this.bedMaxC,
+  });
+
+  factory HydraSafetyLimitsConfigTemperatureModelsValue.fromJson(Map<String, dynamic> json) => HydraSafetyLimitsConfigTemperatureModelsValue(
+        bedMaxC: json['bedMaxC'] == null ? null : json['bedMaxC'] as num,
+      );
+
+  final num? bedMaxC;
+
+  Map<String, dynamic> toJson() {
+    final hydraOut = <String, dynamic>{};
+    final hydraField0 = bedMaxC;
+    if (hydraField0 != null) hydraOut['bedMaxC'] = hydraField0;
+    return hydraOut;
+  }
+}
+
+/// GET /api/safety-limits: the limits in force, the defaults, the ceilings no value can pass and, when ?robotId= names a robot, the limits that apply to it.
+class HydraSafetyLimitsView {
+  const HydraSafetyLimitsView({
+    required this.limits,
+    required this.defaults,
+    required this.hardLimits,
+    this.robot,
+  });
+
+  factory HydraSafetyLimitsView.fromJson(Map<String, dynamic> json) => HydraSafetyLimitsView(
+        limits: HydraSafetyLimitsConfig.fromJson(_hydraMap(json['limits'])),
+        defaults: HydraSafetyLimitsConfig.fromJson(_hydraMap(json['defaults'])),
+        hardLimits: _hydraMap(json['hardLimits']),
+        robot: json['robot'] == null ? null : HydraSafetyLimitsViewRobot.fromJson(_hydraMap(json['robot'])),
+      );
+
+  final HydraSafetyLimitsConfig limits;
+  final HydraSafetyLimitsConfig defaults;
+  /// The fixed ceilings (jogMaxAmount, jogMaxAbsolute, armTtlMs {min,max}, bedMaxC, auditMotionIntervalSeconds {min,max}); the set grows with the server.
+  final Map<String, dynamic> hardLimits;
+  final HydraSafetyLimitsViewRobot? robot;
+
+  Map<String, dynamic> toJson() {
+    final hydraOut = <String, dynamic>{};
+    hydraOut['limits'] = limits.toJson();
+    hydraOut['defaults'] = defaults.toJson();
+    hydraOut['hardLimits'] = hardLimits;
+    final hydraField3 = robot;
+    if (hydraField3 != null) hydraOut['robot'] = hydraField3.toJson();
+    return hydraOut;
+  }
+}
+
+/// An object of the server contract.
+class HydraSafetyLimitsViewRobot {
+  const HydraSafetyLimitsViewRobot({
+    required this.id,
+    this.model,
+    required this.jog,
+    required this.temperature,
+    this.jogArmedUntil,
+  });
+
+  factory HydraSafetyLimitsViewRobot.fromJson(Map<String, dynamic> json) => HydraSafetyLimitsViewRobot(
+        id: (json['id'] as num).toInt(),
+        model: json['model'] == null ? null : json['model'] as String,
+        jog: HydraSafetyLimitsViewRobotJog.fromJson(_hydraMap(json['jog'])),
+        temperature: HydraSafetyLimitsViewRobotTemperature.fromJson(_hydraMap(json['temperature'])),
+        jogArmedUntil: json['jogArmedUntil'] == null ? null : json['jogArmedUntil'] as num,
+      );
+
+  final int id;
+  final String? model;
+  final HydraSafetyLimitsViewRobotJog jog;
+  final HydraSafetyLimitsViewRobotTemperature temperature;
+  /// Milliseconds since the epoch; null when the jog is not armed.
+  final num? jogArmedUntil;
+
+  Map<String, dynamic> toJson() {
+    final hydraOut = <String, dynamic>{};
+    hydraOut['id'] = id;
+    final hydraField1 = model;
+    if (hydraField1 != null) hydraOut['model'] = hydraField1;
+    hydraOut['jog'] = jog.toJson();
+    hydraOut['temperature'] = temperature.toJson();
+    final hydraField4 = jogArmedUntil;
+    if (hydraField4 != null) hydraOut['jogArmedUntil'] = hydraField4;
+    return hydraOut;
+  }
+}
+
+/// An object of the server contract.
+class HydraSafetyLimitsViewRobotJog {
+  const HydraSafetyLimitsViewRobotJog({
+    this.maxAmount,
+    this.maxAbsolute,
+  });
+
+  factory HydraSafetyLimitsViewRobotJog.fromJson(Map<String, dynamic> json) => HydraSafetyLimitsViewRobotJog(
+        maxAmount: json['maxAmount'] == null ? null : json['maxAmount'] as num,
+        maxAbsolute: json['maxAbsolute'] == null ? null : json['maxAbsolute'] as num,
+      );
+
+  final num? maxAmount;
+  final num? maxAbsolute;
+
+  Map<String, dynamic> toJson() {
+    final hydraOut = <String, dynamic>{};
+    final hydraField0 = maxAmount;
+    if (hydraField0 != null) hydraOut['maxAmount'] = hydraField0;
+    final hydraField1 = maxAbsolute;
+    if (hydraField1 != null) hydraOut['maxAbsolute'] = hydraField1;
+    return hydraOut;
+  }
+}
+
+/// An object of the server contract.
+class HydraSafetyLimitsViewRobotTemperature {
+  const HydraSafetyLimitsViewRobotTemperature({
+    this.bedMaxC,
+  });
+
+  factory HydraSafetyLimitsViewRobotTemperature.fromJson(Map<String, dynamic> json) => HydraSafetyLimitsViewRobotTemperature(
+        bedMaxC: json['bedMaxC'] == null ? null : json['bedMaxC'] as num,
+      );
+
+  final num? bedMaxC;
+
+  Map<String, dynamic> toJson() {
+    final hydraOut = <String, dynamic>{};
+    final hydraField0 = bedMaxC;
+    if (hydraField0 != null) hydraOut['bedMaxC'] = hydraField0;
+    return hydraOut;
+  }
+}
+
 /// An object of the server contract.
 class HydraSelfUpdateItem {
   const HydraSelfUpdateItem({
@@ -5462,23 +6015,29 @@ class HydraSelfUpdateStatus {
   }
 }
 
-/// An object of the server contract.
+/// The listen port and, besides it, the security options of the server (the groups of PUT /api/admin/server-config: tls, ble, mqtt, voice, auth, ingest...). The groups grow with the server, so a key this list does not name is kept, not dropped.
 class HydraServerConfig {
   const HydraServerConfig({
     required this.port,
     required this.pendingPort,
+    this.additionalProperties = const <String, dynamic>{},
   });
 
   factory HydraServerConfig.fromJson(Map<String, dynamic> json) => HydraServerConfig(
         port: (json['port'] as num).toInt(),
         pendingPort: json['pendingPort'] == null ? null : (json['pendingPort'] as num).toInt(),
+        additionalProperties: _hydraMap(<String, dynamic>{for (final entry in json.entries) if (!_knownKeys.contains(entry.key)) entry.key: entry.value}),
       );
+
+  static const Set<String> _knownKeys = <String>{'port', 'pendingPort'};
 
   final int port;
   final int? pendingPort;
+  /// The keys the contract does not list, kept as they came.
+  final Map<String, dynamic> additionalProperties;
 
   Map<String, dynamic> toJson() {
-    final hydraOut = <String, dynamic>{};
+    final hydraOut = <String, dynamic>{...additionalProperties};
     hydraOut['port'] = port;
     hydraOut['pendingPort'] = pendingPort;
     return hydraOut;
@@ -6035,6 +6594,54 @@ class HydraUserList {
   }
 }
 
+/// The answer of POST /api/voice/confirm: the confirmation result of the voice interface and whether the server verified its signature. Keys the interface adds are kept.
+class HydraVoiceConfirmResult {
+  const HydraVoiceConfirmResult({
+    required this.type,
+    required this.status,
+    this.requestId,
+    this.intent,
+    this.subject,
+    required this.verified,
+    this.additionalProperties = const <String, dynamic>{},
+  });
+
+  factory HydraVoiceConfirmResult.fromJson(Map<String, dynamic> json) => HydraVoiceConfirmResult(
+        type: json['type'] as String,
+        status: json['status'] as String,
+        requestId: json['requestId'] == null ? null : json['requestId'] as String,
+        intent: json['intent'] == null ? null : _hydraMap(json['intent']),
+        subject: json['subject'] == null ? null : json['subject'] as String,
+        verified: json['verified'] as bool,
+        additionalProperties: _hydraMap(<String, dynamic>{for (final entry in json.entries) if (!_knownKeys.contains(entry.key)) entry.key: entry.value}),
+      );
+
+  static const Set<String> _knownKeys = <String>{'type', 'status', 'requestId', 'intent', 'subject', 'verified'};
+
+  final String type;
+  final String status;
+  final String? requestId;
+  final Map<String, dynamic>? intent;
+  final String? subject;
+  final bool verified;
+  /// The keys the contract does not list, kept as they came.
+  final Map<String, dynamic> additionalProperties;
+
+  Map<String, dynamic> toJson() {
+    final hydraOut = <String, dynamic>{...additionalProperties};
+    hydraOut['type'] = type;
+    hydraOut['status'] = status;
+    final hydraField2 = requestId;
+    if (hydraField2 != null) hydraOut['requestId'] = hydraField2;
+    final hydraField3 = intent;
+    if (hydraField3 != null) hydraOut['intent'] = hydraField3;
+    final hydraField4 = subject;
+    if (hydraField4 != null) hydraOut['subject'] = hydraField4;
+    hydraOut['verified'] = verified;
+    return hydraOut;
+  }
+}
+
 /// An object of the server contract.
 class HydraVoiceReply {
   const HydraVoiceReply({
@@ -6386,8 +6993,14 @@ class HydraServerClient {
   }
 
   /// GET /api/audit (access: admin)
-  Future<void> getAudit({String? afterSeq, String? format, String? limit, String? robotId, String? type, String? verify}) async {
-    await _transport(HydraRequest('GET', '/api/audit', queryOf({'afterSeq': afterSeq, 'format': format, 'limit': limit, 'robotId': robotId, 'type': type, 'verify': verify}), null, 'admin'));
+  Future<HydraAuditReport> getAudit({String? afterSeq, String? format, String? limit, String? robotId, String? type, String? verify}) async {
+    final raw = await _transport(HydraRequest('GET', '/api/audit', queryOf({'afterSeq': afterSeq, 'format': format, 'limit': limit, 'robotId': robotId, 'type': type, 'verify': verify}), null, 'admin'));
+    return HydraAuditReport.fromJson(_hydraMap(raw));
+  }
+
+  /// GET /api/audit (access: admin); the answer as text, the way the route offers it besides JSON.
+  Future<String> getAuditAsText({String? afterSeq, String? format, String? limit, String? robotId, String? type, String? verify}) async {
+    return (await _transport(HydraRequest('GET', '/api/audit', queryOf({'afterSeq': afterSeq, 'format': format, 'limit': limit, 'robotId': robotId, 'type': type, 'verify': verify}), null, 'admin', responseType: 'text'))) as String;
   }
 
   /// GET /api/bridges (access: user)
@@ -6477,8 +7090,9 @@ class HydraServerClient {
   }
 
   /// GET /api/claims (access: user)
-  Future<void> getClaims() async {
-    await _transport(HydraRequest('GET', '/api/claims', const <String, String>{}, null, 'user'));
+  Future<HydraClaimList> getClaims() async {
+    final raw = await _transport(HydraRequest('GET', '/api/claims', const <String, String>{}, null, 'user'));
+    return HydraClaimList.fromJson(_hydraMap(raw));
   }
 
   /// List the clients the server has seen (access: user)
@@ -6816,8 +7430,9 @@ class HydraServerClient {
   }
 
   /// GET /api/safety-limits (access: user)
-  Future<void> getSafetyLimits({String? robotId}) async {
-    await _transport(HydraRequest('GET', '/api/safety-limits', queryOf({'robotId': robotId}), null, 'user'));
+  Future<HydraSafetyLimitsView> getSafetyLimits({String? robotId}) async {
+    final raw = await _transport(HydraRequest('GET', '/api/safety-limits', queryOf({'robotId': robotId}), null, 'user'));
+    return HydraSafetyLimitsView.fromJson(_hydraMap(raw));
   }
 
   /// GET /api/semantic-planner/settings (access: user)
@@ -7045,13 +7660,15 @@ class HydraServerClient {
   }
 
   /// POST /api/voice/confirm (access: user)
-  Future<void> postVoiceConfirm({HydraPostVoiceConfirmBody? body}) async {
-    await _transport(HydraRequest('POST', '/api/voice/confirm', const <String, String>{}, body?.toJson(), 'user'));
+  Future<HydraVoiceConfirmResult> postVoiceConfirm({HydraPostVoiceConfirmBody? body}) async {
+    final raw = await _transport(HydraRequest('POST', '/api/voice/confirm', const <String, String>{}, body?.toJson(), 'user'));
+    return HydraVoiceConfirmResult.fromJson(_hydraMap(raw));
   }
 
   /// POST /api/voice/turn (access: user)
-  Future<void> postVoiceTurn({HydraPostVoiceTurnBody? body}) async {
-    await _transport(HydraRequest('POST', '/api/voice/turn', const <String, String>{}, body?.toJson(), 'user'));
+  Future<HydraVoiceReply> postVoiceTurn({HydraPostVoiceTurnBody? body}) async {
+    final raw = await _transport(HydraRequest('POST', '/api/voice/turn', const <String, String>{}, body?.toJson(), 'user'));
+    return HydraVoiceReply.fromJson(_hydraMap(raw));
   }
 
   /// GET /api/watch/system-status (access: user)
