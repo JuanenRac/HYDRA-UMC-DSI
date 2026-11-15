@@ -5,6 +5,7 @@ Every test below is **not executed**. The panel logic, the settings file and the
 ## What the software already covers (no panel needed)
 
 - `python tools/hydra_project_tool.py test` runs the Dart tests (login, reservations, take control, idle lock, settings file, redraw counts) and the text checks of the kiosk files.
+- `test/outage_simulation_test.dart` plays a server that goes wrong and comes back (a cut connection, a 503 or 504, a page that is not JSON, an expired session) in an order drawn from a fixed seed and checks that each fault is an error, that STOP is never reported as done under a fault and that the next call works. Step 8 and the reconnect of the panel on a real board stay below.
 - `tools/verify_kiosk_screen.py` reads the kiosk files and checks that the unit, the installer and the udev rule agree with each other. It does not run systemd.
 
 ## Setup
