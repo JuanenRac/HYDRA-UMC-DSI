@@ -11,7 +11,7 @@
     python tools/check_rest_routes.py --record   # write docs/rest_routes.json from the sources (on purpose, after adding or dropping a route)
 
 A route can only be added or dropped on purpose (record it again); when the shared contracts are checked out next to this repository, every route
-must exist in the server contract, so an app cannot call a route the server does not have. The relay of the server to the local services
+must exist in the server contract, so an app cannot call a route the server does not have. The requests made through the generated client (lib/generated, tools/sync_sdk_client.py) are not listed: they are checked by the contract itself. The relay of the server to the local services
 (/api/ai/<service>/...) is one wildcard route that the inventory does not list path by path, so it is not compared.
 """
 from __future__ import annotations
@@ -47,6 +47,8 @@ def called_routes() -> list[str]:
         for path in sorted(base.rglob("*")):
             if path.suffix not in SOURCE_SUFFIXES or not path.is_file():
                 continue
+            if "generated" in path.relative_to(base).parts[:-1]:
+                continue  # the generated server client names every route of the server; only the routes written by hand are listed
             for line in path.read_text(encoding="utf-8", errors="replace").splitlines():
                 code = re.sub(r"(^|\s)//.*$", "", line)  # comments hold examples, not calls
                 if code.lstrip().startswith(("*", "/*")):

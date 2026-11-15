@@ -27,6 +27,7 @@ import 'package:hydra_umc_app_common/hydra_umc_app_common.dart' show CommandSequ
 import '../app_version.dart';
 import '../models/access.dart';
 import '../models/contract_v2.dart';
+import 'generated_transport.dart';
 import 'package_http_transport.dart';
 import 'tls_settings.dart';
 
@@ -205,10 +206,12 @@ class HydraApiClient extends HydraApiCore {
 
   Future<Map<String, dynamic>> getEcosystemStatus() => getJson('/api/ecosystem/status', const Duration(seconds: 8));
 
-  Future<Map<String, dynamic>> postEcosystemService(String unit, String action) => postJson(
-      '/api/ecosystem/service/${Uri.encodeComponent(unit)}/${Uri.encodeComponent(action)}', const Duration(seconds: 20));
+  // The three actions below go through the generated server client (generated/hydra_server_client.dart) over the HTTP stack
+  // of this client (network/generated_transport.dart); the answer is the object of the contract, written back as a map.
+  Future<Map<String, dynamic>> postEcosystemService(String unit, String action) async =>
+      (await callGenerated(this, const Duration(seconds: 20), (api) => api.postEcosystemServiceByUnitByAction(unit: unit, action: action))).toJson();
 
-  Future<Map<String, dynamic>> postAdminRestart() => postJson('/api/admin/restart', const Duration(seconds: 8));
+  Future<Map<String, dynamic>> postAdminRestart() async => (await callGenerated(this, const Duration(seconds: 8), (api) => api.postAdminRestart())).toJson();
 
-  Future<Map<String, dynamic>> postSystemReboot() => postJson('/api/system/reboot', const Duration(seconds: 8));
+  Future<Map<String, dynamic>> postSystemReboot() async => (await callGenerated(this, const Duration(seconds: 8), (api) => api.postSystemReboot())).toJson();
 }

@@ -1,5 +1,4 @@
 [
-  "/api/admin/restart",
   "/api/admin/server-config",
   "/api/audit",
   "/api/camera/{p}/stream",
@@ -7,11 +6,9 @@
   "/api/connections/clients",
   "/api/connections/events",
   "/api/device/login",
-  "/api/ecosystem/service/{p}/{p}",
   "/api/ecosystem/status",
   "/api/hydra-info",
   "/api/robot/{p}",
   "/api/safety-limits",
-  "/api/system/reboot",
   "/api/tool-arms"
 ]
