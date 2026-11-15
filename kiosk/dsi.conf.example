@@ -4,7 +4,7 @@
 # GPL-3.0-or-later - see LICENSE
 #
 # The settings of the panel. install_kiosk.sh copies this file to
-# /etc/hydra-umc/dsi.conf (readable by the panel account only) when there is
+# /etc/hydra-umc-dsi/dsi.conf (readable by the panel account only) when there is
 # none yet and never overwrites an existing one. One `key = value` per line,
 # `#` starts a comment, on/off/yes/no/true/false/1/0 for switches. A key that is
 # missing or has a value that makes no sense keeps its default, and every

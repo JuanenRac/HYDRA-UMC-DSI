@@ -25,8 +25,8 @@
 #
 # The app does not run as root: this script creates the account hydra-dsi (a
 # system user with no login shell, in the groups video, render and input), gives
-# it the settings file /etc/hydra-umc/dsi.conf (copied from dsi.conf.example only
-# when there is none, never overwritten, readable by that account only) and the
+# it the settings file /etc/hydra-umc-dsi/dsi.conf (a directory of the panel alone; the file of
+# /etc/hydra-umc is copied once, else it is made from dsi.conf.example, never overwritten, readable by that account only, proved readable before the unit is installed) and the
 # udev rule that lets the video group set the brightness of the backlight.
 #
 # HONESTY NOTE: same as hydra-umc-dsi.service's own header comment - never
@@ -95,14 +95,23 @@ done
 chown -R root:root "$(dirname "$BUNDLE_DIR")"
 chmod -R go-w "$(dirname "$BUNDLE_DIR")"
 
-# The settings file: created once, kept on every later run.
-CONF_DIR="${HYDRA_DSI_CONF_DIR:-/etc/hydra-umc}"
-install -d -m 755 "$CONF_DIR"
+# The settings file: in a directory of the panel alone, because the account cannot enter the shared /etc/hydra-umc (the app would ignore the file without a word).
+# The file of the earlier place is copied once and never deleted; a new one is made from the example only when there is none, never overwritten. Then the account
+# itself is asked whether it can read the file, BEFORE the unit is installed: when it cannot, nothing more is changed.
+CONF_DIR="${HYDRA_DSI_CONF_DIR:-/etc/hydra-umc-dsi}"
+APP_DIR="$(dirname "$BUNDLE_DIR")"
+export HYDRA_DSI_CONFIG_DIR="$CONF_DIR" HYDRA_DSI_USER="$DSI_USER"
+install -d -m 755 "$APP_DIR"
+install -m 755 -o root -g root "$SCRIPT_DIR/dsi_config.sh" "$APP_DIR/dsi_config.sh"
+sh "$APP_DIR/dsi_config.sh" prepare || { echo "DSI_CONFIG=REFUSED the settings directory $CONF_DIR could not be prepared: the unit was not installed." >&2; exit 4; }
 if [ ! -e "$CONF_DIR/dsi.conf" ]; then
   install -m 640 -o root -g "$DSI_USER" "$SCRIPT_DIR/dsi.conf.example" "$CONF_DIR/dsi.conf"
   echo "Created $CONF_DIR/dsi.conf from dsi.conf.example (edit it, then restart the service)."
 else
   echo "Kept the existing $CONF_DIR/dsi.conf."
+fi
+if command -v runuser >/dev/null 2>&1; then
+  (cd / && runuser -u "$DSI_USER" -- sh "$APP_DIR/dsi_config.sh" check) || { echo "DSI_CONFIG=REFUSED the account $DSI_USER cannot read $CONF_DIR/dsi.conf: the unit was not installed and nothing running was touched." >&2; exit 4; }
 fi
 
 # The backlight: the video group may write the brightness (dimming by time of day and after a time without a touch).

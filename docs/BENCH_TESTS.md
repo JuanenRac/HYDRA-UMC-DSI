@@ -11,7 +11,7 @@ Every test below is **not executed**. The panel logic, the settings file and the
 ## Setup
 
 - A Compute Module 5 with the DSI panel, the HYDRA-UMC server running on the same board and the panel installed with `kiosk/install_kiosk.sh`.
-- The settings file `/etc/hydra-umc/dsi.conf` created by the installer (every key is documented in `kiosk/dsi.conf.example`).
+- The settings file `/etc/hydra-umc-dsi/dsi.conf` created by the installer (every key is documented in `kiosk/dsi.conf.example`).
 - One administrator account and one operator account on the server.
 
 ## Steps
