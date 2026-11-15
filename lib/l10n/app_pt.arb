@@ -478,5 +478,11 @@
   "toolArmsNetwork": "O servidor não responde.",
   "toolArmsOther": "O servidor não conseguiu fornecer as ferramentas armadas.",
   "toolArmsShape": "O servidor deu uma resposta inesperada sobre as ferramentas armadas.",
-  "toolArmsReadOnlyNote": "Este painel apenas mostra o estado. Nunca arma, desarma nem pára uma ferramenta."
+  "toolArmsReadOnlyNote": "Este painel apenas mostra o estado. Nunca arma, desarma nem pára uma ferramenta.",
+  "settingsUpdateNotice": "Avisar-me de novas versões",
+  "settingsUpdateNoticeSubtitle": "Quando o pedir, lê a lista pública de versões e indica se existe uma mais recente. Não é descarregado nem instalado nada. Desativado por predefinição.",
+  "settingsUpdateCheckNow": "Procurar uma nova versão",
+  "settingsUpdateAvailable": "A versão {version} está disponível",
+  "settingsUpdateUpToDate": "Esta versão está atualizada",
+  "settingsUpdateCheckFailed": "Não foi possível ler a lista de versões"
 }

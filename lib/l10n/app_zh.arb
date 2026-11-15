@@ -478,5 +478,11 @@
   "toolArmsNetwork": "服务器没有响应。",
   "toolArmsOther": "服务器无法提供工具武装状态。",
   "toolArmsShape": "服务器对工具武装状态给出了意外的响应。",
-  "toolArmsReadOnlyNote": "此面板仅显示状态，绝不会武装、解除或停止任何工具。"
+  "toolArmsReadOnlyNote": "此面板仅显示状态，绝不会武装、解除或停止任何工具。",
+  "settingsUpdateNotice": "通知新版本",
+  "settingsUpdateNoticeSubtitle": "在您操作时读取公开的版本列表，并告知是否有更新的版本。不会下载或安装任何内容。默认关闭。",
+  "settingsUpdateCheckNow": "检查新版本",
+  "settingsUpdateAvailable": "版本 {version} 可用",
+  "settingsUpdateUpToDate": "此版本已是最新",
+  "settingsUpdateCheckFailed": "无法读取版本列表"
 }

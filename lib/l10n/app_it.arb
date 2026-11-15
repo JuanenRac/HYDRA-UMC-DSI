@@ -478,5 +478,11 @@
   "toolArmsNetwork": "Il server non risponde.",
   "toolArmsOther": "Il server non ha potuto fornire gli utensili armati.",
   "toolArmsShape": "Il server ha dato una risposta inattesa sugli utensili armati.",
-  "toolArmsReadOnlyNote": "Questo pannello mostra solo lo stato. Non arma, non disarma e non ferma mai un utensile."
+  "toolArmsReadOnlyNote": "Questo pannello mostra solo lo stato. Non arma, non disarma e non ferma mai un utensile.",
+  "settingsUpdateNotice": "Avvisami delle nuove versioni",
+  "settingsUpdateNoticeSubtitle": "Su richiesta legge l'elenco pubblico delle versioni e dice se ne esiste una più recente. Non viene scaricato né installato nulla. Disattivato per impostazione predefinita.",
+  "settingsUpdateCheckNow": "Cerca una nuova versione",
+  "settingsUpdateAvailable": "La versione {version} è disponibile",
+  "settingsUpdateUpToDate": "Questa versione è aggiornata",
+  "settingsUpdateCheckFailed": "Impossibile leggere l'elenco delle versioni"
 }

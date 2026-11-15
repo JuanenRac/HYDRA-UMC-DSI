@@ -504,5 +504,12 @@
   "toolArmsNetwork": "The server does not answer.",
   "toolArmsOther": "The server could not give the tool arms.",
   "toolArmsShape": "The server gave an unexpected answer for the tool arms.",
-  "toolArmsReadOnlyNote": "This panel only shows the state. It never arms, disarms or stops a tool."
+  "toolArmsReadOnlyNote": "This panel only shows the state. It never arms, disarms or stops a tool.",
+  "settingsUpdateNotice": "Tell me about new versions",
+  "settingsUpdateNoticeSubtitle": "When you ask, it reads the public list of releases and tells you whether a newer version exists. Nothing is downloaded or installed. Off by default.",
+  "settingsUpdateCheckNow": "Check for a new version",
+  "settingsUpdateAvailable": "Version {version} is available",
+  "@settingsUpdateAvailable": {"placeholders": {"version": {"type": "String"}}},
+  "settingsUpdateUpToDate": "This version is up to date",
+  "settingsUpdateCheckFailed": "The list of releases could not be read"
 }

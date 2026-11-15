@@ -478,5 +478,11 @@
   "toolArmsNetwork": "Der Server antwortet nicht.",
   "toolArmsOther": "Der Server konnte die Werkzeug-Scharfschaltung nicht liefern.",
   "toolArmsShape": "Der Server hat eine unerwartete Antwort zur Werkzeug-Scharfschaltung gegeben.",
-  "toolArmsReadOnlyNote": "Dieses Panel zeigt nur den Zustand. Es schaltet nie ein Werkzeug scharf, entschärft oder stoppt es."
+  "toolArmsReadOnlyNote": "Dieses Panel zeigt nur den Zustand. Es schaltet nie ein Werkzeug scharf, entschärft oder stoppt es.",
+  "settingsUpdateNotice": "Über neue Versionen informieren",
+  "settingsUpdateNoticeSubtitle": "Auf Wunsch liest die App die öffentliche Liste der Versionen und sagt, ob es eine neuere gibt. Es wird nichts heruntergeladen oder installiert. Standardmäßig aus.",
+  "settingsUpdateCheckNow": "Nach neuer Version suchen",
+  "settingsUpdateAvailable": "Version {version} ist verfügbar",
+  "settingsUpdateUpToDate": "Diese Version ist aktuell",
+  "settingsUpdateCheckFailed": "Die Liste der Versionen konnte nicht gelesen werden"
 }

@@ -478,5 +478,11 @@
   "toolArmsNetwork": "Le serveur ne répond pas.",
   "toolArmsOther": "Le serveur n'a pas pu fournir les outils armés.",
   "toolArmsShape": "Le serveur a donné une réponse inattendue pour les outils armés.",
-  "toolArmsReadOnlyNote": "Ce panneau n'affiche que l'état. Il n'arme, ne désarme et n'arrête jamais un outil."
+  "toolArmsReadOnlyNote": "Ce panneau n'affiche que l'état. Il n'arme, ne désarme et n'arrête jamais un outil.",
+  "settingsUpdateNotice": "Me prévenir des nouvelles versions",
+  "settingsUpdateNoticeSubtitle": "À votre demande, lit la liste publique des versions et indique s'il en existe une plus récente. Rien n'est téléchargé ni installé. Désactivé par défaut.",
+  "settingsUpdateCheckNow": "Rechercher une nouvelle version",
+  "settingsUpdateAvailable": "La version {version} est disponible",
+  "settingsUpdateUpToDate": "Cette version est à jour",
+  "settingsUpdateCheckFailed": "La liste des versions n'a pas pu être lue"
 }
