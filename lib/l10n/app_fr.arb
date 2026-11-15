@@ -484,5 +484,20 @@
   "settingsUpdateCheckNow": "Rechercher une nouvelle version",
   "settingsUpdateAvailable": "La version {version} est disponible",
   "settingsUpdateUpToDate": "Cette version est à jour",
-  "settingsUpdateCheckFailed": "La liste des versions n'a pas pu être lue"
+  "settingsUpdateCheckFailed": "La liste des versions n'a pas pu être lue",
+  "canOtaTitle": "Flash CAN",
+  "canOtaPhaseConnecting": "Connexion à la carte",
+  "canOtaPhaseEnteringBootloader": "Entrée dans le bootloader",
+  "canOtaPhaseErasingFram": "Effacement de la FRAM",
+  "canOtaPhaseTransferring": "Envoi de l'image",
+  "canOtaPhaseVerifying": "Vérification de l'image",
+  "canOtaPhaseRebooting": "Redémarrage de la carte",
+  "canOtaPhaseDone": "Flash terminé",
+  "canOtaPhaseError": "Échec du flash",
+  "canOtaPercent": "{percent} %",
+  "@canOtaPercent": {"placeholders": {"percent": {"type": "int"}}},
+  "canOtaPages": "{sent} sur {total} pages",
+  "@canOtaPages": {"placeholders": {"sent": {"type": "int"}, "total": {"type": "int"}}},
+  "canOtaError": "Motif : {reason}",
+  "@canOtaError": {"placeholders": {"reason": {"type": "String"}}}
 }

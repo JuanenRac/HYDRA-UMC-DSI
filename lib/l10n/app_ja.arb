@@ -484,5 +484,20 @@
   "settingsUpdateCheckNow": "新しいバージョンを確認",
   "settingsUpdateAvailable": "バージョン {version} が利用できます",
   "settingsUpdateUpToDate": "このバージョンは最新です",
-  "settingsUpdateCheckFailed": "バージョン一覧を読み込めませんでした"
+  "settingsUpdateCheckFailed": "バージョン一覧を読み込めませんでした",
+  "canOtaTitle": "CAN フラッシュ",
+  "canOtaPhaseConnecting": "ボードに接続中",
+  "canOtaPhaseEnteringBootloader": "ブートローダーに移行中",
+  "canOtaPhaseErasingFram": "FRAM を消去中",
+  "canOtaPhaseTransferring": "イメージを送信中",
+  "canOtaPhaseVerifying": "イメージを検証中",
+  "canOtaPhaseRebooting": "ボードを再起動中",
+  "canOtaPhaseDone": "フラッシュが完了しました",
+  "canOtaPhaseError": "フラッシュに失敗しました",
+  "canOtaPercent": "{percent} %",
+  "@canOtaPercent": {"placeholders": {"percent": {"type": "int"}}},
+  "canOtaPages": "{sent} / {total} ページ",
+  "@canOtaPages": {"placeholders": {"sent": {"type": "int"}, "total": {"type": "int"}}},
+  "canOtaError": "理由: {reason}",
+  "@canOtaError": {"placeholders": {"reason": {"type": "String"}}}
 }

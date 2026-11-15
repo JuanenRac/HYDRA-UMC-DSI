@@ -484,5 +484,20 @@
   "settingsUpdateCheckNow": "Buscar una versión nueva",
   "settingsUpdateAvailable": "Hay disponible la versión {version}",
   "settingsUpdateUpToDate": "Esta versión está al día",
-  "settingsUpdateCheckFailed": "No se pudo leer la lista de versiones"
+  "settingsUpdateCheckFailed": "No se pudo leer la lista de versiones",
+  "canOtaTitle": "Flasheo CAN",
+  "canOtaPhaseConnecting": "Conectando con la placa",
+  "canOtaPhaseEnteringBootloader": "Entrando en el bootloader",
+  "canOtaPhaseErasingFram": "Borrando la FRAM",
+  "canOtaPhaseTransferring": "Enviando la imagen",
+  "canOtaPhaseVerifying": "Verificando la imagen",
+  "canOtaPhaseRebooting": "Reiniciando la placa",
+  "canOtaPhaseDone": "Flasheo terminado",
+  "canOtaPhaseError": "El flasheo ha fallado",
+  "canOtaPercent": "{percent} %",
+  "@canOtaPercent": {"placeholders": {"percent": {"type": "int"}}},
+  "canOtaPages": "{sent} de {total} páginas",
+  "@canOtaPages": {"placeholders": {"sent": {"type": "int"}, "total": {"type": "int"}}},
+  "canOtaError": "Motivo: {reason}",
+  "@canOtaError": {"placeholders": {"reason": {"type": "String"}}}
 }
