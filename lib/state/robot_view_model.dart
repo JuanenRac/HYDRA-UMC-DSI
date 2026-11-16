@@ -210,7 +210,10 @@ class RobotViewModel extends ChangeNotifier {
     } else {
       await _clientPrefs.saveControllerId(HydraApiClient.controllerId);
     }
-    final saved = await _authPrefs.loadConnection();
+    final stored = await _authPrefs.loadConnection();
+    // An appliance panel talks to the server of its own machine: a connection saved earlier for another host is not restored, so the token of
+    // this device is never sent there.
+    final saved = (stored != null && panelConfig.appliance && !TlsPolicy.isLoopback(stored.$1)) ? null : stored;
     final token = await _authPrefs.loadToken();
     if (saved != null) {
       final (host, port) = saved;
@@ -380,6 +383,9 @@ class RobotViewModel extends ChangeNotifier {
   Future<bool> _renewWithDeviceToken(HydraApiClient client) async {
     final path = panelConfig.deviceTokenFile;
     if (!panelConfig.appliance || path.isEmpty) return false;
+    // The token of this device belongs to the server of this machine: never to another host.
+    final current = activeServer;
+    if (current != null && !TlsPolicy.isLoopback(current.host)) return false;
     final deviceToken = (await _deviceTokenReader(path))?.trim();
     if (deviceToken == null || deviceToken.isEmpty) return false;
     try {

@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+- **An appliance panel never sends the token of its device to another host:** a connection saved earlier for a server that is not on this machine is not restored in appliance mode, and the sign-in with the device token is only tried against this machine's own server. A test covers the restore.
+
 - **The camera view uses the app's own HTTPS client:** it used a plain client, so a server with a pinned or self-signed certificate that the rest of the app reaches could not show its camera pictures; it now goes through the same client as the other calls.
 
 ## [0.3.8]
