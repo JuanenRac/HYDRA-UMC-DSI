@@ -141,6 +141,9 @@ class HydraApiClient extends HydraApiCore {
     if (baseUrl.startsWith('http://')) return baseUrl.replaceFirst('http://', 'https://');
     if (_tlsSeen) return null;
     final host = Uri.parse(baseUrl).host;
+    // A pinned certificate says the person trusts this server over TLS only: with a fingerprint set, a host outside this
+    // machine is never reached over plain http, whatever the plain-http switches say.
+    if (!TlsPolicy.isLoopback(host) && TlsSettingsStore.current.pinnedFingerprint.trim().isNotEmpty) return null;
     if (!TlsSettingsStore.current.plainAllowedFor(host)) return null;
     return baseUrl.replaceFirst('https://', 'http://');
   }

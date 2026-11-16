@@ -175,7 +175,7 @@
   "settingsListenOnly": "仅监听",
   "settingsListenOnlySubtitle": "显示机器人及其数据，但不发送任何命令：控件已禁用。STOP 始终可用。",
   "settingsRequireReleaseSignature": "要求发布签名",
-  "settingsRequireReleaseSignatureSubtitle": "检查已下载的发布版本时，还要求发布的 Ed25519 签名，并拒绝没有有效签名的版本。默认关闭：摘要仍会被检查。",
+  "settingsRequireReleaseSignatureSubtitle": "此应用只通知有新版本，不下载也不安装任何内容，因此该开关在这里没有效果。保留它是为了让设置随你同步。",
   "controlListenOnlyBanner": "仅监听：命令已禁用。STOP 仍然可用。",
   "playConfirmTitle": "开始播放?",
   "playConfirmMessage": "{robot} 将执行其现有轨迹:已记录 {points} 个点,速度 {speed}%。\n{reservation}",
