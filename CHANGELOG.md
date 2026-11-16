@@ -2,6 +2,7 @@
 
 ## [Unreleased]
 
+- **The camera view uses the app's own HTTPS client:** it used a plain client, so a server with a pinned or self-signed certificate that the rest of the app reaches could not show its camera pictures; it now goes through the same client as the other calls.
 
 ## [0.3.8]
 

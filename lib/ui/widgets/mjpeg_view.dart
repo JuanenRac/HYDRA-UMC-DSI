@@ -28,6 +28,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 import '../../l10n/app_localizations.dart';
+import '../../network/tls_settings.dart';
 
 /// Upper bound for the bytes waiting for a frame end.
 const int mjpegMaxBufferBytes = 4 * 1024 * 1024;
@@ -89,7 +90,7 @@ class _MjpegViewState extends State<MjpegView> {
 
   Future<void> _start() async {
     final generation = ++_generation;
-    final client = http.Client();
+    final client = createClient();
     _client = client;
     var pending = BytesBuilder(copy: false);
     try {
