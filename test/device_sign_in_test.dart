@@ -162,4 +162,20 @@ void main() {
     expect(server.deviceTokensSeen.length, 2, reason: 'then the device token');
     expect(vm.isLoggedIn, isTrue);
   });
+
+  test('a connection saved for another host is not restored in appliance mode, and the device token is not sent there', () async {
+    final server = await _Server.start();
+    addTearDown(server.close);
+    final secure = _Secure();
+    final prefs = AuthPrefs(secureBackend: secure);
+    await prefs.saveConnection('printer.example.invalid', 8443);
+    await prefs.saveToken('old-access', 'ana', refreshToken: 'old-refresh');
+    final vm = _vm(secure);
+    addTearDown(vm.logout);
+
+    await vm.init();
+
+    expect(vm.activeServer?.host, isNot('printer.example.invalid'));
+    expect(server.deviceTokensSeen, isEmpty);
+  });
 }
