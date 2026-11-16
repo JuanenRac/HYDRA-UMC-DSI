@@ -147,6 +147,14 @@ void main() {
       expect(await client2.getHydraInfo(), isNotNull);
     });
 
+    test('with a pinned fingerprint a host outside this machine is never reached over plain HTTP', () async {
+      final seen = <Uri>[];
+      TlsSettingsStore.current = TlsSettings(allowPlainHttp: true, pinnedFingerprint: kTestCertFingerprint);
+      final client = HydraApiClient('192.168.1.5', 3000, client: _recording(seen, (u) => u.scheme == 'http'));
+      expect(await client.getHydraInfo(), isNull);
+      expect(seen.every((u) => u.scheme == 'https'), isTrue);
+    });
+
     test('a server that was seen over TLS is never retried over plain HTTP', () async {
       final seen = <Uri>[];
       TlsSettingsStore.current = const TlsSettings(allowPlainHttp: true);

@@ -175,7 +175,7 @@
   "settingsListenOnly": "Solo escucha",
   "settingsListenOnlySubtitle": "Muestra los robots y sus datos pero no envía ningún comando: los controles quedan desactivados. STOP siempre funciona.",
   "settingsRequireReleaseSignature": "Exigir la firma de la versión",
-  "settingsRequireReleaseSignatureSubtitle": "Al comprobar una versión descargada, exige además la firma Ed25519 de las versiones y rechaza la que no tenga una válida. Desactivado por defecto: el resumen digital se comprueba igualmente.",
+  "settingsRequireReleaseSignatureSubtitle": "Esta app solo avisa de versiones nuevas: no descarga ni instala nada, así que este interruptor no tiene efecto aquí. Se conserva para que el ajuste te siga.",
   "controlListenOnlyBanner": "Solo escucha: los comandos están desactivados. STOP sigue funcionando.",
   "playConfirmTitle": "¿Iniciar la reproducción?",
   "playConfirmMessage": "{robot} ejecutará la trayectoria que tiene: {points} puntos grabados a velocidad {speed}%.\n{reservation}",
