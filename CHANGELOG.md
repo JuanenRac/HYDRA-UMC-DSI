@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+- **The vendored server client and test answers follow the SDK contract again:** they now include the route that issues new recovery codes of the second factor, so the nightly family check finds no drift.
+
 - **A new sign-in no longer forgets that the server spoke TLS, and a pinned certificate is never traded for plain http:** signing in to the saved server (or to one the list already probed over TLS) starts on https and does not go back to plain http, and with a certificate fingerprint set a host outside this machine is never reached over plain http whatever the plain-http switches say.
 
 - **The "Require a release signature" switch says what it does here:** this app only announces new versions and downloads nothing, so the text of the switch, in the eight languages, now says it has no effect in this app instead of promising a check.

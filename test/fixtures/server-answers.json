@@ -4385,6 +4385,36 @@
         }
       }
     },
+    "POST /api/totp/recovery-codes": {
+      "200": {
+        "minimal": {
+          "success": false,
+          "recoveryCodes": []
+        },
+        "full": {
+          "success": false,
+          "recoveryCodes": [
+            "sample"
+          ]
+        }
+      },
+      "401": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "429": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      }
+    },
     "GET /api/totp/status": {
       "200": {
         "minimal": {
