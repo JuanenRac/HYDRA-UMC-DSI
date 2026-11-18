@@ -4049,6 +4049,29 @@ class HydraPostTotpDisableBody {
 }
 
 /// An object of the server contract.
+class HydraPostTotpRecoveryCodesBody {
+  const HydraPostTotpRecoveryCodesBody({
+    required this.password,
+    required this.code,
+  });
+
+  factory HydraPostTotpRecoveryCodesBody.fromJson(Map<String, dynamic> json) => HydraPostTotpRecoveryCodesBody(
+        password: json['password'] as String,
+        code: json['code'] as String,
+      );
+
+  final String password;
+  final String code;
+
+  Map<String, dynamic> toJson() {
+    final hydraOut = <String, dynamic>{};
+    hydraOut['password'] = password;
+    hydraOut['code'] = code;
+    return hydraOut;
+  }
+}
+
+/// An object of the server contract.
 class HydraPostUploadWorkBody {
   const HydraPostUploadWorkBody({
     required this.folderPath,
@@ -7607,6 +7630,12 @@ class HydraServerClient {
     return HydraSuccess.fromJson(_hydraMap(raw));
   }
 
+  /// POST /api/totp/recovery-codes (access: user)
+  Future<HydraTotpConfirmed> postTotpRecoveryCodes({required HydraPostTotpRecoveryCodesBody body}) async {
+    final raw = await _transport(HydraRequest('POST', '/api/totp/recovery-codes', const <String, String>{}, body.toJson(), 'user'));
+    return HydraTotpConfirmed.fromJson(_hydraMap(raw));
+  }
+
   /// GET /api/totp/status (access: user)
   Future<HydraTotpStatus> getTotpStatus() async {
     final raw = await _transport(HydraRequest('GET', '/api/totp/status', const <String, String>{}, null, 'user'));
@@ -7818,6 +7847,7 @@ const List<String> hydraClientOperations = [
   'postTotpBegin',
   'postTotpConfirm',
   'postTotpDisable',
+  'postTotpRecoveryCodes',
   'getTotpStatus',
   'postTrajectoryProposalsVerify',
   'postUploadWork',
