@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.3.9]
+
 - **The SDK is pinned to its newest release and the generated server client follows it:** the vendored client now includes the route that issues new recovery codes of the second factor and the confirmation proof, and the continuous check compares it with the pinned release.
 - **The vendored server answers follow the SDK contract again:** they now include the answers of the route that issues new recovery codes of the second factor, so the nightly family check finds no drift.
 
@@ -12,6 +14,8 @@
 - **An appliance panel never sends the token of its device to another host:** a connection saved earlier for a server that is not on this machine is not restored in appliance mode, and the sign-in with the device token is only tried against this machine's own server. A test covers the restore.
 
 - **The camera view uses the app's own HTTPS client:** it used a plain client, so a server with a pinned or self-signed certificate that the rest of the app reaches could not show its camera pictures; it now goes through the same client as the other calls.
+
+- Build version synchronized with `hydra-umc.project.json` and the repository-native version source.
 
 ## [0.3.8]
 
