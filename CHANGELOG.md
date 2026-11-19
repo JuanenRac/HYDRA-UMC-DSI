@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+- **The reservations and the safety limits of a robot go through the generated client of the SDK:** `GET /api/claims` and `GET /api/safety-limits` are no longer written by hand; an answer that does not have the shape of the contract is a `HydraApiException`, and an older server without the safety route still answers null. New `test/typed_claims_limits_test.dart`.
+
 ## [0.3.9]
 
 - **The SDK is pinned to its newest release and the generated server client follows it:** the vendored client now includes the route that issues new recovery codes of the second factor and the confirmation proof, and the continuous check compares it with the pinned release.

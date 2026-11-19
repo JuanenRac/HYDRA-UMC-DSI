@@ -2,13 +2,11 @@
   "/api/admin/server-config",
   "/api/audit",
   "/api/camera/{p}/stream",
-  "/api/claims",
   "/api/connections/clients",
   "/api/connections/events",
   "/api/device/login",
   "/api/ecosystem/status",
   "/api/hydra-info",
   "/api/robot/{p}",
-  "/api/safety-limits",
   "/api/tool-arms"
 ]
