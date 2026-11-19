@@ -162,7 +162,7 @@ class HydraApiClient extends HydraApiCore {
   }
 
   Future<List<ClaimInfo>> getClaims() async =>
-      ClaimInfo.listFromJson(await getJson('/api/claims', const Duration(seconds: 5)));
+      ClaimInfo.listFromJson(await callGenerated(this, const Duration(seconds: 5), (api) async => (await api.getClaims()).toJson()));
 
   Future<RobotRead?> getRobot(dynamic robotId) async {
     try {
@@ -197,7 +197,7 @@ class HydraApiClient extends HydraApiCore {
 
   Future<RobotSafety?> getRobotSafety(dynamic robotId) async {
     try {
-      return RobotSafety.fromJson(await getJson('/api/safety-limits?robotId=$robotId', const Duration(seconds: 5)));
+      return RobotSafety.fromJson(await callGenerated(this, const Duration(seconds: 5), (api) async => (await api.getSafetyLimits(robotId: '$robotId')).toJson()));
     } on HydraApiException catch (e) {
       if (e.isNotFound) return null;
       rethrow;
