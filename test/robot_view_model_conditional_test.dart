@@ -24,6 +24,14 @@ import 'package:hydra_umc_dsi/network/auth_prefs.dart';
 import 'package:hydra_umc_dsi/state/hydra_error.dart';
 import 'package:hydra_umc_dsi/state/robot_view_model.dart';
 
+/// A safety-limits answer that has the shape of the server contract (every configuration block).
+Map<String, dynamic> _fullLimits({bool armRequired = false}) => {
+      'jog': {'armRequired': armRequired, 'armTtlMs': 60000, 'default': {'maxAmount': 100, 'maxAbsolute': 1000}, 'models': {}},
+      'temperature': {'default': {'bedMaxC': 90}, 'models': {}},
+      'claims': {'requireControllerId': true},
+      'audit': {'enabled': true, 'motionIntervalSeconds': 60},
+    };
+
 class _FakeSecureBackend implements SecureTokenBackend {
   final Map<String, String> store = {};
   @override
@@ -101,9 +109,9 @@ class _Server {
         request.response.write(jsonEncode({'claims': []}));
       } else if (route == 'GET /api/safety-limits') {
         request.response.write(jsonEncode({
-          'limits': {
-            'jog': {'armRequired': false, 'armTtlMs': 60000, 'default': {'maxAmount': 100, 'maxAbsolute': 1000}, 'models': {}},
-          },
+          'limits': _fullLimits(armRequired: false),
+          'defaults': _fullLimits(),
+          'hardLimits': <String, dynamic>{},
           'robot': {
             'id': 1,
             'model': 'Parol6 (6-DOF)',

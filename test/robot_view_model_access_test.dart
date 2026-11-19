@@ -23,6 +23,14 @@ import 'package:hydra_umc_dsi/network/hydra_api_client.dart';
 import 'package:hydra_umc_dsi/state/hydra_error.dart';
 import 'package:hydra_umc_dsi/state/robot_view_model.dart';
 
+/// A safety-limits answer that has the shape of the server contract (every configuration block).
+Map<String, dynamic> _fullLimits({bool armRequired = false}) => {
+      'jog': {'armRequired': armRequired, 'armTtlMs': 60000, 'default': {'maxAmount': 100, 'maxAbsolute': 1000}, 'models': {}},
+      'temperature': {'default': {'bedMaxC': 90}, 'models': {}},
+      'claims': {'requireControllerId': true},
+      'audit': {'enabled': true, 'motionIntervalSeconds': 60},
+    };
+
 class _FakeSecureBackend implements SecureTokenBackend {
   final Map<String, String> store = {};
   @override
@@ -95,9 +103,9 @@ class _Server {
         request.response.write(jsonEncode({'claims': claims}));
       } else if (route == 'GET /api/safety-limits') {
         request.response.write(jsonEncode({
-          'limits': {
-            'jog': {'armRequired': armRequired, 'armTtlMs': 60000, 'default': {'maxAmount': 100, 'maxAbsolute': 1000}, 'models': {}},
-          },
+          'limits': _fullLimits(armRequired: armRequired),
+          'defaults': _fullLimits(),
+          'hardLimits': <String, dynamic>{},
           'robot': {
             'id': 1,
             'model': 'Parol6 (6-DOF)',
@@ -263,19 +271,19 @@ void main() {
     expect(vm.claimStandingOf(1), ClaimStanding.free);
 
     server.claims = [
-      {'robotId': 1, 'robotName': 'A1', 'ownerUsername': 'alice', 'controllerId': HydraApiClient.controllerId, 'expiresAt': 1},
+      {'robotId': 1, 'robotName': 'A1', 'ownerUsername': 'alice', 'controllerId': HydraApiClient.controllerId, 'claimedAt': 0, 'expiresAt': 1},
     ];
     await vm.refreshAccess();
     expect(vm.claimStandingOf(1), ClaimStanding.mineHere);
 
     server.claims = [
-      {'robotId': 1, 'robotName': 'A1', 'ownerUsername': 'alice', 'controllerId': 'dsi-elsewhere', 'expiresAt': 1},
+      {'robotId': 1, 'robotName': 'A1', 'ownerUsername': 'alice', 'controllerId': 'dsi-elsewhere', 'claimedAt': 0, 'expiresAt': 1},
     ];
     await vm.refreshAccess();
     expect(vm.claimStandingOf(1), ClaimStanding.mineElsewhere);
 
     server.claims = [
-      {'robotId': 1, 'robotName': 'A1', 'ownerUsername': 'bob', 'controllerId': 'x', 'expiresAt': 1},
+      {'robotId': 1, 'robotName': 'A1', 'ownerUsername': 'bob', 'controllerId': 'x', 'claimedAt': 0, 'expiresAt': 1},
     ];
     await vm.refreshAccess();
     expect(vm.claimStandingOf(1), ClaimStanding.other);
@@ -284,7 +292,7 @@ void main() {
   test('an administrator can take over a robot someone else holds, and the request carries force', () async {
     final (server, vm) = await _signedIn();
     server.claims = [
-      {'robotId': 1, 'robotName': 'A1', 'ownerUsername': 'bob', 'controllerId': 'x', 'expiresAt': 1},
+      {'robotId': 1, 'robotName': 'A1', 'ownerUsername': 'bob', 'controllerId': 'x', 'claimedAt': 0, 'expiresAt': 1},
     ];
     await vm.refreshAccess();
     expect(vm.isAdmin, isTrue);
@@ -300,7 +308,7 @@ void main() {
   test('an operator never gets the take-over and nothing is sent if it is asked for anyway', () async {
     final (server, vm) = await _signedIn(role: 'operator');
     server.claims = [
-      {'robotId': 1, 'robotName': 'A1', 'ownerUsername': 'bob', 'controllerId': 'x', 'expiresAt': 1},
+      {'robotId': 1, 'robotName': 'A1', 'ownerUsername': 'bob', 'controllerId': 'x', 'claimedAt': 0, 'expiresAt': 1},
     ];
     await vm.refreshAccess();
     expect(vm.isAdmin, isFalse);
@@ -315,7 +323,7 @@ void main() {
     final (server, vm) = await _signedIn();
     expect(vm.canTakeOver(1), isFalse);
     server.claims = [
-      {'robotId': 1, 'robotName': 'A1', 'ownerUsername': 'alice', 'controllerId': HydraApiClient.controllerId, 'expiresAt': 1},
+      {'robotId': 1, 'robotName': 'A1', 'ownerUsername': 'alice', 'controllerId': HydraApiClient.controllerId, 'claimedAt': 0, 'expiresAt': 1},
     ];
     await vm.refreshAccess();
     expect(vm.canTakeOver(1), isFalse);
