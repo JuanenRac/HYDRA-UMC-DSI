@@ -1303,6 +1303,38 @@
         }
       }
     },
+    "POST /api/admin/updates/manifest/check": {
+      "200": {
+        "minimal": {
+          "accepted": false,
+          "code": "ok",
+          "key_id": "sample",
+          "require_asymmetric_signature": false
+        },
+        "full": {
+          "accepted": false,
+          "code": "ok",
+          "key_id": "sample",
+          "require_asymmetric_signature": false
+        }
+      },
+      "400": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "503": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      }
+    },
     "GET /api/anomaly/verdicts": {
       "400": {
         "minimal": {
@@ -1378,6 +1410,16 @@
     },
     "POST /api/bridges/{name}/cmd/{verb}": {
       "200": {
+        "minimal": {
+          "accepted": false,
+          "result": null
+        },
+        "full": {
+          "accepted": false,
+          "result": null
+        }
+      },
+      "202": {
         "minimal": {
           "accepted": false,
           "result": null
@@ -1673,6 +1715,14 @@
         }
       },
       "503": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "507": {
         "minimal": {
           "error": "sample"
         },
@@ -2316,6 +2366,14 @@
           "error": "sample"
         }
       },
+      "409": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
       "502": {
         "minimal": {
           "error": "sample"
@@ -2580,24 +2638,6 @@
       }
     },
     "POST /api/ingest/dev-server/status": {
-      "400": {
-        "minimal": {
-          "error": "sample"
-        },
-        "full": {
-          "error": "sample"
-        }
-      },
-      "503": {
-        "minimal": {
-          "error": "sample"
-        },
-        "full": {
-          "error": "sample"
-        }
-      }
-    },
-    "POST /api/ingest/developer-node/status": {
       "400": {
         "minimal": {
           "error": "sample"
@@ -3843,6 +3883,14 @@
           "success": false,
           "announced": false
         }
+      },
+      "500": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
       }
     },
     "POST /api/system/bluetooth/pair": {
@@ -4399,6 +4447,14 @@
         }
       },
       "401": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      },
+      "409": {
         "minimal": {
           "error": "sample"
         },
