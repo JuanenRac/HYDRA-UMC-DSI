@@ -5402,34 +5402,6 @@ class HydraReachable {
 }
 
 /// An object of the server contract.
-class HydraReservation {
-  const HydraReservation({
-    required this.success,
-    this.reservation,
-    required this.reservationHistory,
-  });
-
-  factory HydraReservation.fromJson(Map<String, dynamic> json) => HydraReservation(
-        success: json['success'] as bool,
-        reservation: json['reservation'] == null ? null : _hydraMap(json['reservation']),
-        reservationHistory: (json['reservationHistory'] as List).map((v0) => _hydraMap(v0)).toList(),
-      );
-
-  final bool success;
-  final Map<String, dynamic>? reservation;
-  final List<Map<String, dynamic>> reservationHistory;
-
-  Map<String, dynamic> toJson() {
-    final hydraOut = <String, dynamic>{};
-    hydraOut['success'] = success;
-    final hydraField1 = reservation;
-    if (hydraField1 != null) hydraOut['reservation'] = hydraField1;
-    hydraOut['reservationHistory'] = reservationHistory;
-    return hydraOut;
-  }
-}
-
-/// An object of the server contract.
 class HydraRobotLiveness {
   const HydraRobotLiveness({
     required this.schemaVersion,
@@ -6067,29 +6039,6 @@ class HydraServerConfig {
   }
 }
 
-/// An object of the server contract.
-class HydraServerConfigSaved {
-  const HydraServerConfigSaved({
-    required this.success,
-    required this.appliesOnRestart,
-  });
-
-  factory HydraServerConfigSaved.fromJson(Map<String, dynamic> json) => HydraServerConfigSaved(
-        success: json['success'] as bool,
-        appliesOnRestart: json['appliesOnRestart'] as bool,
-      );
-
-  final bool success;
-  final bool appliesOnRestart;
-
-  Map<String, dynamic> toJson() {
-    final hydraOut = <String, dynamic>{};
-    hydraOut['success'] = success;
-    hydraOut['appliesOnRestart'] = appliesOnRestart;
-    return hydraOut;
-  }
-}
-
 /// The identity this server presents to the services it calls: the switch (auth.serviceIdentity.enabled), whether JWT_SECRET can sign, and which services take the identity. Read-only; the switch is changed with PUT /api/admin/server-config.
 class HydraServiceIdentityStatus {
   const HydraServiceIdentityStatus({
@@ -6543,6 +6492,39 @@ class HydraUpdateItem {
     hydraOut['installed'] = installed;
     hydraOut['latest'] = latest;
     hydraOut['state'] = state;
+    return hydraOut;
+  }
+}
+
+/// An object of the server contract.
+class HydraUpdateManifestVerdict {
+  const HydraUpdateManifestVerdict({
+    required this.accepted,
+    required this.code,
+    required this.keyId,
+    required this.requireAsymmetricSignature,
+  });
+
+  factory HydraUpdateManifestVerdict.fromJson(Map<String, dynamic> json) => HydraUpdateManifestVerdict(
+        accepted: json['accepted'] as bool,
+        code: json['code'] as String,
+        keyId: json['key_id'] == null ? null : json['key_id'] as String,
+        requireAsymmetricSignature: json['require_asymmetric_signature'] as bool,
+      );
+
+  final bool accepted;
+  final String code;
+  /// The key that signed the manifest, or null when it carries no signature.
+  final String? keyId;
+  /// Whether the switch that refuses a manifest without an Ed25519 signature was on when the manifest was checked.
+  final bool requireAsymmetricSignature;
+
+  Map<String, dynamic> toJson() {
+    final hydraOut = <String, dynamic>{};
+    hydraOut['accepted'] = accepted;
+    hydraOut['code'] = code;
+    hydraOut['key_id'] = keyId;
+    hydraOut['require_asymmetric_signature'] = requireAsymmetricSignature;
     return hydraOut;
   }
 }
@@ -7010,6 +6992,12 @@ class HydraServerClient {
     return HydraUpdateReport.fromJson(_hydraMap(raw));
   }
 
+  /// POST /api/admin/updates/manifest/check (access: admin)
+  Future<HydraUpdateManifestVerdict> postAdminUpdatesManifestCheck({required Map<String, dynamic> body}) async {
+    final raw = await _transport(HydraRequest('POST', '/api/admin/updates/manifest/check', const <String, String>{}, body, 'admin'));
+    return HydraUpdateManifestVerdict.fromJson(_hydraMap(raw));
+  }
+
   /// GET /api/anomaly/verdicts (access: user)
   Future<void> getAnomalyVerdicts({String? verdict, String? verify}) async {
     await _transport(HydraRequest('GET', '/api/anomaly/verdicts', queryOf({'verdict': verdict, 'verify': verify}), null, 'user'));
@@ -7159,11 +7147,6 @@ class HydraServerClient {
     await _transport(HydraRequest('GET', '/api/dev-server/status', queryOf({'verify': verify}), null, 'user'));
   }
 
-  /// GET /api/developer-node/status (access: user)
-  Future<void> getDeveloperNodeStatus({String? verify}) async {
-    await _transport(HydraRequest('GET', '/api/developer-node/status', queryOf({'verify': verify}), null, 'user'));
-  }
-
   /// POST /api/device/login (access: public)
   Future<HydraLoginResult> postDeviceLogin({required HydraPostDeviceLoginBody body}) async {
     final raw = await _transport(HydraRequest('POST', '/api/device/login', const <String, String>{}, body.toJson(), 'public'));
@@ -7262,11 +7245,6 @@ class HydraServerClient {
   /// POST /api/ingest/dev-server/status (access: public)
   Future<void> postIngestDevServerStatus() async {
     await _transport(HydraRequest('POST', '/api/ingest/dev-server/status', const <String, String>{}, null, 'public'));
-  }
-
-  /// POST /api/ingest/developer-node/status (access: public)
-  Future<void> postIngestDeveloperNodeStatus() async {
-    await _transport(HydraRequest('POST', '/api/ingest/developer-node/status', const <String, String>{}, null, 'public'));
   }
 
   /// POST /api/ingest/scenario-outcome (access: user)
@@ -7749,6 +7727,7 @@ const List<String> hydraClientOperations = [
   'putAdminServerConfig',
   'getAdminServiceIdentity',
   'getAdminUpdates',
+  'postAdminUpdatesManifestCheck',
   'getAnomalyVerdicts',
   'getAudit',
   'getBridges',
@@ -7774,7 +7753,6 @@ const List<String> hydraClientOperations = [
   'getConnectorHubGateSettings',
   'postConnectorHubGateSettings',
   'getDevServerStatus',
-  'getDeveloperNodeStatus',
   'postDeviceLogin',
   'getDroidEstopSettings',
   'postDroidEstopSettings',
@@ -7792,7 +7770,6 @@ const List<String> hydraClientOperations = [
   'getHydraInfo',
   'postInfoTicket',
   'postIngestDevServerStatus',
-  'postIngestDeveloperNodeStatus',
   'postIngestScenarioOutcome',
   'getIngestScenarioOutcomes',
   'postIntegrationsTestConnection',
