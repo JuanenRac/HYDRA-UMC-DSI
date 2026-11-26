@@ -1335,6 +1335,24 @@
         }
       }
     },
+    "GET /api/admin/watch/release-notice": {
+      "200": {
+        "minimal": {
+          "devices": []
+        },
+        "full": {
+          "devices": [
+            {
+              "device_id": "sample",
+              "platform": "android",
+              "username": "sample",
+              "notifies_watch": false,
+              "updated_at": "sample"
+            }
+          ]
+        }
+      }
+    },
     "GET /api/anomaly/verdicts": {
       "400": {
         "minimal": {
@@ -4728,6 +4746,24 @@
         }
       },
       "503": {
+        "minimal": {
+          "error": "sample"
+        },
+        "full": {
+          "error": "sample"
+        }
+      }
+    },
+    "POST /api/watch/release-notice": {
+      "200": {
+        "minimal": {
+          "saved": false
+        },
+        "full": {
+          "saved": false
+        }
+      },
+      "400": {
         "minimal": {
           "error": "sample"
         },

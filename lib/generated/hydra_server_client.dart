@@ -4179,6 +4179,33 @@ class HydraPostVoiceTurnBody {
 }
 
 /// An object of the server contract.
+class HydraPostWatchReleaseNoticeBody {
+  const HydraPostWatchReleaseNoticeBody({
+    required this.deviceId,
+    required this.platform,
+    required this.notifiesWatch,
+  });
+
+  factory HydraPostWatchReleaseNoticeBody.fromJson(Map<String, dynamic> json) => HydraPostWatchReleaseNoticeBody(
+        deviceId: json['device_id'] as String,
+        platform: json['platform'] as String,
+        notifiesWatch: json['notifies_watch'] as bool,
+      );
+
+  final String deviceId;
+  final String platform;
+  final bool notifiesWatch;
+
+  Map<String, dynamic> toJson() {
+    final hydraOut = <String, dynamic>{};
+    hydraOut['device_id'] = deviceId;
+    hydraOut['platform'] = platform;
+    hydraOut['notifies_watch'] = notifiesWatch;
+    return hydraOut;
+  }
+}
+
+/// An object of the server contract.
 class HydraPtzResult {
   const HydraPtzResult({
     required this.ok,
@@ -6727,6 +6754,79 @@ class HydraVoiceReply {
 }
 
 /// An object of the server contract.
+class HydraWatchReleaseNoticeList {
+  const HydraWatchReleaseNoticeList({
+    required this.devices,
+  });
+
+  factory HydraWatchReleaseNoticeList.fromJson(Map<String, dynamic> json) => HydraWatchReleaseNoticeList(
+        devices: (json['devices'] as List).map((v0) => HydraWatchReleaseNoticeListDevicesItem.fromJson(_hydraMap(v0))).toList(),
+      );
+
+  final List<HydraWatchReleaseNoticeListDevicesItem> devices;
+
+  Map<String, dynamic> toJson() {
+    final hydraOut = <String, dynamic>{};
+    hydraOut['devices'] = devices.map((v0) => v0.toJson()).toList();
+    return hydraOut;
+  }
+}
+
+/// An object of the server contract.
+class HydraWatchReleaseNoticeListDevicesItem {
+  const HydraWatchReleaseNoticeListDevicesItem({
+    required this.deviceId,
+    required this.platform,
+    required this.username,
+    required this.notifiesWatch,
+    required this.updatedAt,
+  });
+
+  factory HydraWatchReleaseNoticeListDevicesItem.fromJson(Map<String, dynamic> json) => HydraWatchReleaseNoticeListDevicesItem(
+        deviceId: json['device_id'] as String,
+        platform: json['platform'] as String,
+        username: json['username'] as String,
+        notifiesWatch: json['notifies_watch'] as bool,
+        updatedAt: json['updated_at'] as String,
+      );
+
+  final String deviceId;
+  final String platform;
+  final String username;
+  final bool notifiesWatch;
+  final String updatedAt;
+
+  Map<String, dynamic> toJson() {
+    final hydraOut = <String, dynamic>{};
+    hydraOut['device_id'] = deviceId;
+    hydraOut['platform'] = platform;
+    hydraOut['username'] = username;
+    hydraOut['notifies_watch'] = notifiesWatch;
+    hydraOut['updated_at'] = updatedAt;
+    return hydraOut;
+  }
+}
+
+/// An object of the server contract.
+class HydraWatchReleaseNoticeSaved {
+  const HydraWatchReleaseNoticeSaved({
+    required this.saved,
+  });
+
+  factory HydraWatchReleaseNoticeSaved.fromJson(Map<String, dynamic> json) => HydraWatchReleaseNoticeSaved(
+        saved: json['saved'] as bool,
+      );
+
+  final bool saved;
+
+  Map<String, dynamic> toJson() {
+    final hydraOut = <String, dynamic>{};
+    hydraOut['saved'] = saved;
+    return hydraOut;
+  }
+}
+
+/// An object of the server contract.
 class HydraWatchStatus {
   const HydraWatchStatus({
     required this.type,
@@ -6998,6 +7098,12 @@ class HydraServerClient {
     return HydraUpdateManifestVerdict.fromJson(_hydraMap(raw));
   }
 
+  /// GET /api/admin/watch/release-notice (access: admin)
+  Future<HydraWatchReleaseNoticeList> getAdminWatchReleaseNotice() async {
+    final raw = await _transport(HydraRequest('GET', '/api/admin/watch/release-notice', const <String, String>{}, null, 'admin'));
+    return HydraWatchReleaseNoticeList.fromJson(_hydraMap(raw));
+  }
+
   /// GET /api/anomaly/verdicts (access: user)
   Future<void> getAnomalyVerdicts({String? verdict, String? verify}) async {
     await _transport(HydraRequest('GET', '/api/anomaly/verdicts', queryOf({'verdict': verdict, 'verify': verify}), null, 'user'));
@@ -7195,8 +7301,8 @@ class HydraServerClient {
   }
 
   /// POST /api/hardware/canota/flash (access: admin)
-  Future<HydraCanotaFlash> postHardwareCanotaFlash({required List<int> body, String? tier, String? slot, String? relay, String? hardwareId, String? versionMajor, String? versionMinor, String? versionPatch, String? signature, String? downgradeFrom, String? target, String? minBootloader}) async {
-    final raw = await _transport(HydraRequest('POST', '/api/hardware/canota/flash', queryOf({'tier': tier, 'slot': slot, 'relay': relay, 'hardware_id': hardwareId, 'version_major': versionMajor, 'version_minor': versionMinor, 'version_patch': versionPatch, 'signature': signature, 'downgrade_from': downgradeFrom, 'target': target, 'min_bootloader': minBootloader}), body, 'admin', contentType: 'application/octet-stream'));
+  Future<HydraCanotaFlash> postHardwareCanotaFlash({required List<int> body, String? tier, String? slot, String? relay, String? hardwareId, String? versionMajor, String? versionMinor, String? versionPatch, String? signature, String? downgradeFrom, String? target, String? minBootloader, String? header, String? rollbackCounter, String? keyId}) async {
+    final raw = await _transport(HydraRequest('POST', '/api/hardware/canota/flash', queryOf({'tier': tier, 'slot': slot, 'relay': relay, 'hardware_id': hardwareId, 'version_major': versionMajor, 'version_minor': versionMinor, 'version_patch': versionPatch, 'signature': signature, 'downgrade_from': downgradeFrom, 'target': target, 'min_bootloader': minBootloader, 'header': header, 'rollback_counter': rollbackCounter, 'key_id': keyId}), body, 'admin', contentType: 'application/octet-stream'));
     return HydraCanotaFlash.fromJson(_hydraMap(raw));
   }
 
@@ -7678,6 +7784,12 @@ class HydraServerClient {
     return HydraVoiceReply.fromJson(_hydraMap(raw));
   }
 
+  /// POST /api/watch/release-notice (access: user)
+  Future<HydraWatchReleaseNoticeSaved> postWatchReleaseNotice({required HydraPostWatchReleaseNoticeBody body}) async {
+    final raw = await _transport(HydraRequest('POST', '/api/watch/release-notice', const <String, String>{}, body.toJson(), 'user'));
+    return HydraWatchReleaseNoticeSaved.fromJson(_hydraMap(raw));
+  }
+
   /// GET /api/watch/system-status (access: user)
   Future<void> getWatchSystemStatus() async {
     await _transport(HydraRequest('GET', '/api/watch/system-status', const <String, String>{}, null, 'user'));
@@ -7728,6 +7840,7 @@ const List<String> hydraClientOperations = [
   'getAdminServiceIdentity',
   'getAdminUpdates',
   'postAdminUpdatesManifestCheck',
+  'getAdminWatchReleaseNotice',
   'getAnomalyVerdicts',
   'getAudit',
   'getBridges',
@@ -7836,6 +7949,7 @@ const List<String> hydraClientOperations = [
   'getVoiceChain',
   'postVoiceConfirm',
   'postVoiceTurn',
+  'postWatchReleaseNotice',
   'getWatchSystemStatus',
   'getHealth',
   'getMetrics',
