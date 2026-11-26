@@ -2,6 +2,7 @@
 
 ## [Unreleased]
 
+- **The vendored files follow the SDK contract again:** the SDK is pinned to its newest release and the vendored server client and server answers now include the routes of the watch release notice, so the nightly family check finds no drift.
 - **The reservations and the safety limits of a robot go through the generated client of the SDK:** `GET /api/claims` and `GET /api/safety-limits` are no longer written by hand; an answer that does not have the shape of the contract is a `HydraApiException`, and an older server without the safety route still answers null. New `test/typed_claims_limits_test.dart`.
 
 ## [0.3.9]
