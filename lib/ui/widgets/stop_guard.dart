@@ -22,7 +22,7 @@ import '../../state/robot_view_model.dart';
 import 'stop_all.dart';
 
 /// The margin of every dialog: wide enough at the sides that no dialog reaches the STOP of the top right corner.
-const EdgeInsets stopGuardDialogInsets = EdgeInsets.symmetric(horizontal: 140, vertical: 24);
+const EdgeInsets stopGuardDialogInsets = EdgeInsets.symmetric(horizontal: 160, vertical: 24);
 
 /// Knows whether something modal covers the screen. Give it to MaterialApp.navigatorObservers.
 class StopGuardObserver extends NavigatorObserver {
