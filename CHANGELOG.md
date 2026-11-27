@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+- **The shared API client sees the headers of the answers of the server:** the HTTP transport of the panel dropped them, so `header()` of an answer was always empty (an `ETag`, the `Retry-After` of a refused request); they are passed on now, as the other Flutter app does. No screen of the panel reads one today. Test.
+
 - **Reserving and releasing a robot go through the generated client of the SDK:** `POST /api/robot/{id}/claim` and `POST /api/robot/{id}/release` keep the same request (token, controller id, `If-Match`) and the same errors; an answer without the shape of the contract is now a `HydraApiException`. A server that sends no revision, and the release of a robot that was never reserved (no history), are still accepted.
 - **The vendored files follow the SDK contract again:** the SDK is pinned to its newest release and the vendored server client and server answers now include the routes of the watch release notice, so the nightly family check finds no drift.
 - **The reservations and the safety limits of a robot go through the generated client of the SDK:** `GET /api/claims` and `GET /api/safety-limits` are no longer written by hand; an answer that does not have the shape of the contract is a `HydraApiException`, and an older server without the safety route still answers null. New `test/typed_claims_limits_test.dart`.
