@@ -57,7 +57,7 @@ class _Server {
   /// What the command route answers, one entry per request (the last one repeats).
   List<(int, Map<String, dynamic>)> commandAnswers = [(200, {'success': true})];
   int claimStatus = 200;
-  Map<String, dynamic> claimBody = {'success': true};
+  Map<String, dynamic> claimBody = {'success': true, 'reservation': {}, 'reservationHistory': []};
   int robotStatus = 404;
   Map<String, dynamic> robotBody = {};
   int auditStatus = 404;
@@ -247,7 +247,7 @@ void main() {
 
   test('reserving and releasing carry the revision, a take-over does not', () async {
     final (server, vm) = await _signedIn();
-    server.claimBody = {'success': true, 'revision': 'after-claim'};
+    server.claimBody = {'success': true, 'reservation': {}, 'reservationHistory': [], 'revision': 'after-claim'};
 
     await vm.claimSelectedRobot();
     expect(vm.revisions.known(1), 'after-claim');

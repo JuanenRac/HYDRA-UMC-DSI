@@ -25,6 +25,7 @@ import 'package:http/http.dart' as http;
 import 'package:hydra_umc_app_common/hydra_umc_app_common.dart' show CommandSequence, HydraApiCore, HydraApiException;
 
 import '../app_version.dart';
+import '../generated/hydra_server_client.dart' show HydraPostRobotByIdClaimBody, HydraPostRobotByIdReleaseBody, HydraServerClient;
 import '../models/access.dart';
 import '../models/contract_v2.dart';
 import 'generated_transport.dart';
@@ -163,6 +164,42 @@ class HydraApiClient extends HydraApiCore {
 
   Future<List<ClaimInfo>> getClaims() async =>
       ClaimInfo.listFromJson(await callGenerated(this, const Duration(seconds: 5), (api) async => (await api.getClaims()).toJson()));
+
+  // The reservation and the release of a robot go through the generated client too: the same request (token, controller id,
+  // `If-Match`) and the same errors, with an answer checked against the contract.
+  @override
+  Future<Map<String, dynamic>> postClaim(dynamic robotId, {int? ttlMs, bool force = false, String? ifMatch}) => _reservation((api) async => (await api.postRobotByIdClaim(
+          id: _robotNumber(robotId),
+          headerIfMatch: ifMatch,
+          headerXControllerId: controllerIdValue,
+          body: HydraPostRobotByIdClaimBody(ttlMs: ttlMs, force: force ? true : null, controllerId: controllerIdValue)))
+      .toJson());
+
+  @override
+  Future<Map<String, dynamic>> postRelease(dynamic robotId, {String? ifMatch}) => _reservation((api) async => (await api.postRobotByIdRelease(
+          id: _robotNumber(robotId),
+          headerIfMatch: ifMatch,
+          headerXControllerId: controllerIdValue,
+          body: HydraPostRobotByIdReleaseBody(controllerId: controllerIdValue)))
+      .toJson());
+
+  static int _robotNumber(dynamic robotId) => robotId is num ? robotId.toInt() : int.parse('$robotId');
+
+  /// What a server may leave out of the answer to a claim or a release that the app still accepts: a server of the first
+  /// contract sends no `revision` (an empty one is never used as If-Match), and the release of a robot that was never
+  /// reserved has no `reservationHistory`. Anything else that is missing stays an error.
+  static dynamic completeReservationAnswer(dynamic answer) => answer is Map<String, dynamic> && answer['success'] is bool
+      ? <String, dynamic>{'revision': '', 'reservationHistory': <dynamic>[], ...answer}
+      : answer;
+
+  Future<Map<String, dynamic>> _reservation(Future<Map<String, dynamic>> Function(HydraServerClient api) run) async {
+    final transport = GeneratedTransport(this, timeout: const Duration(seconds: 5));
+    try {
+      return await run(HydraServerClient((request) async => completeReservationAnswer(await transport.send(request))));
+    } on TypeError catch (e) {
+      throw HydraApiException('The answer does not match the server contract: $e');
+    }
+  }
 
   Future<RobotRead?> getRobot(dynamic robotId) async {
     try {

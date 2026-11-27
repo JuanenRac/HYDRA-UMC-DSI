@@ -59,7 +59,7 @@ class _Server {
   int commandStatus = 200;
   Map<String, dynamic> commandBody = {'success': true};
   int claimStatus = 200;
-  Map<String, dynamic> claimBody = {'success': true};
+  Map<String, dynamic> claimBody = {'success': true, 'reservation': {}, 'reservationHistory': []};
   bool armRequired = false;
   double maxAmount = 100;
   List<Map<String, dynamic>> claims = [];
