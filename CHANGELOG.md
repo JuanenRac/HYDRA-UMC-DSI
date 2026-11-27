@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+- **The STOP button can be pressed with a dialog or a menu open:** a modal window lays a barrier over the whole screen, the STOP of the top bar included, so a first press only closed it or did nothing. While one is open the global STOP is now drawn above everything, where the one of the bar is, with what it did at the bottom, and no dialog reaches that corner. New `test/stop_guard_test.dart`.
+
 - **The shared API client sees the headers of the answers of the server:** the HTTP transport of the panel dropped them, so `header()` of an answer was always empty (an `ETag`, the `Retry-After` of a refused request); they are passed on now, as the other Flutter app does. No screen of the panel reads one today. Test.
 
 - **Reserving and releasing a robot go through the generated client of the SDK:** `POST /api/robot/{id}/claim` and `POST /api/robot/{id}/release` keep the same request (token, controller id, `If-Match`) and the same errors; an answer without the shape of the contract is now a `HydraApiException`. A server that sends no revision, and the release of a robot that was never reserved (no history), are still accepted.

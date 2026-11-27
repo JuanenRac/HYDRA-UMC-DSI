@@ -28,6 +28,7 @@ import 'ui/login_screen.dart';
 import 'ui/main_screen.dart';
 import 'ui/widgets/idle_gate.dart';
 import 'ui/widgets/pairing_widgets.dart';
+import 'ui/widgets/stop_guard.dart';
 
 /// Attached to MaterialApp's scaffoldMessengerKey: the only way an error caught
 /// outside Flutter's build/layout/paint pipeline (no BuildContext of its own)
@@ -137,6 +138,9 @@ class _CrashScreenState extends State<_CrashScreen> {
   }
 }
 
+/// Tells whether a dialog or a menu covers the screen, so the global STOP is drawn above it.
+final StopGuardObserver _stopGuardObserver = StopGuardObserver();
+
 class HydraUmcDsiApp extends StatelessWidget {
   const HydraUmcDsiApp({super.key});
 
@@ -155,7 +159,11 @@ class HydraUmcDsiApp extends StatelessWidget {
           title: 'HYDRA-UMC DSI',
           scaffoldMessengerKey: _rootMessengerKey,
           navigatorKey: _rootNavigatorKey,
-          builder: (context, child) => PairingDialogHost(vm: context.read<RobotViewModel>(), navigatorKey: _rootNavigatorKey, child: child ?? const SizedBox.shrink()),
+          navigatorObservers: [_stopGuardObserver],
+          builder: (context, child) => StopGuard(
+            observer: _stopGuardObserver,
+            child: PairingDialogHost(vm: context.read<RobotViewModel>(), navigatorKey: _rootNavigatorKey, child: child ?? const SizedBox.shrink()),
+          ),
           debugShowCheckedModeBanner: false,
           localizationsDelegates: const [
             AppLocalizations.delegate,
@@ -178,6 +186,7 @@ class HydraUmcDsiApp extends StatelessWidget {
               surface: const Color(0xFF12161C),
             ),
             useMaterial3: true,
+            dialogTheme: const DialogThemeData(insetPadding: stopGuardDialogInsets),
             // Larger default tap targets ecosystem-wide would be a bigger
             // change than this app needs - individual widgets (JoystickPad,
             // the nav bar, playback buttons) already size themselves for
