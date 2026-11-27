@@ -27,7 +27,8 @@ class PackageHttpTransport implements HttpTransport {
     final body = request.body;
     if (body != null) req.body = body;
     final resp = await http.Response.fromStream(await _client.send(req));
-    return HttpResponseData(resp.statusCode, resp.body, path: request.path);
+    // package:http names the response headers in lower case, as HttpResponseData.header expects (the Retry-After of a refused code, an ETag)
+    return HttpResponseData(resp.statusCode, resp.body, path: request.path, headers: resp.headers);
   }
 
   @override

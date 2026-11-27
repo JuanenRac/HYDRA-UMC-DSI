@@ -68,4 +68,17 @@ void main() {
     await transport.send(const HttpRequestData('POST', 'http://127.0.0.1:3000/api/stop-all'));
     expect(sent, 3);
   });
+
+  test('the transport hands the response headers to the shared client, for an answer and for a refusal of the server', () async {
+    final transport = PackageHttpTransport(MockClient((http.Request r) async {
+      if (r.method == 'GET') return http.Response('{}', 200, headers: {'etag': '"0123456789abcdef"'});
+      return http.Response('{}', 429, headers: {'retry-after': '30'});
+    }));
+
+    final read = await transport.send(const HttpRequestData('GET', 'http://127.0.0.1:3000/api/settings'));
+    expect(read.header('ETag'), '"0123456789abcdef"');
+    final refused = await transport.send(const HttpRequestData('POST', 'http://127.0.0.1:3000/api/login', body: '{}'));
+    expect(refused.statusCode, 429);
+    expect(refused.header('Retry-After'), '30');
+  });
 }
