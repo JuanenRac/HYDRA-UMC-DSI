@@ -91,13 +91,16 @@ void main() {
     test('only a salted digest is stored, never the PIN', () async {
       final backend = _Backend();
       final pin = make(backend);
-      await pin.set('4821');
+      // Long on purpose: the salt and the digest are random hex, and a four-digit
+      // PIN turns up inside them by chance now and then.
+      const digits = '482139075642';
+      await pin.set(digits);
       expect(pin.isSet, isTrue);
-      expect(backend.store.values.any((v) => v.contains('4821')), isFalse);
+      expect(backend.store.values.any((v) => v.contains(digits)), isFalse);
       expect(backend.store.length, 2);
       // A second PIN with the same digits gets another salt, so another digest.
       final other = _Backend();
-      await make(other).set('4821');
+      await make(other).set(digits);
       expect(other.store.values.toSet(), isNot(equals(backend.store.values.toSet())));
     });
 
