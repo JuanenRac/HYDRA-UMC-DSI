@@ -232,9 +232,13 @@
                 "unitRestored": false,
                 "log": [
                   null
-                ]
+                ],
+                "previous": "sample"
               }
-            ]
+            ],
+            "helper": "root",
+            "planId": "sample",
+            "totpRequired": false
           }
         }
       },
@@ -308,9 +312,13 @@
                 "unitRestored": false,
                 "log": [
                   null
-                ]
+                ],
+                "previous": "sample"
               }
-            ]
+            ],
+            "helper": "root",
+            "planId": "sample",
+            "totpRequired": false
           }
         }
       },
@@ -408,9 +416,13 @@
                 "unitRestored": false,
                 "log": [
                   null
-                ]
+                ],
+                "previous": "sample"
               }
-            ]
+            ],
+            "helper": "root",
+            "planId": "sample",
+            "totpRequired": false
           }
         }
       },
@@ -500,9 +512,13 @@
                 "unitRestored": false,
                 "log": [
                   null
-                ]
+                ],
+                "previous": "sample"
               }
-            ]
+            ],
+            "helper": "root",
+            "planId": "sample",
+            "totpRequired": false
           }
         }
       },
