@@ -27,7 +27,9 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 
-import '../l10n/language_prefs.dart';
+import 'package:hydra_umc_app_common/hydra_umc_app_common.dart' show LanguagePrefsCore;
+import '../l10n/app_localizations.dart';
+import '../network/shared_preferences_store.dart';
 import '../models/access.dart';
 import '../models/can_ota_progress.dart';
 import '../models/connection_history.dart';
@@ -83,7 +85,14 @@ class RobotViewModel extends ChangeNotifier {
 
   /// How the app reaches the server and what it trusts (see network/tls_settings.dart).
   TlsSettings tlsSettings = const TlsSettings();
-  final LanguagePrefs _languagePrefs = LanguagePrefs();
+  final LanguagePrefsCore _languagePrefs = LanguagePrefsCore(SharedPreferencesPrefsStore());
+
+  /// The saved language as one the app ships, or null: MaterialApp then follows the language of the system.
+  Future<Locale?> _savedLocale() async {
+    final code = await _languagePrefs.loadLanguageCode(AppLocalizations.supportedLocales.map((locale) => locale.languageCode));
+    if (code == null) return null;
+    return AppLocalizations.supportedLocales.firstWhere((locale) => locale.languageCode == code);
+  }
 
   RobotViewModel({AuthPrefs? authPrefs, PanelConfig? config, OperatorPin? operatorPin, Future<String?> Function(String path)? deviceTokenReader})
       : _authPrefs = authPrefs ?? AuthPrefs(),
@@ -178,13 +187,13 @@ class RobotViewModel extends ChangeNotifier {
   Map<String, dynamic>? hydraInfo;
 
   // Explicit language override (null = follow the OS locale) - persisted
-  // via LanguagePrefs, loaded in init(), read by main.dart's own
+  // via LanguagePrefsCore, loaded in init(), read by main.dart's own
   // MaterialApp.locale and changed from ui/settings_screen.dart.
   Locale? languageOverride;
 
   Future<void> setLanguage(String? languageCode) async {
     await _languagePrefs.saveLanguage(languageCode);
-    languageOverride = await _languagePrefs.loadLocale();
+    languageOverride = await _savedLocale();
     notifyListeners();
   }
 
@@ -196,7 +205,7 @@ class RobotViewModel extends ChangeNotifier {
     await pin.load();
     homeResetEnabled = await _clientPrefs.loadHomeReset(RobotCommandContract.homeResetEnabledByDefault);
     pairingEnabled = await _clientPrefs.loadPairing(false);
-    languageOverride = await _languagePrefs.loadLocale();
+    languageOverride = await _savedLocale();
     tlsSettings = await _tlsPrefs.load();
     TlsSettingsStore.current = tlsSettings;
     // The controller id of this installation: made once, kept, and adopted here.
