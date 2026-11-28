@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [0.4.0] - STOP reachable above dialogs and the generated API client
 
 - **The STOP button can be pressed with a dialog or a menu open:** a modal window lays a barrier over the whole screen, the STOP of the top bar included, so a first press only closed it or did nothing. While one is open the global STOP is now drawn above everything, where the one of the bar is, with what it did at the bottom, and no dialog reaches that corner. New `test/stop_guard_test.dart`.
 
