@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+- The server client and the recorded server answers now come from SDK 0.7.8, and the continuous integration fetches that tag.
+
 - **The remembered language is kept by the shared keeper of the SDK:** the app takes HYDRA-UMC-SDK v0.7.7 and drops its own copy of the language preferences; the saved choice and its key are the same.
 
 ## [0.4.0] - STOP reachable above dialogs and the generated API client

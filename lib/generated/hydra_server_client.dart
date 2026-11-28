@@ -1236,6 +1236,9 @@ class HydraFleetUpdateReport {
     required this.requireSignedTags,
     required this.disk,
     required this.services,
+    this.helper,
+    this.planId,
+    this.totpRequired,
   });
 
   factory HydraFleetUpdateReport.fromJson(Map<String, dynamic> json) => HydraFleetUpdateReport(
@@ -1250,6 +1253,9 @@ class HydraFleetUpdateReport {
         requireSignedTags: json['requireSignedTags'] as bool,
         disk: HydraFleetUpdateReportDisk.fromJson(_hydraMap(json['disk'])),
         services: (json['services'] as List).map((v0) => HydraFleetUpdateRow.fromJson(_hydraMap(v0))).toList(),
+        helper: json['helper'] == null ? null : json['helper'] as String,
+        planId: json['planId'] == null ? null : json['planId'] as String,
+        totpRequired: json['totpRequired'] == null ? null : json['totpRequired'] as bool,
       );
 
   final String schema;
@@ -1263,6 +1269,10 @@ class HydraFleetUpdateReport {
   final bool requireSignedTags;
   final HydraFleetUpdateReportDisk disk;
   final List<HydraFleetUpdateRow> services;
+  final String? helper;
+  /// Root helper only: the identifier of this look, empty when the helper gave none that is valid.
+  final String? planId;
+  final bool? totpRequired;
 
   Map<String, dynamic> toJson() {
     final hydraOut = <String, dynamic>{};
@@ -1277,6 +1287,12 @@ class HydraFleetUpdateReport {
     hydraOut['requireSignedTags'] = requireSignedTags;
     hydraOut['disk'] = disk.toJson();
     hydraOut['services'] = services.map((v0) => v0.toJson()).toList();
+    final hydraField11 = helper;
+    if (hydraField11 != null) hydraOut['helper'] = hydraField11;
+    final hydraField12 = planId;
+    if (hydraField12 != null) hydraOut['planId'] = hydraField12;
+    final hydraField13 = totpRequired;
+    if (hydraField13 != null) hydraOut['totpRequired'] = hydraField13;
     return hydraOut;
   }
 }
@@ -1326,6 +1342,7 @@ class HydraFleetUpdateRow {
     this.needMb,
     this.unitRestored,
     required this.log,
+    this.previous,
   });
 
   factory HydraFleetUpdateRow.fromJson(Map<String, dynamic> json) => HydraFleetUpdateRow(
@@ -1348,6 +1365,7 @@ class HydraFleetUpdateRow {
         needMb: json['needMb'] == null ? null : (json['needMb'] as num).toInt(),
         unitRestored: json['unitRestored'] == null ? null : json['unitRestored'] as bool,
         log: (json['log'] as List).map((v0) => HydraFleetUpdateRowLogItem.fromJson(_hydraMap(v0))).toList(),
+        previous: json['previous'] == null ? null : json['previous'] as String,
       );
 
   final String name;
@@ -1369,6 +1387,8 @@ class HydraFleetUpdateRow {
   final int? needMb;
   final bool? unitRestored;
   final List<HydraFleetUpdateRowLogItem> log;
+  /// Root helper only: the version kept to go back to.
+  final String? previous;
 
   Map<String, dynamic> toJson() {
     final hydraOut = <String, dynamic>{};
@@ -1397,6 +1417,8 @@ class HydraFleetUpdateRow {
     final hydraField17 = unitRestored;
     if (hydraField17 != null) hydraOut['unitRestored'] = hydraField17;
     hydraOut['log'] = log.map((v0) => v0.toJson()).toList();
+    final hydraField19 = previous;
+    if (hydraField19 != null) hydraOut['previous'] = hydraField19;
     return hydraOut;
   }
 }
@@ -2642,21 +2664,33 @@ class HydraPostAdminFleetUpdateApplyBody {
   const HydraPostAdminFleetUpdateApplyBody({
     this.services,
     required this.confirm,
+    this.planId,
+    this.code,
   });
 
   factory HydraPostAdminFleetUpdateApplyBody.fromJson(Map<String, dynamic> json) => HydraPostAdminFleetUpdateApplyBody(
         services: json['services'] == null ? null : (json['services'] as List).map((v0) => v0 as String).toList(),
         confirm: json['confirm'] as bool,
+        planId: json['planId'] == null ? null : json['planId'] as String,
+        code: json['code'] == null ? null : json['code'] as String,
       );
 
   final List<String>? services;
   final bool confirm;
+  /// Root helper only: the identifier of the look the user saw (left out: the one of the report).
+  final String? planId;
+  /// Root helper only: the one-time code, required while the report says totpRequired.
+  final String? code;
 
   Map<String, dynamic> toJson() {
     final hydraOut = <String, dynamic>{};
     final hydraField0 = services;
     if (hydraField0 != null) hydraOut['services'] = hydraField0;
     hydraOut['confirm'] = confirm;
+    final hydraField2 = planId;
+    if (hydraField2 != null) hydraOut['planId'] = hydraField2;
+    final hydraField3 = code;
+    if (hydraField3 != null) hydraOut['code'] = hydraField3;
     return hydraOut;
   }
 }
@@ -2666,20 +2700,38 @@ class HydraPostAdminFleetUpdateResumeBody {
   const HydraPostAdminFleetUpdateResumeBody({
     required this.service,
     required this.confirm,
+    this.planId,
+    this.code,
+    this.rollback,
   });
 
   factory HydraPostAdminFleetUpdateResumeBody.fromJson(Map<String, dynamic> json) => HydraPostAdminFleetUpdateResumeBody(
         service: json['service'] as String,
         confirm: json['confirm'] as bool,
+        planId: json['planId'] == null ? null : json['planId'] as String,
+        code: json['code'] == null ? null : json['code'] as String,
+        rollback: json['rollback'] == null ? null : json['rollback'] as bool,
       );
 
   final String service;
   final bool confirm;
+  /// Root helper only: the identifier of the look the user saw (left out: the one of the report).
+  final String? planId;
+  /// Root helper only: the one-time code, required while the report says totpRequired.
+  final String? code;
+  /// Root helper only: go back to the version kept (`previous`) instead of taking the program up.
+  final bool? rollback;
 
   Map<String, dynamic> toJson() {
     final hydraOut = <String, dynamic>{};
     hydraOut['service'] = service;
     hydraOut['confirm'] = confirm;
+    final hydraField2 = planId;
+    if (hydraField2 != null) hydraOut['planId'] = hydraField2;
+    final hydraField3 = code;
+    if (hydraField3 != null) hydraOut['code'] = hydraField3;
+    final hydraField4 = rollback;
+    if (hydraField4 != null) hydraOut['rollback'] = hydraField4;
     return hydraOut;
   }
 }
@@ -3211,6 +3263,7 @@ class HydraPostLogoutBody {
 /// An object of the server contract.
 class HydraPostModelsSubmitBody {
   const HydraPostModelsSubmitBody({
+    this.attribution,
     this.category,
     this.meshFiles,
     this.name,
@@ -3220,6 +3273,7 @@ class HydraPostModelsSubmitBody {
   });
 
   factory HydraPostModelsSubmitBody.fromJson(Map<String, dynamic> json) => HydraPostModelsSubmitBody(
+        attribution: json['attribution'],
         category: json['category'],
         meshFiles: json['meshFiles'],
         name: json['name'],
@@ -3228,6 +3282,7 @@ class HydraPostModelsSubmitBody {
         urdfXml: json['urdfXml'],
       );
 
+  final dynamic attribution;
   final dynamic category;
   final dynamic meshFiles;
   final dynamic name;
@@ -3237,18 +3292,20 @@ class HydraPostModelsSubmitBody {
 
   Map<String, dynamic> toJson() {
     final hydraOut = <String, dynamic>{};
-    final hydraField0 = category;
-    if (hydraField0 != null) hydraOut['category'] = hydraField0;
-    final hydraField1 = meshFiles;
-    if (hydraField1 != null) hydraOut['meshFiles'] = hydraField1;
-    final hydraField2 = name;
-    if (hydraField2 != null) hydraOut['name'] = hydraField2;
-    final hydraField3 = overwrite;
-    if (hydraField3 != null) hydraOut['overwrite'] = hydraField3;
-    final hydraField4 = urdfFilename;
-    if (hydraField4 != null) hydraOut['urdfFilename'] = hydraField4;
-    final hydraField5 = urdfXml;
-    if (hydraField5 != null) hydraOut['urdfXml'] = hydraField5;
+    final hydraField0 = attribution;
+    if (hydraField0 != null) hydraOut['attribution'] = hydraField0;
+    final hydraField1 = category;
+    if (hydraField1 != null) hydraOut['category'] = hydraField1;
+    final hydraField2 = meshFiles;
+    if (hydraField2 != null) hydraOut['meshFiles'] = hydraField2;
+    final hydraField3 = name;
+    if (hydraField3 != null) hydraOut['name'] = hydraField3;
+    final hydraField4 = overwrite;
+    if (hydraField4 != null) hydraOut['overwrite'] = hydraField4;
+    final hydraField5 = urdfFilename;
+    if (hydraField5 != null) hydraOut['urdfFilename'] = hydraField5;
+    final hydraField6 = urdfXml;
+    if (hydraField6 != null) hydraOut['urdfXml'] = hydraField6;
     return hydraOut;
   }
 }
